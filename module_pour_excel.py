@@ -38,11 +38,10 @@ Pour la programmation par classe, la logique voudrait une classe File parent, un
 
 Version ++ : on fait une interface graphique ou web permettant d'entrer un excel et faire ces opérations sans code.
 """
-
-import xlwt, xlrd
+ 
 from xlutils.copy import copy 
 
-import openpyxl
+import openpyxl 
 
 class File():
     def __init__(self,name_file,name_file_generated='test_generated.xls', path = 'fichiers_xls/'):
@@ -50,21 +49,19 @@ class File():
         self.name_file = name_file 
         self.name_file_generated = name_file_generated
         self.path = path
-        self.readbook = xlrd.open_workbook(self.path + self.name_file) 
-        self.writebook = copy(self.readbook)
-        self.sheets_name = self.readbook.sheet_names()
+        self.writebook = openpyxl.load_workbook(self.path + self.name_file, data_only=True)
+        self.sheets_name = self.writebook.sheetnames
     
 
 class Sheet(File):
 
-    def __init__(self, name_file, name_onglet, name_file_generated='test_generated.xls',path = 'fichiers_xls/'):
+    def __init__(self, name_file, name_onglet, name_file_generated='test_generated.xlsx',path = 'fichiers_xls/'):
         super().__init__(name_file,name_file_generated,path)
         self.name_onglet = name_onglet  
-        self.sheet_read = self.readbook.sheet_by_name(self.name_onglet)
-        self.sheet_write = self.writebook.get_sheet(self.name_onglet)
+        self.sheet = self.writebook[self.name_onglet]
         del self.sheets_name
 
-    def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 1, line_end = 100):
+    def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2, line_end = 100):
         """
         Fonction qui prend une colonne de str et qui renvoie une colonne de 0 ou de 1
         L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où mettre les 0 ou 1. Si les numéros de colonne sont identiques il renvoie un message d'erreur.
@@ -74,9 +71,10 @@ class Sheet(File):
                 line_beggining, line_end : intervalle de ligne dans lequel l'utilisateur veut appliquer sa transformation
         """
         for i in range(line_beginning,line_end):
-            chaine_object = Str(self.sheet_read.cell_value(i,column_read)) 
+            chaine_object = Str(self.sheet.cell(i,column_read).value)  
             bool = chaine_object.clean_string().transform_string_in_binary(*good_answers) 
-            self.sheet_write.write(i,column_write,bool)
+            self.sheet.cell(i,column_write).value = bool
+
         self.writebook.save(self.path + self.name_file_generated)
 
     
@@ -127,6 +125,7 @@ class Str():
 
 """
 Déroulé et prochaines étapes :
+
     FAIT Imaginer la strcuture par classe 
     FAIT Fabriquer un excel jouet puis un micro test pour la fonction column transform string. 
     FAIT Tester l'ouverture de l'attribut sheet (bonne page) de la classe sheet. 
@@ -137,10 +136,11 @@ Déroulé et prochaines étapes :
     FAIT : Factoriser : voir aussi comment utiliser args, kwargs.
     FAIT : Poo : voir s'il ne vaut pas mieux créer une classe Files avec deux noms : celui du fichier à lire et celui à écrire.
     FAIT : Factoriser : Certains arguments des méthode ne seraient-ils pas mieux comme attributs de classe?
-    Me former à github avant de continuer.
-    Passer à openpyxl : modifier avec les nouvelles commandes.
+    FAIT : Créer un repository git (j'aurais dû le faire bien avant).
+    FAIT : Passer à openpyxl : modifier avec les nouvelles commandes.
     Faire et retester une fonction sécurité qui empêche d'écrire dans une colonne contenant des choses.
     Ajouter dans la classe File une méthode permettant de créer une sauvegarde du fichier de départ.
+    Factoriser : enlever les deux noms de fichiers (name file generated et name file) de sorte d'avoir création d'une copie mais manipulation d'un seul nom de fichier.
     Modifier mes classes de sorte que les modifications se fassent sur le même fichier (en ayant bien vérifié que la sauvegarde fonctionne avant).
 """
 

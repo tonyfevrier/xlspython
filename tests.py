@@ -1,12 +1,11 @@
 from unittest import TestCase,main
 from module_pour_excel import *
-import xlrd
+
 
 class TestFile(TestCase):
     
     def test_open_and_copy(self):
-        file = File('test.xls')
-        self.assertNotEqual(file.readbook,None)
+        file = File('test.xlsx')
         self.assertNotEqual(file.writebook,None)
         
 
@@ -14,34 +13,35 @@ class TestSheet(TestCase):
     def test_sheet_correctly_opened(self):
         """Ici je teste que l'attribut sheet de la classe sheet contient bien la bonne page correspondant à l'onglet.
         Pour cela, je génère la feuille via mes classes et par la préocédure habituelle et je regarde si la première colonne des deux fichiers se correspondent.""" 
-        feuille = Sheet('test.xls','sheet1')
+        feuille = Sheet('test.xlsx','sheet1')
 
-        readbook = xlrd.open_workbook('fichiers_xls/test.xls') 
-        feuille2 = readbook.sheet_by_index(0) 
-        for i in range(feuille2.nrows):
-            self.assertEqual(feuille.sheet_read.cell_value(i,0),feuille2.cell_value(i,0)) 
+        readbook = openpyxl.load_workbook('fichiers_xls/test.xlsx', data_only=True)
+        feuille2 = readbook.worksheets[0] 
+        for i in range(1,feuille2.max_row):
+            self.assertEqual(feuille.sheet.cell(i,1).value,feuille2.cell(i,1).value)
          
     def column_identical(self,name_file1, name_file2, column):
         """
         Méthode qui prend deux fichiers et regarde si à une colonne donnée les valeurs sont les mêmes"""
         file1 = File(name_file1) 
         file2 = File(name_file2)  
-        sheet1 = file1.readbook.sheet_by_index(0)
-        sheet2 = file2.readbook.sheet_by_index(0)
-        self.assertEqual(sheet1.nrows,sheet2.nrows) 
-        for i in range(sheet1.nrows): 
-            self.assertEqual(sheet1.cell_value(i,column),sheet2.cell_value(i,column)) 
+        sheet1 = file1.writebook.worksheets[0] 
+        sheet2 = file2.writebook.worksheets[0] 
+        self.assertEqual(sheet1.max_row,sheet2.max_row) 
+        
+        for i in range(1,sheet1.max_row ): 
+            self.assertEqual(sheet1.cell(i,column).value,sheet2.cell(i,column).value) 
 
     def test_column_transform_string_in_binary(self):
-        sheet = Sheet('test.xls','sheet1')
-        sheet.column_transform_string_in_binary(11,12,'partie 1 : Vrai',line_end= 14)
-        self.column_identical('test.xls','test_generated.xls', 12) 
-        sheet.column_transform_string_in_binary(11,12,'partie 2 : Vrai',line_end= 14)
-        self.column_identical('test.xls','test_generated.xls', 14) 
-        sheet.column_transform_string_in_binary(11,12,'partie 3 : Vrai',line_end= 14)
-        self.column_identical('test.xls','test_generated.xls', 16)
-        sheet.column_transform_string_in_binary(40,41,'Laser Interferometer Gravitational-Wave Observatory(LIGO)','virgo','Virgo',line_end= 14)
-        self.column_identical('test.xls','test_generated.xls', 41)
+        sheet = Sheet('test.xlsx','sheet1')
+        sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',line_end= 15)
+        self.column_identical('test.xlsx','test_generated.xlsx', 13) 
+        sheet.column_transform_string_in_binary(14,15,'partie 2 : Vrai',line_end= 15)
+        self.column_identical('test.xlsx','test_generated.xlsx', 15) 
+        sheet.column_transform_string_in_binary(16,17,'partie 3 : Vrai',line_end= 15)
+        self.column_identical('test.xlsx','test_generated.xlsx', 17)
+        sheet.column_transform_string_in_binary(41,42,'Laser Interferometer Gravitational-Wave Observatory(LIGO)','virgo','Virgo',line_end= 15)
+        self.column_identical('test.xlsx','test_generated.xlsx', 42)
 
     """
     def test_column_security(self):
