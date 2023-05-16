@@ -34,22 +34,26 @@ class TestSheet(TestCase):
 
     def test_column_transform_string_in_binary(self):
         sheet = Sheet('test.xlsx','sheet1')
-        sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',line_end= 15)
+
+        sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',line_end= 15,security=False)
         self.column_identical('test.xlsx','test_generated.xlsx', 13) 
-        sheet.column_transform_string_in_binary(14,15,'partie 2 : Vrai',line_end= 15)
+        sheet.column_transform_string_in_binary(14,15,'partie 2 : Vrai',line_end= 15,security=False)
         self.column_identical('test.xlsx','test_generated.xlsx', 15) 
-        sheet.column_transform_string_in_binary(16,17,'partie 3 : Vrai',line_end= 15)
+        sheet.column_transform_string_in_binary(16,17,'partie 3 : Vrai',line_end= 15,security=False)
         self.column_identical('test.xlsx','test_generated.xlsx', 17)
-        sheet.column_transform_string_in_binary(41,42,'Laser Interferometer Gravitational-Wave Observatory(LIGO)','virgo','Virgo',line_end= 15)
+        sheet.column_transform_string_in_binary(41,42,'Laser Interferometer Gravitational-Wave Observatory(LIGO)','virgo','Virgo',line_end= 15,security=False)
         self.column_identical('test.xlsx','test_generated.xlsx', 42)
 
-    """
+        self.assertEqual(type(sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',line_end= 15)),str)
+        self.assertEqual(type(sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',line_end= 15,security=False)),type(None))
+
+    
     def test_column_security(self):
-        sheet = Sheet('test.xls','sheet1')
+        sheet = Sheet('test.xlsx','sheet1')
         
-        self.assertEqual(sheet.column_security(1),False)
-        self.assertEqual(sheet.column_security(100),True)
-    """
+        self.assertEqual(sheet.column_security(1), False)
+        self.assertEqual(sheet.column_security(123), True)
+    
 
 
 class TestStr(TestCase):

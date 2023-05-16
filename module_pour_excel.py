@@ -21,7 +21,10 @@ Classe File qui prend un fichier et qui possède des méthodes.
     8) *Fonction qui prend tous les fichiers d'un dossier et qui fait la même action sur chacun de ces fichiers.
     9) En combinant les deux précédentes fonctions, on peut créer un fichier de data à partir n fichiers individuels.
     10) Fonction qui regarde si une colonne contient ou non des choses : on pourra s'en servir afin d'éviter d'écraser des données déjà écrite.
-    
+    11) (- urgent) Fonction qui trie les lignes suivant un ou plusieurs critères avec des ordres de priorité suivant les critères. Par exe, pour le recrutement de l'institut, on veut trier les femmes en premier critère puis par handicap puis...
+    12) (- urgent) Fonction qui filtre les lignes suivant un critère.
+    13) (- urgent) Fonction qui copie des lignes dans un autre fichier. On pourra la combiner à 12) pour classer pour le recrutt Charpak.
+
 Tests : 
     pour 1)
     2a créer une fonction testant si de 
@@ -61,7 +64,7 @@ class Sheet(File):
         self.sheet = self.writebook[self.name_onglet]
         del self.sheets_name
 
-    def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2, line_end = 100):
+    def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2, line_end = 100, security = True):
         """
         Fonction qui prend une colonne de str et qui renvoie une colonne de 0 ou de 1
         L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où mettre les 0 ou 1. Si les numéros de colonne sont identiques il renvoie un message d'erreur.
@@ -70,6 +73,11 @@ class Sheet(File):
                 colum_write : la colonne d'écriture des 0 et 1. 
                 line_beggining, line_end : intervalle de ligne dans lequel l'utilisateur veut appliquer sa transformation
         """
+        if security == True and self.column_security(column_write) == False:
+            msg = "La colonne n'est pas vide. Si vous voulez vraiment y écrire, mettez security = False en argument."
+            print(msg)
+            return msg
+
         for i in range(line_beginning,line_end):
             chaine_object = Str(self.sheet.cell(i,column_read).value)  
             bool = chaine_object.clean_string().transform_string_in_binary(*good_answers) 
@@ -78,15 +86,23 @@ class Sheet(File):
         self.writebook.save(self.path + self.name_file_generated)
 
     
-    """
+    
     def column_security(self,column):
+        """
+        Fonction qui prend une colonne et regarde si la colonne est vide.
+        Input : column
+        Output : True si elle ne contient rien, False sinon
+        """
         bool = True
-        for i in range(self.writebook.nrows):
-            if self.sheet_write.cell_value(i,column) != '':
+        for i in range(1,self.sheet.max_row): 
+            if self.sheet.cell(i,column).value != None:
                 bool = False
                 break
         return bool
-    """
+        #if bool == False:
+        #    return "La colonne n'est pas vide. Si vous voulez vraiment y écrire, mettez security = False en argument."
+        
+    
 
 
 class Str():
@@ -138,7 +154,7 @@ Déroulé et prochaines étapes :
     FAIT : Factoriser : Certains arguments des méthode ne seraient-ils pas mieux comme attributs de classe?
     FAIT : Créer un repository git (j'aurais dû le faire bien avant).
     FAIT : Passer à openpyxl : modifier avec les nouvelles commandes.
-    Faire et retester une fonction sécurité qui empêche d'écrire dans une colonne contenant des choses.
+    FAIT : Faire et retester une fonction sécurité qui empêche d'écrire dans une colonne contenant des choses. Pour cela ajouter dans les fonctions un paramètre security = True qui mis à False permettra d'écrire dans une colonne déjà remplie.
     Ajouter dans la classe File une méthode permettant de créer une sauvegarde du fichier de départ.
     Factoriser : enlever les deux noms de fichiers (name file generated et name file) de sorte d'avoir création d'une copie mais manipulation d'un seul nom de fichier.
     Modifier mes classes de sorte que les modifications se fassent sur le même fichier (en ayant bien vérifié que la sauvegarde fonctionne avant).
