@@ -54,7 +54,23 @@ class File():
         self.path = path
         self.writebook = openpyxl.load_workbook(self.path + self.name_file, data_only=True)
         self.sheets_name = self.writebook.sheetnames
-    
+
+    def sauvegarde(self):
+        """
+        Fonction qui crée une sauvegarde du fichier name_file et qui l'appelle name_file_numero où le numéro est le premier qui n'a pas été utilisé.
+        """
+        file_copy = openpyxl.Workbook()
+        del file_copy[file_copy.active.title] #supprimer l'onglet créé
+
+        for onglet in self.sheets_name:
+            new_sheet = file_copy.create_sheet(onglet)
+            initial_sheet = self.writebook[onglet]
+            for i in range(1,initial_sheet.max_row):
+                for j in range(1,initial_sheet.max_column): 
+                    new_sheet.cell(i,j).value = initial_sheet.cell(i,j).value 
+                    #new_sheet.cell(i,j).fill = initial_sheet.cell(i,j).fill 
+                    
+        file_copy.save(self.path + 'test_copie.xlsx') 
 
 class Sheet(File):
 
@@ -155,8 +171,9 @@ Déroulé et prochaines étapes :
     FAIT : Créer un repository git (j'aurais dû le faire bien avant).
     FAIT : Passer à openpyxl : modifier avec les nouvelles commandes.
     FAIT : Faire et retester une fonction sécurité qui empêche d'écrire dans une colonne contenant des choses. Pour cela ajouter dans les fonctions un paramètre security = True qui mis à False permettra d'écrire dans une colonne déjà remplie.
-    Ajouter dans la classe File une méthode permettant de créer une sauvegarde du fichier de départ.
-    Factoriser : enlever les deux noms de fichiers (name file generated et name file) de sorte d'avoir création d'une copie mais manipulation d'un seul nom de fichier.
+    FAIT : Ajouter dans la classe File une méthode permettant de créer une sauvegarde du fichier de départ 
+    FAIT : Ecrire la fonction test_files_identical
+    Améliorer la fonction copy afin de conserver aussi le format des cellules, les couleurs de fond et de texte.
     Modifier mes classes de sorte que les modifications se fassent sur le même fichier (en ayant bien vérifié que la sauvegarde fonctionne avant).
 """
 

@@ -7,6 +7,24 @@ class TestFile(TestCase):
     def test_open_and_copy(self):
         file = File('test.xlsx')
         self.assertNotEqual(file.writebook,None)
+
+    def test_files_identical(self):
+        """On prend deux fichiers excel, on vérifie qu'ils ont les mêmes onglets et que dans chaque onglet on a les mêmes cellules."""
+
+        file1 = File('test.xlsx')
+        file1.sauvegarde()
+        
+        file2 = File('test_copie.xlsx')
+
+        self.assertEqual(file1.sheets_name,file2.sheets_name)
+
+        for onglet in file1.sheets_name:
+            sheet1 = file1.writebook[onglet]
+            sheet2 = file2.writebook[onglet]
+            for i in range(1,sheet1.max_row):
+                for j in range(1,sheet1.max_column):
+                    self.assertEqual(sheet1.cell(i,j).value,sheet2.cell(i,j).value)
+
         
 
 class TestSheet(TestCase):
@@ -22,7 +40,8 @@ class TestSheet(TestCase):
          
     def column_identical(self,name_file1, name_file2, column):
         """
-        Méthode qui prend deux fichiers et regarde si à une colonne donnée les valeurs sont les mêmes"""
+        Méthode qui prend deux fichiers et regarde si à une colonne donnée les valeurs sont les mêmes
+        """
         file1 = File(name_file1) 
         file2 = File(name_file2)  
         sheet1 = file1.writebook.worksheets[0] 
