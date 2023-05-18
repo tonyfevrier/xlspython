@@ -45,6 +45,7 @@ Version ++ : on fait une interface graphique ou web permettant d'entrer un excel
 from xlutils.copy import copy 
 
 import openpyxl 
+from copy import copy
 
 class File():
     def __init__(self,name_file,name_file_generated='test_generated.xls', path = 'fichiers_xls/'):
@@ -64,11 +65,13 @@ class File():
 
         for onglet in self.sheets_name:
             new_sheet = file_copy.create_sheet(onglet)
-            initial_sheet = self.writebook[onglet]
-            for i in range(1,initial_sheet.max_row):
-                for j in range(1,initial_sheet.max_column): 
-                    new_sheet.cell(i,j).value = initial_sheet.cell(i,j).value 
-                    #new_sheet.cell(i,j).fill = initial_sheet.cell(i,j).fill 
+            initial_sheet = self.writebook[onglet] 
+
+            for i in range(1,initial_sheet.max_row+1):
+                for j in range(1,initial_sheet.max_column+1): 
+                    new_sheet.cell(i,j).value = initial_sheet.cell(i,j).value  
+                    new_sheet.cell(i,j).fill = copy(initial_sheet.cell(i,j).fill)
+                    new_sheet.cell(i,j).font = copy(initial_sheet.cell(i,j).font) 
                     
         file_copy.save(self.path + 'test_copie.xlsx') 
 
@@ -88,6 +91,8 @@ class Sheet(File):
                 column_read : la colonne de lecture des réponses.
                 colum_write : la colonne d'écriture des 0 et 1. 
                 line_beggining, line_end : intervalle de ligne dans lequel l'utilisateur veut appliquer sa transformation
+        
+        Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
         """
         if security == True and self.column_security(column_write) == False:
             msg = "La colonne n'est pas vide. Si vous voulez vraiment y écrire, mettez security = False en argument."
@@ -110,13 +115,11 @@ class Sheet(File):
         Output : True si elle ne contient rien, False sinon
         """
         bool = True
-        for i in range(1,self.sheet.max_row): 
+        for i in range(1,self.sheet.max_row+1): 
             if self.sheet.cell(i,column).value != None:
                 bool = False
                 break
-        return bool
-        #if bool == False:
-        #    return "La colonne n'est pas vide. Si vous voulez vraiment y écrire, mettez security = False en argument."
+        return bool 
         
     
 
@@ -173,7 +176,8 @@ Déroulé et prochaines étapes :
     FAIT : Faire et retester une fonction sécurité qui empêche d'écrire dans une colonne contenant des choses. Pour cela ajouter dans les fonctions un paramètre security = True qui mis à False permettra d'écrire dans une colonne déjà remplie.
     FAIT : Ajouter dans la classe File une méthode permettant de créer une sauvegarde du fichier de départ 
     FAIT : Ecrire la fonction test_files_identical
-    Améliorer la fonction copy afin de conserver aussi le format des cellules, les couleurs de fond et de texte.
+    FAIT : Améliorer la fonction copy afin de conserver aussi le format des cellules, les couleurs de fond et de texte.
+    Voir aussi pour obtenir un nom plus pertinent pour le fichier copié.
     Modifier mes classes de sorte que les modifications se fassent sur le même fichier (en ayant bien vérifié que la sauvegarde fonctionne avant).
 """
 

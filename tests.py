@@ -18,11 +18,11 @@ class TestFile(TestCase):
 
         self.assertEqual(file1.sheets_name,file2.sheets_name)
 
-        for onglet in file1.sheets_name:
+        for onglet in file1.sheets_name: 
             sheet1 = file1.writebook[onglet]
             sheet2 = file2.writebook[onglet]
-            for i in range(1,sheet1.max_row):
-                for j in range(1,sheet1.max_column):
+            for i in range(1,sheet1.max_row+1):
+                for j in range(1,sheet1.max_column+1):
                     self.assertEqual(sheet1.cell(i,j).value,sheet2.cell(i,j).value)
 
         
@@ -48,7 +48,7 @@ class TestSheet(TestCase):
         sheet2 = file2.writebook.worksheets[0] 
         self.assertEqual(sheet1.max_row,sheet2.max_row) 
         
-        for i in range(1,sheet1.max_row ): 
+        for i in range(1,sheet1.max_row+1 ): 
             self.assertEqual(sheet1.cell(i,column).value,sheet2.cell(i,column).value) 
 
     def test_column_transform_string_in_binary(self):
