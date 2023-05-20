@@ -16,7 +16,8 @@ Classe File qui prend un fichier et qui possède des méthodes.
     5) *Fonction qui parcourt plusieurs colonnes d'un fichier et qui crée une nouvelle colonne contenant des choses dépendant du contenu des cellules (même style qu'en ligne 6 mais avec plusieurs colonnes au départ) : on aurait aussi une fonction générique en argument.
         a Fonction gén 1 : si on a ça et ça, on met un 1 dans la nouvelle colonne.
         b Fonction gén 2 : on fait la somme, la moyenne de colonnes chiffrées.
-    6) *Fonction ajout_colonne_autre_fichier(file1, file2,column): qui parcourt les mails ou un élément caractérisant les participants d'un fichier et ajoute une des caractéristiques dans un second fichier si les mails ou la caractéristique est présent dans ce fichier. Il faut passer en arg les onglets et les colonnes de travail des deux fichiers. Idem peut sûrement se baser sur celle 2 lignes au-dessus
+    6) *Fonction ajout_colonne_autre_fichier(file1, file2,column): qui parcourt les mails ou un élément caractérisant les participants d'un fichier et ajoute une des caractéristiques dans un second fichier si les mails ou la caractéristique est présent dans ce fichier (les mails sont dans un ordre différent du fichier de départ). Il faut passer en arg les onglets et les colonnes de travail des deux fichiers. Idem peut sûrement se baser sur celle 2 lignes au-dessus
+    6,5) *Améliorer la fonction précédente et qui fait copie non pas une mais plusieurs colonnes (l'idée est que si on doit copier plusieurs colonnes, on ne fasse pas plusieurs fois la recherche des mails dans le fichier d'arrivée car c'est coûteux).
     7) *Fonction ajout ligne_autre_fichier : qui fait comme ajout colonne.  
     8) *Fonction qui prend tous les fichiers d'un dossier et qui fait la même action sur chacun de ces fichiers.
     9) En combinant les deux précédentes fonctions, on peut créer un fichier de data à partir n fichiers individuels.
@@ -47,11 +48,10 @@ from xlutils.copy import copy
 import openpyxl 
 from copy import copy
 
-class File():
-    def __init__(self,name_file,name_file_generated='test_generated.xls', path = 'fichiers_xls/'):
-        """L'utilisateur sera invité à mettre son fichier dans un dossier nommé fichiers_xls"""
-        self.name_file = name_file 
-        self.name_file_generated = name_file_generated
+class File(): 
+    def __init__(self,name_file, path = 'fichiers_xls/'):
+        """L'utilisateur sera invité à mettre son fichier xslx dans un dossier nommé fichiers_xls"""
+        self.name_file = name_file  
         self.path = path
         self.writebook = openpyxl.load_workbook(self.path + self.name_file, data_only=True)
         self.sheets_name = self.writebook.sheetnames
@@ -73,12 +73,12 @@ class File():
                     new_sheet.cell(i,j).fill = copy(initial_sheet.cell(i,j).fill)
                     new_sheet.cell(i,j).font = copy(initial_sheet.cell(i,j).font) 
                     
-        file_copy.save(self.path + 'test_copie.xlsx') 
+        name_file_no_extension = Str(self.name_file).del_extension() 
+        file_copy.save(self.path + name_file_no_extension + '_copie.xlsx') 
 
-class Sheet(File):
-
-    def __init__(self, name_file, name_onglet, name_file_generated='test_generated.xlsx',path = 'fichiers_xls/'):
-        super().__init__(name_file,name_file_generated,path)
+class Sheet(File): 
+    def __init__(self, name_file, name_onglet,path = 'fichiers_xls/'): 
+        super().__init__(name_file,path)
         self.name_onglet = name_onglet  
         self.sheet = self.writebook[self.name_onglet]
         del self.sheets_name
@@ -86,7 +86,7 @@ class Sheet(File):
     def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2, line_end = 100, security = True):
         """
         Fonction qui prend une colonne de str et qui renvoie une colonne de 0 ou de 1
-        L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où mettre les 0 ou 1. Si les numéros de colonne sont identiques il renvoie un message d'erreur.
+        L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où mettre les 0 ou 1.
         Input : good_answers : une séquence d'un nb quelconque de bonnes réponses qui valent 1pt. Chaque mot ne doit pas contenir d'espace ni au début ni à la fin.
                 column_read : la colonne de lecture des réponses.
                 colum_write : la colonne d'écriture des 0 et 1. 
@@ -103,8 +103,8 @@ class Sheet(File):
             chaine_object = Str(self.sheet.cell(i,column_read).value)  
             bool = chaine_object.clean_string().transform_string_in_binary(*good_answers) 
             self.sheet.cell(i,column_write).value = bool
-
-        self.writebook.save(self.path + self.name_file_generated)
+ 
+        self.writebook.save(self.path + self.name_file)
 
     
     
@@ -156,6 +156,11 @@ class Str():
                 fin -= 1
         self.chaine = self.chaine[depart:fin]
         return self
+    
+    def del_extension(self):
+        """Fonction qui enlève l'extension d'un nom de fichier"""
+        position = self.chaine.find('.')
+        return self.chaine[:position]
 
 
 """
@@ -177,7 +182,7 @@ Déroulé et prochaines étapes :
     FAIT : Ajouter dans la classe File une méthode permettant de créer une sauvegarde du fichier de départ 
     FAIT : Ecrire la fonction test_files_identical
     FAIT : Améliorer la fonction copy afin de conserver aussi le format des cellules, les couleurs de fond et de texte.
-    Voir aussi pour obtenir un nom plus pertinent pour le fichier copié.
+    Voir aussi pour obtenir un nom plus pertinent pour le fichier copié. Mettre test_2023_04_25 pour avoir un historique des copies. Il faudrait alors changer ma fonction del_extension pour supprimer aussi la date si on sauve un fichier déjà daté.
     Modifier mes classes de sorte que les modifications se fassent sur le même fichier (en ayant bien vérifié que la sauvegarde fonctionne avant).
 """
 
