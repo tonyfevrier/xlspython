@@ -8,6 +8,8 @@ class TestFile(TestCase):
         file = File('test.xlsx')
         self.assertNotEqual(file.writebook,None) 
 
+        print(datetime.now().strftime("%Y-%m-%d %Hh%M"))
+
     def test_files_identical(self):
         """On prend deux fichiers excel, on vérifie qu'ils ont les mêmes onglets et que dans chaque onglet on a les mêmes cellules."""
 
@@ -54,17 +56,21 @@ class TestSheet(TestCase):
     def test_column_transform_string_in_binary(self):
         sheet = Sheet('test.xlsx','sheet1')
 
-        sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',line_end= 15,security=False)
+        sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',line_end= 15,security=False,insert=False)
         self.column_identical('test.xlsx','test_generated.xlsx', 13) 
-        sheet.column_transform_string_in_binary(14,15,'partie 2 : Vrai',line_end= 15,security=False)
+        sheet.column_transform_string_in_binary(14,15,'partie 2 : Vrai',line_end= 15,security=False,insert=False)
         self.column_identical('test.xlsx','test_generated.xlsx', 15) 
-        sheet.column_transform_string_in_binary(16,17,'partie 3 : Vrai',line_end= 15,security=False)
+        sheet.column_transform_string_in_binary(16,17,'partie 3 : Vrai',line_end= 15,security=False,insert=False)
         self.column_identical('test.xlsx','test_generated.xlsx', 17)
-        sheet.column_transform_string_in_binary(41,42,'Laser Interferometer Gravitational-Wave Observatory(LIGO)','virgo','Virgo',line_end= 15,security=False)
+        sheet.column_transform_string_in_binary(41,42,'Laser Interferometer Gravitational-Wave Observatory(LIGO)','virgo','Virgo',line_end= 15,security=False,insert=False)
         self.column_identical('test.xlsx','test_generated.xlsx', 42)
 
-        self.assertEqual(type(sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',line_end= 15)),str)
-        self.assertEqual(type(sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',line_end= 15,security=False)),type(None))
+        self.assertEqual(type(sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',line_end= 15,insert=False)),str)
+        self.assertEqual(type(sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',line_end= 15,security=False,insert=False)),type(None))
+
+        #Tester l'insertion de colonne : regarder si le nb de colonnes a augmenté (pour éviter de tout modifier test.xlsx j'insère à la fin du fichier ou alors je supprime après coup ma colonne.)
+        #sheet.column_transform_string_in_binary(16,17,'partie 3 : Vrai',line_end= 15)
+        #A COMPLETER
 
     
     def test_column_security(self):

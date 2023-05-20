@@ -7,7 +7,7 @@ Classe File qui prend un fichier et qui possède des méthodes.
     1) (A préciser : quel but) Fonction sur le modèle de "cherche" ou plutôt "recherche_chaine_et_retourne_ligne" qui recherche une donnée dans une colonne donnée et qui renvoie une autre donnée d'une autre colonne ainsi que la ligne.
     2) * Fonction qui parcourt une colonne C et qui crée (ou insère pour éviter l'écrasement de données) une nouvelle colonne à une position donnée, cette nouvelle colonne étant le résultat d'une fonction appliquée à la colonne C et passée en argument.
         a Fonction qui parcourt une colonne qui contient plusieurs types de réponses et qui crée une nouvelle colonne à une position donnée qui contient 1 ou 0. Pourrait prendre en argument deux listes de réponses associées par le prog à 0 ou 1. A mon avis vu la fonction de la ligne précédente, il suffit de créer une fonction qui transforme un str en 0 ou 1 et de l'appliquer à la précédente fonction.
-        b Fonction style xlsparse de dataset2 qui parcourt une colonne qui contient une chaîne à séparer et qui écrit les morceaux séparés dans des colonnes préalablement choisies.
+        b Fonction style xlsparse de dataset2 qui parcourt une colonne qui contient une chaîne à séparer et qui écrit les morceaux séparés en insérant des colonnes (autant que le nb de morceaux de la chaîne) à partir d'une colonne fixée en argument.  
         c Avec la fonction globale, il ne resterait qu'à écrire une fonction spécifique décrivant une action sur la chaîne de chaque cellule de cette colonne (exe : les deux ci-dessous) voir d'autres.
         d Fonction qui sous conditions d'une colonne colore une case.
         e Fonction qui si il y a une couleur insère une colonne et y met qqch.
@@ -47,7 +47,7 @@ from xlutils.copy import copy
 
 import openpyxl 
 from copy import copy
-from datetime import date
+from datetime import date, datetime
 
 class File(): 
     def __init__(self,name_file, path = 'fichiers_xls/'):
@@ -75,7 +75,8 @@ class File():
                     new_sheet.cell(i,j).font = copy(initial_sheet.cell(i,j).font) 
                     
         name_file_no_extension = Str(self.name_file).del_extension() 
-        file_copy.save(self.path  + name_file_no_extension + '_date_' + str(date.today()) + '.xlsx') 
+        #file_copy.save(self.path  + name_file_no_extension + '_date_' + str(date.today()) + '.xlsx') 
+        file_copy.save(self.path  + name_file_no_extension + '_date_' + datetime.now().strftime("%Y-%m-%d_%Hh%M") + '.xlsx') 
 
 class Sheet(File): 
     def __init__(self, name_file, name_onglet,path = 'fichiers_xls/'): 
@@ -84,7 +85,7 @@ class Sheet(File):
         self.sheet = self.writebook[self.name_onglet]
         del self.sheets_name
 
-    def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2, line_end = 100, security = True):
+    def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2, line_end = 100, insert = True, security = True):
         """
         Fonction qui prend une colonne de str et qui renvoie une colonne de 0 ou de 1
         L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où mettre les 0 ou 1.
@@ -95,10 +96,14 @@ class Sheet(File):
         
         Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
         """
-        if security == True and self.column_security(column_write) == False:
+
+        if insert == False and security == True and self.column_security(column_write) == False:
             msg = "La colonne n'est pas vide. Si vous voulez vraiment y écrire, mettez security = False en argument."
             print(msg)
             return msg
+
+        if insert == True:
+            self.sheet.insert_cols(column_write)
 
         for i in range(line_beginning,line_end):
             chaine_object = Str(self.sheet.cell(i,column_read).value)  
@@ -191,8 +196,15 @@ Déroulé et prochaines étapes :
     FAIT : Ajouter dans la classe File une méthode permettant de créer une sauvegarde du fichier de départ 
     FAIT : Ecrire la fonction test_files_identical
     FAIT : Améliorer la fonction copy afin de conserver aussi le format des cellules, les couleurs de fond et de texte.
-    Voir aussi pour obtenir un nom plus pertinent pour le fichier copié. Mettre test_2023_04_25 pour avoir un historique des copies. Il faudrait alors changer ma fonction del_extension pour supprimer aussi la date si on sauve un fichier déjà daté.
+    FAIT : Voir aussi pour obtenir un nom plus pertinent pour le fichier copié. Mettre test_2023_04_25 pour avoir un historique des copies. Il faudrait alors changer ma fonction del_extension pour supprimer aussi la date si on sauve un fichier déjà daté.
     FAIT : Modifier mes classes de sorte que les modifications se fassent sur le même fichier (en ayant bien vérifié que la sauvegarde fonctionne avant).
+    FAIT : Ajouter l'heure au nom du fichier sauvegardé.
+    Modifier ma fonction 2a avec un paramètre insert = True qui choisit si on insère ou non une colonne à la position column_write. Si on n'insère pas, le paramètre security permet alors d'éviter d'écraser.
+    Tester ma fonction dans les deux cas : insert = True ou False.    
+    Fonction 2b : imaginer un test avec un fichier d'arrivée déjà écrit à la main (avec les colonnes séparées).
+    Programmer le test.
+    Programmer la fonction.
+    Voir si on ne peut pas faire une seule fonction pour 2a et 2b qui utilise en argument les ss fonctions transform_string_in_binary et ...
 """
 
 
