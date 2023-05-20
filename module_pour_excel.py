@@ -47,6 +47,7 @@ from xlutils.copy import copy
 
 import openpyxl 
 from copy import copy
+from datetime import date
 
 class File(): 
     def __init__(self,name_file, path = 'fichiers_xls/'):
@@ -74,7 +75,7 @@ class File():
                     new_sheet.cell(i,j).font = copy(initial_sheet.cell(i,j).font) 
                     
         name_file_no_extension = Str(self.name_file).del_extension() 
-        file_copy.save(self.path + name_file_no_extension + '_copie.xlsx') 
+        file_copy.save(self.path  + name_file_no_extension + '_date_' + str(date.today()) + '.xlsx') 
 
 class Sheet(File): 
     def __init__(self, name_file, name_onglet,path = 'fichiers_xls/'): 
@@ -158,10 +159,18 @@ class Str():
         return self
     
     def del_extension(self):
-        """Fonction qui enlève l'extension d'un nom de fichier"""
-        position = self.chaine.find('.')
+        """Fonction 
+            - qui enlève l'extension d'un nom de fichier si le nom ne contient pas de date
+            - qui ne garde que la partie avant _date_ pour un fichier nommé test_date_****-**-**.xlsx. 
+            - qui sert à la sauvegarde et permet ainsi d'éviter des noms à rallonge.
+        """
+        position = self.chaine.find('_date_')
+        if position == -1: 
+           position = self.chaine.find('.xlsx')
+
         return self.chaine[:position]
 
+    
 
 """
 Déroulé et prochaines étapes :
@@ -183,7 +192,7 @@ Déroulé et prochaines étapes :
     FAIT : Ecrire la fonction test_files_identical
     FAIT : Améliorer la fonction copy afin de conserver aussi le format des cellules, les couleurs de fond et de texte.
     Voir aussi pour obtenir un nom plus pertinent pour le fichier copié. Mettre test_2023_04_25 pour avoir un historique des copies. Il faudrait alors changer ma fonction del_extension pour supprimer aussi la date si on sauve un fichier déjà daté.
-    Modifier mes classes de sorte que les modifications se fassent sur le même fichier (en ayant bien vérifié que la sauvegarde fonctionne avant).
+    FAIT : Modifier mes classes de sorte que les modifications se fassent sur le même fichier (en ayant bien vérifié que la sauvegarde fonctionne avant).
 """
 
 

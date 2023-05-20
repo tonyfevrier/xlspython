@@ -6,12 +6,12 @@ class TestFile(TestCase):
     
     def test_open_and_copy(self):
         file = File('test.xlsx')
-        self.assertNotEqual(file.writebook,None)
+        self.assertNotEqual(file.writebook,None) 
 
     def test_files_identical(self):
         """On prend deux fichiers excel, on vérifie qu'ils ont les mêmes onglets et que dans chaque onglet on a les mêmes cellules."""
 
-        file1 = File('test.xlsx')
+        file1 = File('test_date_2023-05-20.xlsx')
         file1.sauvegarde()
         
         file2 = File('test_copie.xlsx')
