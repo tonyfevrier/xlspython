@@ -199,8 +199,8 @@ Déroulé et prochaines étapes :
     FAIT : Voir aussi pour obtenir un nom plus pertinent pour le fichier copié. Mettre test_2023_04_25 pour avoir un historique des copies. Il faudrait alors changer ma fonction del_extension pour supprimer aussi la date si on sauve un fichier déjà daté.
     FAIT : Modifier mes classes de sorte que les modifications se fassent sur le même fichier (en ayant bien vérifié que la sauvegarde fonctionne avant).
     FAIT : Ajouter l'heure au nom du fichier sauvegardé.
-    Modifier ma fonction 2a avec un paramètre insert = True qui choisit si on insère ou non une colonne à la position column_write. Si on n'insère pas, le paramètre security permet alors d'éviter d'écraser.
-    Tester ma fonction dans les deux cas : insert = True ou False.    
+    FAIT : Modifier ma fonction 2a avec un paramètre insert = True qui choisit si on insère ou non une colonne à la position column_write. Si on n'insère pas, le paramètre security permet alors d'éviter d'écraser.
+    FAIT : Tester ma fonction dans les deux cas : insert = True ou False.    
     Fonction 2b : imaginer un test avec un fichier d'arrivée déjà écrit à la main (avec les colonnes séparées).
     Programmer le test.
     Programmer la fonction.
