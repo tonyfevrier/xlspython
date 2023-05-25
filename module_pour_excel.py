@@ -17,7 +17,8 @@ Classe File qui prend un fichier et qui possède des méthodes.
         a Fonction gén 1 : si on a ça et ça, on met un 1 dans la nouvelle colonne.
         b Fonction gén 2 : on fait la somme, la moyenne de colonnes chiffrées.
     6) *Fonction ajout_colonne_autre_fichier(file1, file2,column): qui parcourt les mails ou un élément caractérisant les participants d'un fichier et ajoute une des caractéristiques dans un second fichier si les mails ou la caractéristique est présent dans ce fichier (les mails sont dans un ordre différent du fichier de départ). Il faut passer en arg les onglets et les colonnes de travail des deux fichiers. Idem peut sûrement se baser sur celle 2 lignes au-dessus
-    6,5) *Améliorer la fonction précédente et qui fait copie non pas une mais plusieurs colonnes (l'idée est que si on doit copier plusieurs colonnes, on ne fasse pas plusieurs fois la recherche des mails dans le fichier d'arrivée car c'est coûteux).
+    6bis) *Améliorer la fonction précédente et qui fait copie non pas une mais plusieurs colonnes (l'idée est que si on doit copier plusieurs colonnes, on ne fasse pas plusieurs fois la recherche des mails dans le fichier d'arrivée car c'est coûteux).
+    6ter) Même chose mais cette fois en créant une colonne (et pas en copiant).
     7) *Fonction ajout ligne_autre_fichier : qui fait comme ajout colonne.  
     8) *Fonction qui prend tous les fichiers d'un dossier et qui fait la même action sur chacun de ces fichiers.
     9) En combinant les deux précédentes fonctions, on peut créer un fichier de data à partir n fichiers individuels.
@@ -25,6 +26,7 @@ Classe File qui prend un fichier et qui possède des méthodes.
     11) (- urgent) Fonction qui trie les lignes suivant un ou plusieurs critères avec des ordres de priorité suivant les critères. Par exe, pour le recrutement de l'institut, on veut trier les femmes en premier critère puis par handicap puis...
     12) (- urgent) Fonction qui filtre les lignes suivant un critère.
     13) (- urgent) Fonction qui copie des lignes dans un autre fichier. On pourra la combiner à 12) pour classer pour le recrutt Charpak.
+    14) Fonction qui si qqch est écrit dans une case la colore en une couleur choisie par l'utilisateur. A décliner sur une colonne ou sur l'ensemble d'une feuille.
 
 Tests : 
     pour 1)
@@ -46,6 +48,7 @@ Version ++ : on fait une interface graphique ou web permettant d'entrer un excel
 from xlutils.copy import copy 
 
 import openpyxl 
+from openpyxl.styles import PatternFill
 from copy import copy
 from datetime import date, datetime
 
@@ -111,8 +114,6 @@ class Sheet(File):
             self.sheet.cell(i,column_write).value = bool
  
         self.writebook.save(self.path + self.name_file)
-
-    
     
     def column_security(self,column):
         """
@@ -126,6 +127,40 @@ class Sheet(File):
                 bool = False
                 break
         return bool 
+        
+    def column_color(self,column,chainecolor):
+        """
+        Fonction qui regarde pour une colonne donnée colore les cases contenant à certaines chaînes de caractères
+        Input : 
+            - column : le numéro de la colonne.
+            - chainecolor : les str qui vont être colorés et les couleurs qui correspondent à écrire avec la syntaxe suivante {'vrai':'couleur1','autre':couleur2}. Attention,
+                la couleur doit être entrée en hexadécimal et les chaînes de caractères ne doivent pas avoir d'espace au début ou à la fin.
+        """
+        
+        for i in range(1,self.sheet.max_row + 1):
+            cellule = self.sheet.cell(i,column) 
+
+            if type(cellule.value) == str:
+                key = Str(cellule.value).clean_string().chaine
+            else: 
+                key = cellule.value
+
+            if key in chainecolor.keys():
+                cellule.fill = PatternFill(fill_type = 'solid', start_color = chainecolor[key])
+
+        self.writebook.save(self.path + self.name_file)
+
+    def sheet_color(self,chainecolor): 
+        """
+        Fonction qui colore les cases contenant à certaines chaînes de caractères d'une feuille
+        Input : 
+            - column : le numéro de la colonne.
+            - chainecolor : les str qui vont être colorés et les couleurs qui correspondent à écrire avec la syntaxe suivante {'vrai':'couleur1','autre':couleur2}. Attention,
+                la couleur doit être entrée en hexadécimal et les chaînes de caractères ne doivent pas avoir d'espace au début ou à la fin.
+        """
+
+        for j in range(1, self.sheet.max_column + 1):
+            self.column_color(j,chainecolor)
         
     
 
@@ -150,6 +185,7 @@ class Str():
     def clean_string(self):
         """
         Fonction qui prend une chaîne de caractère et qui élimine tous les espaces de début et de fin.
+        Fonction qui nettoie également les espaces insécables \xa0 par un espace régulier.
         Ceci rendra une chaîne de caractère qui remplacera l'attribut chaine de la classe.  
         On pourra ainsi éviter les erreurs liées à une différence d'un seul espace.      
         """
@@ -161,6 +197,9 @@ class Str():
             if self.chaine[fin-1] == ' ':
                 fin -= 1
         self.chaine = self.chaine[depart:fin]
+ 
+        chaine2 = self.chaine.replace('\xa0', ' ')
+        self.chaine = chaine2
         return self
     
     def del_extension(self):
@@ -201,10 +240,17 @@ Déroulé et prochaines étapes :
     FAIT : Ajouter l'heure au nom du fichier sauvegardé.
     FAIT : Modifier ma fonction 2a avec un paramètre insert = True qui choisit si on insère ou non une colonne à la position column_write. Si on n'insère pas, le paramètre security permet alors d'éviter d'écraser.
     FAIT : Tester ma fonction dans les deux cas : insert = True ou False.    
-    Fonction 2b : imaginer un test avec un fichier d'arrivée déjà écrit à la main (avec les colonnes séparées).
+    FAIT : Débug : comprendre pourquoi dans column_color il ne rentre jamais dans la condition.
+    Débugger le test de sheet_color.
+    Fonction 6 : imaginer un test avec un fichier d'arrivée déjà écrit à la main (avec les colonnes séparées).
     Programmer le test.
     Programmer la fonction.
     Voir si on ne peut pas faire une seule fonction pour 2a et 2b qui utilise en argument les ss fonctions transform_string_in_binary et ...
+
+
+Bug intéressants : 
+    -oubli de sauvegarder la feuille en fin de fonction : le prog ne fait alors rien.     
+    -certaines str sortant d'excel ont des espaces insécables \xa0 différents des espaces réguliers. Python voit ainsi parfois des str qui semblent identiques différemment.
 """
 
 

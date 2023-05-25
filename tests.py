@@ -14,7 +14,7 @@ class TestFile(TestCase):
         """On prend deux fichiers excel, on vérifie qu'ils ont les mêmes onglets et que dans chaque onglet on a les mêmes cellules."""
 
         file1 = File('test_date_2023-05-20.xlsx')
-        file1.sauvegarde()
+        #file1.sauvegarde()
         
         file2 = File('test_copie.xlsx')
 
@@ -81,6 +81,14 @@ class TestSheet(TestCase):
         self.assertEqual(sheet.column_security(1), False)
         self.assertEqual(sheet.column_security(123), True)
     
+    def test_sheet_color(self):
+        sheet = Sheet('test.xlsx','Feuille3')
+        sheet2 = Sheet('test.xlsx','Feuille4')
+
+        sheet.sheet_color({"partie 6 : Faux":'00a933',0:'ffff00',"partie 7 : Vrai":'ff0000','Les électrons sont plus petits que les atomes':'2a6099','accuracy_Q6':'bf0041'})
+        for i in range(1,sheet.sheet.max_row+1):
+            for j in range(1,sheet2.sheet.max_column+1): 
+                self.assertEqual(sheet.sheet.cell(i,j).fill,sheet2.sheet.cell(i,j).fill)
 
 
 class TestStr(TestCase):
