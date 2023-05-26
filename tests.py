@@ -40,39 +40,40 @@ class TestSheet(TestCase):
         for i in range(1,feuille2.max_row):
             self.assertEqual(feuille.sheet.cell(i,1).value,feuille2.cell(i,1).value)
          
-    def column_identical(self,name_file1, name_file2, index_onglet, column1,column2):
+    def column_identical(self,name_file1, name_file2, index_onglet1, index_onglet2, column1,column2):
         """
         Méthode qui prend deux fichiers et regarde si à une colonne donnée les valeurs sont les mêmes
         """
         file1 = File(name_file1) 
         file2 = File(name_file2)  
-        sheet1 = file1.writebook.worksheets[index_onglet] 
-        sheet2 = file2.writebook.worksheets[index_onglet] 
+        sheet1 = file1.writebook.worksheets[index_onglet1] 
+        sheet2 = file2.writebook.worksheets[index_onglet2] 
         self.assertEqual(sheet1.max_row,sheet2.max_row) 
         
         for i in range(2,sheet1.max_row+1 ): 
             self.assertEqual(sheet1.cell(i,column1).value,sheet2.cell(i,column2).value) 
 
     def test_column_transform_string_in_binary(self):
-        sheet = Sheet('test.xlsx','sheet1')
+        sheet = Sheet('test.xlsx','sheet1')  
 
-        sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',line_end= 15,security=False,insert=False)
-        self.column_identical('test.xlsx','test_generated.xlsx',0, 13, 13) 
-        sheet.column_transform_string_in_binary(14,15,'partie 2 : Vrai',line_end= 15,security=False,insert=False)
-        self.column_identical('test.xlsx','test_generated.xlsx',0, 15, 15) 
-        sheet.column_transform_string_in_binary(16,17,'partie 3 : Vrai',line_end= 15,security=False,insert=False)
-        self.column_identical('test.xlsx','test_generated.xlsx',0, 17, 17)
+        sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',line_end= 15,security=False,insert=False)
+        self.column_identical('test.xlsx','test_generated.xlsx',0,0, 13, 13) 
+        sheet.column_transform_string_in_binary(14,15,'partie 2 : Vrai',line_end= 15,security=False,insert=False)
+        self.column_identical('test.xlsx','test_generated.xlsx',0,0, 15, 15) 
+        sheet.column_transform_string_in_binary(16,17,'partie 3 : Vrai',line_end= 15,security=False,insert=False)
+        self.column_identical('test.xlsx','test_generated.xlsx',0,0, 17, 17)
         sheet.column_transform_string_in_binary(41,42,'Laser Interferometer Gravitational-Wave Observatory(LIGO)','virgo','Virgo',line_end= 15,security=False,insert=False)
-        self.column_identical('test.xlsx','test_generated.xlsx',0, 42, 42)
+        self.column_identical('test.xlsx','test_generated.xlsx',0,0, 42, 42)
 
-        self.assertEqual(type(sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',line_end= 15,insert=False)),str)
-        self.assertEqual(type(sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',line_end= 15,security=False,insert=False)),type(None))
+        self.assertEqual(type(sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',line_end= 15,insert=False)),str)
+        self.assertEqual(type(sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',line_end= 15,security=False,insert=False)),type(None))
 
         sheet2 = Sheet('test.xlsx', 'Feuille2')
-        #Tester l'insertion de colonne : regarder si le nb de colonnes a augmenté (pour éviter de tout modifier test.xlsx j'insère à la fin du fichier ou alors je supprime après coup ma colonne.)
-        sheet2.column_transform_string_in_binary(6,7,'partie 12 : Faux',1,line_end= 15)
-        self.column_identical('test.xlsx','test.xlsx', 1, 7,8)
-        #A COMPLETER
+         
+        sheet2.column_transform_string_in_binary(6,7,'partie 12 : Faux',1,line_end= 15)
+        self.column_identical('test.xlsx','test.xlsx', 1, 1, 7,8)
+        sheet2.sheet.delete_cols(7) #sinon à chaque lancement de test.py il insère une colonne en plus.
+        sheet2.writebook.save(sheet2.path + 'test.xlsx') 
 
     
     def test_column_security(self):
@@ -85,10 +86,23 @@ class TestSheet(TestCase):
         sheet = Sheet('test.xlsx','Feuille3')
         sheet2 = Sheet('test.xlsx','Feuille4')
 
-        sheet.sheet_color({"partie 6 : Faux":'00a933',0:'ffff00',"partie 7 : Vrai":'ff0000','Les électrons sont plus petits que les atomes':'2a6099','accuracy_Q6':'bf0041'})
+        sheet.sheet_color({"partie 6 : Faux":'0000a933',0:'00ffff00',"partie 7 : Vrai":'00ff0000','Les électrons sont plus petits que les atomes':'002a6099','accuracy_Q6':'00bf0041'})
         for i in range(1,sheet.sheet.max_row+1):
             for j in range(1,sheet2.sheet.max_column+1): 
-                self.assertEqual(sheet.sheet.cell(i,j).fill,sheet2.sheet.cell(i,j).fill)
+                print(i,j)
+                self.assertEqual(sheet.sheet.cell(i,j).fill.fgColor.rgb,sheet2.sheet.cell(i,j).fill.fgColor.rgb)
+
+    
+    def test_add_column_in_sheet_differently_sorted(self):
+        sheet1 = Sheet('test.xlsx','Feuille5') 
+        sheet1.add_column_in_sheet_differently_sorted(3,5,['test.xlsx','sheet1',3,[2,6]]) 
+        self.column_identical('test.xlsx','test.xlsx',4,5,5,5)
+        self.column_identical('test.xlsx','test.xlsx',4,5,6,6)
+        sheet1.sheet.delete_cols(5,2)
+        sheet1.writebook.save(sheet1.path + 'test.xlsx')
+        
+     
+    
 
 
 class TestStr(TestCase):

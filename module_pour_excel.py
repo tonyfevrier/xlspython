@@ -78,7 +78,7 @@ class File():
                     new_sheet.cell(i,j).font = copy(initial_sheet.cell(i,j).font) 
                     
         name_file_no_extension = Str(self.name_file).del_extension() 
-        #file_copy.save(self.path  + name_file_no_extension + '_date_' + str(date.today()) + '.xlsx') 
+        
         file_copy.save(self.path  + name_file_no_extension + '_date_' + datetime.now().strftime("%Y-%m-%d_%Hh%M") + '.xlsx') 
 
 class Sheet(File): 
@@ -161,6 +161,44 @@ class Sheet(File):
 
         for j in range(1, self.sheet.max_column + 1):
             self.column_color(j,chainecolor)
+
+    def add_column_in_sheet_differently_sorted(self,column_identifiant, column_insertion,other_sheet):
+        """
+        Fonction qui insère dans une feuille des colonnes d'une autre feuille de référence. Les deux feuilles ont des lignes qui ne sont pas triées dans le même ordre.
+        Les deux feuilles ont une colonne d'identifiants (exemple : des mails).
+        La fonction récupère un ou plusieurs éléments d'une ligne déterminée par un identifiant, recherche l'identifiant dans la seconde feuille, insère les éléments
+        dans la ligne correspondante et dans les colonnes insérées. 
+
+        Je passe en revue dans l'ordre les identifiants du premier fichier et je crée un dictionnaire dont les clés sont ces identifiants et les valeurs sont une liste de valeurs à récupérer.
+        Je passe en revue dans l'ordre (qui est différent du premier) les identifiants du second fichier et j'y insère les valeurs si les identifiants sont dans les clés du dico, sinon je laisse les cases vides. 
+        Cela évite de parcourir pleins de fois les identifiants en les recherchant.
+
+        Inputs :
+            - column_identifiant : numéro de la colonne où sont situés les identifiants dans le fichier qu'on souhaite modifier.
+            - column_insertion : numéro de la colonne où on insère les colonnes à récupérer.
+            - other_sheet = ['namefile','namesheet',numéro de la colonne où sont les identifiants,[numéros des colonnes à récupérer sous forme de liste]]
+                namefile doit être au format .xlsx et mis dans le dossier fichier_xls.
+        """
+        
+        file_to_copy = openpyxl.load_workbook(self.path + other_sheet[0])
+        sheet_to_copy = file_to_copy[other_sheet[1]]
+        columns_to_copy = other_sheet[3]
+        dico = {}
+
+        for i in range(1,sheet_to_copy.max_row + 1):
+            value = sheet_to_copy.cell(i,other_sheet[2]).value
+            dico[value] = [sheet_to_copy.cell(i,j).value for j in columns_to_copy]
+
+
+        self.sheet.insert_cols(column_insertion,len(columns_to_copy)) 
+
+        for i in range(1,self.sheet.max_row+1):
+            key = self.sheet.cell(i,column_identifiant).value
+            if key in dico.keys():
+                for j in range(len(columns_to_copy)):
+                    self.sheet.cell(i,column_insertion + j).value = dico[key][j]
+        
+        self.writebook.save(self.path + self.name_file)
         
     
 
@@ -241,16 +279,18 @@ Déroulé et prochaines étapes :
     FAIT : Modifier ma fonction 2a avec un paramètre insert = True qui choisit si on insère ou non une colonne à la position column_write. Si on n'insère pas, le paramètre security permet alors d'éviter d'écraser.
     FAIT : Tester ma fonction dans les deux cas : insert = True ou False.    
     FAIT : Débug : comprendre pourquoi dans column_color il ne rentre jamais dans la condition.
-    Débugger le test de sheet_color.
-    Fonction 6 : imaginer un test avec un fichier d'arrivée déjà écrit à la main (avec les colonnes séparées).
-    Programmer le test.
-    Programmer la fonction.
+    Débugger le test de sheet_color : le code affiche FF alors que l'opacité est bien de 0% quand on va dans format cellule.
+    FAIT : Fonction 6 : imaginer un test avec un fichier d'arrivée déjà écrit à la main (avec les colonnes séparées).
+    FAIT : Programmer le test.
+    FAIT : Programmer la fonction.
+    
     Voir si on ne peut pas faire une seule fonction pour 2a et 2b qui utilise en argument les ss fonctions transform_string_in_binary et ...
 
 
 Bug intéressants : 
     -oubli de sauvegarder la feuille en fin de fonction : le prog ne fait alors rien.     
     -certaines str sortant d'excel ont des espaces insécables \xa0 différents des espaces réguliers. Python voit ainsi parfois des str qui semblent identiques différemment.
+    -quand on charge un fichier, mettre data_only=True si on veut que lors d'une copie, on ait les valeurs et pas les formules.
 """
 
 
