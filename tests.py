@@ -82,11 +82,11 @@ class TestSheet(TestCase):
         self.assertEqual(sheet.column_security(1), False)
         self.assertEqual(sheet.column_security(123), True)
     
-    def test_sheet_color(self):
+    def test_color_special_cases_in_sheet(self):
         sheet = Sheet('test.xlsx','Feuille3')
         sheet2 = Sheet('test.xlsx','Feuille4')
 
-        sheet.sheet_color({"partie 6 : Faux":'0000a933',0:'00ffff00',"partie 7 : Vrai":'00ff0000','Les électrons sont plus petits que les atomes':'002a6099','accuracy_Q6':'00bf0041'})
+        sheet.color_special_cases_in_sheet({"partie 6 : Faux":'0000a933',0:'00ffff00',"partie 7 : Vrai":'00ff0000','Les électrons sont plus petits que les atomes':'002a6099','accuracy_Q6':'00bf0041'})
         for i in range(1,sheet.sheet.max_row+1):
             for j in range(1,sheet2.sheet.max_column+1): 
                 print(i,j)
@@ -101,7 +101,10 @@ class TestSheet(TestCase):
         sheet1.sheet.delete_cols(5,2)
         sheet1.writebook.save(sheet1.path + 'test.xlsx')
         
-     
+    def test_color_line_containing_chaines(self):
+        sheet = Sheet('test.xlsx','color_line')
+        sheet.color_lines_containing_chaines('0000a933','-','+')
+        
     
 
 

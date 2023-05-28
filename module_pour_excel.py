@@ -6,7 +6,7 @@ Fonctions utiles pour travailler automatiquement sur des tableurs excel
 Classe File qui prend un fichier et qui possède des méthodes.
     1) (A préciser : quel but) Fonction sur le modèle de "cherche" ou plutôt "recherche_chaine_et_retourne_ligne" qui recherche une donnée dans une colonne donnée et qui renvoie une autre donnée d'une autre colonne ainsi que la ligne.
     2) * Fonction qui parcourt une colonne C et qui crée (ou insère pour éviter l'écrasement de données) une nouvelle colonne à une position donnée, cette nouvelle colonne étant le résultat d'une fonction appliquée à la colonne C et passée en argument.
-        a Fonction qui parcourt une colonne qui contient plusieurs types de réponses et qui crée une nouvelle colonne à une position donnée qui contient 1 ou 0. Pourrait prendre en argument deux listes de réponses associées par le prog à 0 ou 1. A mon avis vu la fonction de la ligne précédente, il suffit de créer une fonction qui transforme un str en 0 ou 1 et de l'appliquer à la précédente fonction.
+        FAIT : a Fonction qui parcourt une colonne qui contient plusieurs types de réponses et qui crée une nouvelle colonne à une position donnée qui contient 1 ou 0. Pourrait prendre en argument deux listes de réponses associées par le prog à 0 ou 1. A mon avis vu la fonction de la ligne précédente, il suffit de créer une fonction qui transforme un str en 0 ou 1 et de l'appliquer à la précédente fonction.
         b Fonction style xlsparse de dataset2 qui parcourt une colonne qui contient une chaîne à séparer et qui écrit les morceaux séparés en insérant des colonnes (autant que le nb de morceaux de la chaîne) à partir d'une colonne fixée en argument.  
         c Avec la fonction globale, il ne resterait qu'à écrire une fonction spécifique décrivant une action sur la chaîne de chaque cellule de cette colonne (exe : les deux ci-dessous) voir d'autres.
         d Fonction qui sous conditions d'une colonne colore une case.
@@ -16,9 +16,9 @@ Classe File qui prend un fichier et qui possède des méthodes.
     5) *Fonction qui parcourt plusieurs colonnes d'un fichier et qui crée une nouvelle colonne contenant des choses dépendant du contenu des cellules (même style qu'en ligne 6 mais avec plusieurs colonnes au départ) : on aurait aussi une fonction générique en argument.
         a Fonction gén 1 : si on a ça et ça, on met un 1 dans la nouvelle colonne.
         b Fonction gén 2 : on fait la somme, la moyenne de colonnes chiffrées.
-    6) *Fonction ajout_colonne_autre_fichier(file1, file2,column): qui parcourt les mails ou un élément caractérisant les participants d'un fichier et ajoute une des caractéristiques dans un second fichier si les mails ou la caractéristique est présent dans ce fichier (les mails sont dans un ordre différent du fichier de départ). Il faut passer en arg les onglets et les colonnes de travail des deux fichiers. Idem peut sûrement se baser sur celle 2 lignes au-dessus
-    6bis) *Améliorer la fonction précédente et qui fait copie non pas une mais plusieurs colonnes (l'idée est que si on doit copier plusieurs colonnes, on ne fasse pas plusieurs fois la recherche des mails dans le fichier d'arrivée car c'est coûteux).
-    6ter) Même chose mais cette fois en créant une colonne (et pas en copiant).
+    FAIT : 6) *Fonction ajout_colonne_autre_fichier(file1, file2,column): qui parcourt les mails ou un élément caractérisant les participants d'un fichier et ajoute une des caractéristiques dans un second fichier si les mails ou la caractéristique est présent dans ce fichier (les mails sont dans un ordre différent du fichier de départ). Il faut passer en arg les onglets et les colonnes de travail des deux fichiers. Idem peut sûrement se baser sur celle 2 lignes au-dessus
+    FAIT : 6bis) *Améliorer la fonction précédente et qui fait copie non pas une mais plusieurs colonnes (l'idée est que si on doit copier plusieurs colonnes, on ne fasse pas plusieurs fois la recherche des mails dans le fichier d'arrivée car c'est coûteux).
+    6ter) Même chose mais cette fois en créant une colonne (et pas en copiant). Voir si c'est réellement utile
     7) *Fonction ajout ligne_autre_fichier : qui fait comme ajout colonne.  
     8) *Fonction qui prend tous les fichiers d'un dossier et qui fait la même action sur chacun de ces fichiers.
     9) En combinant les deux précédentes fonctions, on peut créer un fichier de data à partir n fichiers individuels.
@@ -26,7 +26,8 @@ Classe File qui prend un fichier et qui possède des méthodes.
     11) (- urgent) Fonction qui trie les lignes suivant un ou plusieurs critères avec des ordres de priorité suivant les critères. Par exe, pour le recrutement de l'institut, on veut trier les femmes en premier critère puis par handicap puis...
     12) (- urgent) Fonction qui filtre les lignes suivant un critère.
     13) (- urgent) Fonction qui copie des lignes dans un autre fichier. On pourra la combiner à 12) pour classer pour le recrutt Charpak.
-    14) Fonction qui si qqch est écrit dans une case la colore en une couleur choisie par l'utilisateur. A décliner sur une colonne ou sur l'ensemble d'une feuille.
+    FAIT : 14) Fonction qui si qqch est écrit dans une case la colore en une couleur choisie par l'utilisateur. A décliner sur une colonne ou sur l'ensemble d'une feuille.
+    FAIT : 14bis) Fonction qui si dans une case d'une ligne, il y a une str particulière (genre un tiret s'il n'y a pas de réponse), colore la ligne entière d'une certaine couleur entrée par l'utilisateur.
 
 Tests : 
     pour 1)
@@ -128,7 +129,7 @@ class Sheet(File):
                 break
         return bool 
         
-    def column_color(self,column,chainecolor):
+    def color_special_cases_in_column(self,column,chainecolor):
         """
         Fonction qui regarde pour une colonne donnée colore les cases contenant à certaines chaînes de caractères
         Input : 
@@ -150,7 +151,7 @@ class Sheet(File):
 
         self.writebook.save(self.path + self.name_file)
 
-    def sheet_color(self,chainecolor): 
+    def color_special_cases_in_sheet(self,chainecolor): 
         """
         Fonction qui colore les cases contenant à certaines chaînes de caractères d'une feuille
         Input : 
@@ -160,7 +161,7 @@ class Sheet(File):
         """
 
         for j in range(1, self.sheet.max_column + 1):
-            self.column_color(j,chainecolor)
+            self.color_special_cases_in_column(j,chainecolor)
 
     def add_column_in_sheet_differently_sorted(self,column_identifiant, column_insertion,other_sheet):
         """
@@ -199,8 +200,47 @@ class Sheet(File):
                     self.sheet.cell(i,column_insertion + j).value = dico[key][j]
         
         self.writebook.save(self.path + self.name_file)
+
+    def color_line(self, color, row_number):
+        """
+        Fonction qui colore une ligne spécifique
+
+        Input :
+            - color : une couleur indiquée en haxadécimal par l'utilisateur.
+            - row_number : le numéro de la ligne à colorer
+        """
+
+        for j in range(1, self.sheet.max_column + 1):
+            self.sheet.cell(row_number,j).fill = PatternFill(fill_type = 'solid', start_color = color)
+
+
+    def color_lines_containing_chaines(self,color,*chaines):
+        """
+        Fonction qui colore les lignes dont une des cases contient une str particulière.
+
+        Input : 
+            - color : une couleur indiquée en haxadécimal par l'utilisateur.
+            - chaines : des chaines de caractères que l'utilisateur entre et qui entraînent la coloration de la ligne.
+        """
+
+        lines_to_color = []
+
+        for i in range(1, self.sheet.max_row + 1):
+            for j in range(1, self.sheet.max_column + 1):
+                if self.sheet.cell(i,j).value in chaines:
+                    lines_to_color.append(i)
+                    break
         
-    
+        for row in lines_to_color:
+            self.color_line(color, row)
+        
+        self.writebook.save(self.path + self.name_file)
+        
+       
+
+
+
+
 
 
 class Str():
@@ -278,12 +318,14 @@ Déroulé et prochaines étapes :
     FAIT : Ajouter l'heure au nom du fichier sauvegardé.
     FAIT : Modifier ma fonction 2a avec un paramètre insert = True qui choisit si on insère ou non une colonne à la position column_write. Si on n'insère pas, le paramètre security permet alors d'éviter d'écraser.
     FAIT : Tester ma fonction dans les deux cas : insert = True ou False.    
-    FAIT : Débug : comprendre pourquoi dans column_color il ne rentre jamais dans la condition.
-    Débugger le test de sheet_color : le code affiche FF alors que l'opacité est bien de 0% quand on va dans format cellule.
+    FAIT : Débug : comprendre pourquoi dans color_special_cases_in_column il ne rentre jamais dans la condition.
+    Débugger le test de color_special_cases_in_sheet : le code affiche FF alors que l'opacité est bien de 0% quand on va dans format cellule.
     FAIT : Fonction 6 : imaginer un test avec un fichier d'arrivée déjà écrit à la main (avec les colonnes séparées).
     FAIT : Programmer le test.
     FAIT : Programmer la fonction.
-    
+    Modifier la fonction add_col_diff_sorted : pour qu'elle copie aussi les éventuelles couleurs du fichier de départ.
+    FAIT : Faire la fonction 14 bis qui colore les lignes.
+
     Voir si on ne peut pas faire une seule fonction pour 2a et 2b qui utilise en argument les ss fonctions transform_string_in_binary et ...
 
 
