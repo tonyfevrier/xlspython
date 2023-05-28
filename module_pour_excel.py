@@ -236,6 +236,18 @@ class Sheet(File):
             self.color_line(color, row)
         
         self.writebook.save(self.path + self.name_file)
+
+    def column_cut_str_in_parts(self,column_to_cut,column_insertion,separator):
+        """
+        Fonction qui prend une colonne contenant dans chaque cellule une grande chaîne de caractères contenant le même nombre de morceaux séparés par un séparateur,
+        qui insère autant de colonnes que de morceaux et qui place un morceau par colonne dans l'ordre.
+
+        Inputs :
+            - column_to_cut : colonne contenant les grandes str.
+            - column_insertion : où insérer les colonnes
+            - separator le séparateur
+        """
+        pass
         
 
 class Str():

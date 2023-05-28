@@ -136,6 +136,8 @@ class TestStr(TestCase):
         
         self.assertEqual(tuple_of_str,("partie 1 : Vrai"," partie 2 : Faux"," partie 3 : Vrai"," partie 4 : Vrai"," partie 5 : Vrai"))
 
+    def test_column_cut_str_in_parts(self):
+        pass
         
 
 if __name__== "__main__":
