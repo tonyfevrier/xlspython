@@ -188,7 +188,7 @@ class Sheet(File):
 
         for i in range(1,sheet_to_copy.max_row + 1):
             value = sheet_to_copy.cell(i,other_sheet[2]).value
-            dico[value] = [sheet_to_copy.cell(i,j).value for j in columns_to_copy]
+            dico[value] = [sheet_to_copy.cell(i,j) for j in columns_to_copy]
 
 
         self.sheet.insert_cols(column_insertion,len(columns_to_copy)) 
@@ -197,7 +197,8 @@ class Sheet(File):
             key = self.sheet.cell(i,column_identifiant).value
             if key in dico.keys():
                 for j in range(len(columns_to_copy)):
-                    self.sheet.cell(i,column_insertion + j).value = dico[key][j]
+                    self.sheet.cell(i,column_insertion + j).value = dico[key][j].value
+                    self.sheet.cell(i,column_insertion + j).fill = copy(dico[key][j].fill)
         
         self.writebook.save(self.path + self.name_file)
 
@@ -236,12 +237,6 @@ class Sheet(File):
         
         self.writebook.save(self.path + self.name_file)
         
-       
-
-
-
-
-
 
 class Str():
     def __init__(self,chaine):
@@ -323,7 +318,7 @@ Déroulé et prochaines étapes :
     FAIT : Fonction 6 : imaginer un test avec un fichier d'arrivée déjà écrit à la main (avec les colonnes séparées).
     FAIT : Programmer le test.
     FAIT : Programmer la fonction.
-    Modifier la fonction add_col_diff_sorted : pour qu'elle copie aussi les éventuelles couleurs du fichier de départ.
+    FAIT : Modifier la fonction add_col_diff_sorted : pour qu'elle copie aussi les éventuelles couleurs du fichier de départ.
     FAIT : Faire la fonction 14 bis qui colore les lignes.
 
     Voir si on ne peut pas faire une seule fonction pour 2a et 2b qui utilise en argument les ss fonctions transform_string_in_binary et ...
