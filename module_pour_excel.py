@@ -9,7 +9,7 @@ Classe File qui prend un fichier et qui possède des méthodes.
         FAIT : a Fonction qui parcourt une colonne qui contient plusieurs types de réponses et qui crée une nouvelle colonne à une position donnée qui contient 1 ou 0. Pourrait prendre en argument deux listes de réponses associées par le prog à 0 ou 1. A mon avis vu la fonction de la ligne précédente, il suffit de créer une fonction qui transforme un str en 0 ou 1 et de l'appliquer à la précédente fonction.
         b Fonction style xlsparse de dataset2 qui parcourt une colonne qui contient une chaîne à séparer et qui écrit les morceaux séparés en insérant des colonnes (autant que le nb de morceaux de la chaîne) à partir d'une colonne fixée en argument.  
         c Avec la fonction globale, il ne resterait qu'à écrire une fonction spécifique décrivant une action sur la chaîne de chaque cellule de cette colonne (exe : les deux ci-dessous) voir d'autres.
-        d Fonction qui sous conditions d'une colonne colore une case.
+        FAIT : d Fonction qui sous conditions d'une colonne colore une case.
         e Fonction qui si il y a une couleur insère une colonne et y met qqch.
     3) Même chose qu'en ligne 8 mais cette fois en remplaçant la même colonne (juste appeler la fonction ligne 6 et bien choisir la position de la nouvelle colonne = à l'ancienne)
     4) *Fonction qui parcourt une colonne C et qui supprime une ligne si la cellule contient qqch.
@@ -286,6 +286,28 @@ class Str():
            position = self.chaine.find('.xlsx')
 
         return self.chaine[:position]
+    
+    def cut_str_in_parts(self, separator):
+        """
+        Fonction qui prend une chaîne de caractères contenant plusieurs sous-chaînes séparées par un séparateur et qui les sépare en plusieurs sous-chaînes.
+
+        Input : separator
+
+        Output : Un tuple contenant les morceaux de chaînes.
+        """ 
+
+        parts = ()
+        chaine = self.chaine
+
+        debut_part = 0
+
+        for i in range(len(chaine)):
+            if chaine[i] == separator:
+                parts = parts + (chaine[debut_part:i],) 
+                debut_part = i+1
+
+        parts = parts + (chaine[debut_part:],) 
+        return parts
 
     
 
@@ -320,6 +342,10 @@ Déroulé et prochaines étapes :
     FAIT : Programmer la fonction.
     FAIT : Modifier la fonction add_col_diff_sorted : pour qu'elle copie aussi les éventuelles couleurs du fichier de départ.
     FAIT : Faire la fonction 14 bis qui colore les lignes.
+    FAIT : Fabriquer un test pour la fonction qui doit couper la chaîne en plusieurs
+    FAIT : Me relancer dans la fonction 2b : commencer par écrire la fonction qui sépare une chaîne (voir fichier dataset)
+    Fabriquer un test pour la fonction xlsparse (préparer un fichier.)
+    Ecrire la fonction équivalente à xlsparse.
 
     Voir si on ne peut pas faire une seule fonction pour 2a et 2b qui utilise en argument les ss fonctions transform_string_in_binary et ...
 

@@ -130,6 +130,12 @@ class TestStr(TestCase):
         self.assertEqual(chaine5.chaine,'prout') 
         self.assertEqual(chaine6.chaine,'prout') 
 
+    def test_cut_str_in_parts(self):
+        chaine = Str("partie 1 : Vrai; partie 2 : Faux; partie 3 : Vrai; partie 4 : Vrai; partie 5 : Vrai")
+        tuple_of_str = chaine.cut_str_in_parts(";")
+        
+        self.assertEqual(tuple_of_str,("partie 1 : Vrai"," partie 2 : Faux"," partie 3 : Vrai"," partie 4 : Vrai"," partie 5 : Vrai"))
+
         
 
 if __name__== "__main__":
