@@ -247,8 +247,17 @@ class Sheet(File):
             - column_insertion : où insérer les colonnes
             - separator le séparateur
         """
-        pass
         
+        for i in range(2, self.sheet.max_row + 1):
+            value = self.sheet.cell(i,column_to_cut).value
+            chaine_object = Str(value)
+            parts = chaine_object.cut_str_in_parts(separator)
+            if i == 2:
+                self.sheet.insert_cols(column_insertion,len(parts))
+            for j in range(len(parts)):
+                self.sheet.cell(i,column_insertion + j).value = parts[j]
+
+        self.writebook.save(self.path + self.name_file) 
 
 class Str():
     def __init__(self,chaine):
@@ -356,8 +365,9 @@ Déroulé et prochaines étapes :
     FAIT : Faire la fonction 14 bis qui colore les lignes.
     FAIT : Fabriquer un test pour la fonction qui doit couper la chaîne en plusieurs
     FAIT : Me relancer dans la fonction 2b : commencer par écrire la fonction qui sépare une chaîne (voir fichier dataset)
-    Fabriquer un test pour la fonction xlsparse (préparer un fichier.)
+    FAIT : Fabriquer un test pour la fonction xlsparse (préparer un fichier.)
     Ecrire la fonction équivalente à xlsparse.
+    Modifier les fonctions au cas où il y a des données sur une dernière ligne (dès fois il y a une valeur juste sur une case) : dire que s'il n'y a rien, on s'arrête pour cut in parts.
 
     Voir si on ne peut pas faire une seule fonction pour 2a et 2b qui utilise en argument les ss fonctions transform_string_in_binary et ...
 

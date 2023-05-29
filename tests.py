@@ -105,7 +105,15 @@ class TestSheet(TestCase):
         sheet = Sheet('test.xlsx','color_line')
         sheet.color_lines_containing_chaines('0000a933','-','+')
         
-    
+    def test_column_cut_str_in_parts(self):
+        sheet = Sheet('test.xlsx','cutinparts')
+        sheet.column_cut_str_in_parts(2,3,';') 
+        self.column_identical('test.xlsx','test.xlsx',7,8, 3, 3)
+        self.column_identical('test.xlsx','test.xlsx',7,8, 4, 4)
+        self.column_identical('test.xlsx','test.xlsx',7,8, 5, 5)
+        self.column_identical('test.xlsx','test.xlsx',7,8, 6, 6)
+        sheet.sheet.delete_cols(3,3)
+        sheet.writebook.save(sheet.path + 'test.xlsx') 
 
 
 class TestStr(TestCase):
@@ -136,8 +144,7 @@ class TestStr(TestCase):
         
         self.assertEqual(tuple_of_str,("partie 1 : Vrai"," partie 2 : Faux"," partie 3 : Vrai"," partie 4 : Vrai"," partie 5 : Vrai"))
 
-    def test_column_cut_str_in_parts(self):
-        pass
+    
         
 
 if __name__== "__main__":
