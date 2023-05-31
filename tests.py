@@ -115,6 +115,16 @@ class TestSheet(TestCase):
         sheet.sheet.delete_cols(3,3)
         sheet.writebook.save(sheet.path + 'test.xlsx') 
 
+    def test_delete_lines(self):
+        sheet = Sheet('test.xlsx','delete_lines') 
+        sheet.delete_lines(4,0)
+        self.column_identical('test.xlsx','test.xlsx',9,10, 1, 1)
+        self.column_identical('test.xlsx','test.xlsx',9,10, 2, 2)
+        self.column_identical('test.xlsx','test.xlsx',9,10, 3, 3)
+        self.column_identical('test.xlsx','test.xlsx',9,10, 4, 4)
+        self.column_identical('test.xlsx','test.xlsx',9,10, 5, 5)
+        self.column_identical('test.xlsx','test.xlsx',9,10, 6, 6)
+
 
 class TestStr(TestCase):
     def test_transform_string_in_binary(self):

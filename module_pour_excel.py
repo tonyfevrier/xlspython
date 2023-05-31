@@ -7,11 +7,11 @@ Classe File qui prend un fichier et qui possède des méthodes.
     1) (A préciser : quel but) Fonction sur le modèle de "cherche" ou plutôt "recherche_chaine_et_retourne_ligne" qui recherche une donnée dans une colonne donnée et qui renvoie une autre donnée d'une autre colonne ainsi que la ligne.
     2) * Fonction qui parcourt une colonne C et qui crée (ou insère pour éviter l'écrasement de données) une nouvelle colonne à une position donnée, cette nouvelle colonne étant le résultat d'une fonction appliquée à la colonne C et passée en argument.
         FAIT : a Fonction qui parcourt une colonne qui contient plusieurs types de réponses et qui crée une nouvelle colonne à une position donnée qui contient 1 ou 0. Pourrait prendre en argument deux listes de réponses associées par le prog à 0 ou 1. A mon avis vu la fonction de la ligne précédente, il suffit de créer une fonction qui transforme un str en 0 ou 1 et de l'appliquer à la précédente fonction.
-        b Fonction style xlsparse de dataset2 qui parcourt une colonne qui contient une chaîne à séparer et qui écrit les morceaux séparés en insérant des colonnes (autant que le nb de morceaux de la chaîne) à partir d'une colonne fixée en argument.  
+        FAIT : b Fonction style xlsparse de dataset2 qui parcourt une colonne qui contient une chaîne à séparer et qui écrit les morceaux séparés en insérant des colonnes (autant que le nb de morceaux de la chaîne) à partir d'une colonne fixée en argument.  
         c Avec la fonction globale, il ne resterait qu'à écrire une fonction spécifique décrivant une action sur la chaîne de chaque cellule de cette colonne (exe : les deux ci-dessous) voir d'autres.
         FAIT : d Fonction qui sous conditions d'une colonne colore une case.
         e Fonction qui si il y a une couleur insère une colonne et y met qqch.
-    3) Même chose qu'en ligne 8 mais cette fois en remplaçant la même colonne (juste appeler la fonction ligne 6 et bien choisir la position de la nouvelle colonne = à l'ancienne)
+    FAIT : 3) Même chose qu'en ligne 8 mais cette fois en remplaçant la même colonne (juste appeler la fonction ligne 6 et bien choisir la position de la nouvelle colonne = à l'ancienne)
     4) *Fonction qui parcourt une colonne C et qui supprime une ligne si la cellule contient qqch.
     5) *Fonction qui parcourt plusieurs colonnes d'un fichier et qui crée une nouvelle colonne contenant des choses dépendant du contenu des cellules (même style qu'en ligne 6 mais avec plusieurs colonnes au départ) : on aurait aussi une fonction générique en argument.
         a Fonction gén 1 : si on a ça et ça, on met un 1 dans la nouvelle colonne.
@@ -38,7 +38,7 @@ Tests :
     Créer un fonction test pour chacune de ces fonctions et un excel jouet court pour voir si le test passe.
     
 Classe chaine :
-    Fonction qui prend une str et qui la sépare en plusieurs chaines, la sparation étant donnée par un séparateur.
+    FAIT : Fonction qui prend une str et qui la sépare en plusieurs chaines, la sparation étant donnée par un séparateur.
     Fonction qui enlève les guillemets ou un symbole qcq autour d'une chaine si ce symbole est là.
 
 Pour la programmation par classe, la logique voudrait une classe File parent, une classe enfant onglet, puis une classe petit enfant colonne
@@ -52,6 +52,18 @@ import openpyxl
 from openpyxl.styles import PatternFill
 from copy import copy
 from datetime import date, datetime
+
+
+class Path():
+    def __init__(self,path = 'fichiers_xls/'):
+        self.path = path
+        
+    def act_on_files(self,fonction):
+        """
+        Fonction qui prend tous les fichiers d'un dossier et qui applique une même action à ces fichiers.
+        """
+        pass 
+
 
 class File(): 
     def __init__(self,name_file, path = 'fichiers_xls/'):
@@ -259,6 +271,20 @@ class Sheet(File):
 
         self.writebook.save(self.path + self.name_file) 
 
+    def delete_lines(self,column,*chaines):
+        """
+        Fonction qui parcourt une colonne et qui supprime la ligne si celle-ci contient un élément particulier dans args.
+
+        Inputs : 
+            -column : la colonne à parcourir.
+            -chaines : les str qui doivent engendrer la suppression de la ligne.
+        """
+        for i in range(1,self.sheet.max_row + 1):  
+            if self.sheet.cell(i,column).value in chaines:
+                self.sheet.delete_rows(i)
+
+        self.writebook.save(self.path + self.name_file)
+
 class Str():
     def __init__(self,chaine):
         self.chaine = chaine
@@ -366,9 +392,16 @@ Déroulé et prochaines étapes :
     FAIT : Fabriquer un test pour la fonction qui doit couper la chaîne en plusieurs
     FAIT : Me relancer dans la fonction 2b : commencer par écrire la fonction qui sépare une chaîne (voir fichier dataset)
     FAIT : Fabriquer un test pour la fonction xlsparse (préparer un fichier.)
-    Ecrire la fonction équivalente à xlsparse.
-    Modifier les fonctions au cas où il y a des données sur une dernière ligne (dès fois il y a une valeur juste sur une case) : dire que s'il n'y a rien, on s'arrête pour cut in parts.
+    FAIT : Ecrire la fonction équivalente à xlsparse.
+    FAIT : Ecrire un test pr la 4)
+    FAIT : Programmer la 4)
+    Créer une classe Path avec attribut nom de dossier
+    Voir comment ça peut modifier les classes File et sheet à qui je donnais un argument path.
+    Comment dans act on files traduire le fait que fonction peut avoir plusieurs arguments?
+    Quel test écrire pour la fonction ci-dessous?
+    Programmer une fonction qui fait une même action donnée par une fonction sur un ensemble de fichiers du dossier.
 
+    Modifier les fonctions au cas où il y a des données sur une dernière ligne (dès fois il y a une valeur juste sur une case) : dire que s'il n'y a rien, on s'arrête pour cut in parts.
     Voir si on ne peut pas faire une seule fonction pour 2a et 2b qui utilise en argument les ss fonctions transform_string_in_binary et ...
 
 
