@@ -145,7 +145,7 @@ class Sheet(File):
                 namefile doit être au format .xlsx et mis dans le dossier fichier_xls.
         """
         
-        file_to_copy = openpyxl.load_workbook(self.path + other_sheet[0])
+        file_to_copy = openpyxl.load_workbook(self.path + other_sheet[0],data_only=True)
         sheet_to_copy = file_to_copy[other_sheet[1]]
         columns_to_copy = other_sheet[3]
         dico = {}
