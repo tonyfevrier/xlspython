@@ -26,6 +26,8 @@
     13) (- urgent) Fonction qui copie des lignes dans un autre fichier. On pourra la combiner à 12) pour classer pour le recrutt Charpak.
     FAIT : 14) Fonction qui si qqch est écrit dans une case la colore en une couleur choisie par l'utilisateur. A décliner sur une colonne ou sur l'ensemble d'une feuille.
     FAIT : 14bis) Fonction qui si dans une case d'une ligne, il y a une str particulière (genre un tiret s'il n'y a pas de réponse), colore la ligne entière d'une certaine couleur entrée par l'utilisateur.
+    15) Fonction qui prend un fichier avec une colonne de data mais un participant qui est sur plusieurs lignes et qui crée une fonction avec une seule ligne par participant.
+    15bis) Fonction qui fait l'inverse : qui prend une ligne et plusieurs colonnes et le coupe en plusieurs lignes pour un même participant.
  
     
 ## Classe chaine :
