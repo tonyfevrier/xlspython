@@ -1,4 +1,4 @@
-from xlutils.copy import copy 
+#from xlutils.copy import copy 
 
 import openpyxl 
 from openpyxl.styles import PatternFill
@@ -236,6 +236,23 @@ class Sheet(File):
                 self.sheet.delete_rows(i)
 
         self.writebook.save(self.path + self.name_file)
+
+
+    def create_dico_from_columns(self, column_keys:int, column_values:int, first_line, last_line):
+        """
+        Function returning a dictionnary whose keys are elements of a column if they are not empty and values are elements of an other column
+        column_keys : column whose elements are the keys of the dictionnary.
+        column_vakues : same with values
+        first_line : the line we begin to read the file
+        """
+        dico = {}
+        for i in range(first_line,last_line):
+            key = self.sheet.cell(i,column_keys).value 
+            
+            print(key,self.sheet.max_row+1)
+            if key != "":
+                dico[key] = self.sheet.cell(i,column_values).value
+        return dico
 
 class Str():
     def __init__(self,chaine):
