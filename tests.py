@@ -1,4 +1,4 @@
-from unittest import TestCase,main
+from unittest import TestCase, main
 from module_pour_excel import *
 
 
@@ -75,7 +75,26 @@ class TestSheet(TestCase):
         sheet2.sheet.delete_cols(7) #sinon à chaque lancement de test.py il insère une colonne en plus.
         sheet2.writebook.save(sheet2.path + 'test.xlsx') 
 
-    
+    def test_column_set_answer_in_group(self):
+        sheet = Sheet('test_column_set_answer.xlsx','sheet1') 
+        #groups_of_response = {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']}
+        groups_of_response = {}
+        for elt in ['2','5','6']:
+            groups_of_response[elt] = "group1"
+        
+        for elt in ['7','8','9']:
+            groups_of_response[elt] = "group2"
+
+        for elt in ['1','3','4']:
+            groups_of_response[elt] = "group3"
+        groups_of_response['10'] = "group4"
+
+        sheet.column_set_answer_in_group(2,3,groups_of_response,line_end= 16)
+
+        self.column_identical('test_column_set_answer.xlsx','test_column_set_answer.xlsx',0,1,3,3)
+
+
+
     def test_column_security(self):
         sheet = Sheet('test.xlsx','sheet1')
         
@@ -133,6 +152,31 @@ class TestStr(TestCase):
         self.assertEqual(chaine.transform_string_in_binary('prout','rr'),1)
         self.assertEqual(chaine.transform_string_in_binary('rr'),0)
         self.assertEqual(chaine.transform_string_in_binary(''),0)
+
+    def test_set_answer_in_group(self):
+        chaine = Str(1)
+        chaine2 = Str(9)
+        """
+        groups_of_response = {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']}
+
+        self.assertEqual(chaine.set_answer_in_group(groups_of_response), "group3")
+        self.assertEqual(chaine2.set_answer_in_group(groups_of_response), "group2")
+        """
+
+        groups_of_response = {}
+        for elt in ['2','5','6']:
+            groups_of_response[elt] = "group1"
+        
+        for elt in ['7','8','9']:
+            groups_of_response[elt] = "group2"
+
+        for elt in ['1','3','4']:
+            groups_of_response[elt] = "group3"
+        groups_of_response['10'] = "group4"
+        
+        self.assertEqual(chaine.set_answer_in_group(groups_of_response),"group3")
+        self.assertEqual(chaine2.set_answer_in_group(groups_of_response), "group2")
+
 
     def test_clean_string(self):
         chaine1 = Str('prout').clean_string()

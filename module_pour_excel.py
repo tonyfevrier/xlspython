@@ -79,6 +79,34 @@ class Sheet(File):
             self.sheet.cell(i,column_write).value = bool
  
         self.writebook.save(self.path + self.name_file)
+
+    def column_set_answer_in_group(self,column_read,column_write,groups_of_responses,line_beginning = 2, line_end = 100, insert = True, security = True):
+        """
+        Fonction qui prend une colonne de str et qui renvoie une colonne remplie de str correspondant à des noms de groupes.
+        L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où écrire
+        Input : groups_of_response : dictionnary whick keys are response groups and which values are a list of responses 
+        associated to this group.
+                column_read : la colonne de lecture des réponses.
+                colum_write : la colonne d'écriture des 0 et 1. 
+                line_beggining, line_end : intervalle de ligne dans lequel l'utilisateur veut appliquer sa transformation
+        
+        Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
+        """
+
+        if insert == False and security == True and self.column_security(column_write) == False:
+            msg = "La colonne n'est pas vide. Si vous voulez vraiment y écrire, mettez security = False en argument."
+            print(msg)
+            return msg
+
+        if insert == True:
+            self.sheet.insert_cols(column_write)
+
+        for i in range(line_beginning,line_end): 
+            chaine_object = Str(self.sheet.cell(i,column_read).value)  
+            group = chaine_object.clean_string().set_answer_in_group(groups_of_responses) 
+            self.sheet.cell(i,column_write).value = group
+ 
+        self.writebook.save(self.path + self.name_file)
     
     def column_security(self,column):
         """
@@ -256,7 +284,7 @@ class Sheet(File):
 
 class Str():
     def __init__(self,chaine):
-        self.chaine = chaine
+        self.chaine = str(chaine)
         
 
     def transform_string_in_binary(self,*args):
@@ -270,6 +298,27 @@ class Str():
         if self.chaine in args:
             bool = 1
         return bool
+    
+    def set_answer_in_group(self, groups_of_response):
+        """
+        Function which takes a response and return a string of the group containing the response.
+        
+        Input : groups_of_response : dictionnary whick keys are response groups and which values are a list of responses 
+        associated to this group.
+        Output : the string of the group containing the response. 
+        """
+
+        """
+        for group in groups_of_response.keys():
+            if self.chaine in groups_of_response[group] :
+                return group
+        return ""
+        """
+        if self.chaine in groups_of_response.keys():
+            return groups_of_response[self.chaine]
+        else:
+            return ""
+        
     
     def clean_string(self):
         """
