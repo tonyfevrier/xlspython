@@ -1,7 +1,23 @@
 import module_pour_excel as mpe
 import json
-#file = mpe.File('dataset_après_moulinette_ter(2).xlsx',path = 'dataset_dulcinee/')
+#file = mpe.File('temps_SPOC.xlsx',path = 'dataset_dulcinee/')
 #file.sauvegarde()
+
+sheet = mpe.Sheet('temps_SPOC.xlsx','Feuil1',path = 'dataset_dulcinee/')
+
+sheet.column_convert_in_minutes(4,5,2,1337)
+print(1)
+sheet.column_convert_in_minutes(6,7,2,1337)
+print(1)
+sheet.column_convert_in_minutes(8,9,2,1337)
+print(1)
+sheet.column_convert_in_minutes(10,11,2,1337)
+print(1)
+sheet.column_convert_in_minutes(12,13,2,1337)
+print(1)
+sheet.column_convert_in_minutes(14,15,2,1337)
+print(1)
+
 
 def createDicoGroup(dicoOrigin):
     dico = {}
@@ -12,7 +28,7 @@ def createDicoGroup(dicoOrigin):
 
 #print(createDicoGroup({"Absolutisme":['1','4','5','6'],"Evaluatisme":['3'],"Multiplisme":['2']}))
 
-
+"""
 sheet = mpe.Sheet('dataset_final_01092023.xlsx','test_fin_style épis',path = 'dataset_dulcinee/')
 
 sheet.column_set_answer_in_group(255,256,createDicoGroup({"Absolutisme":['1','4','5','6'],"Evaluatisme":['3'],"Multiplisme":['2']}),line_end=866)
@@ -23,7 +39,7 @@ sheet.column_set_answer_in_group(263,264,createDicoGroup({"Absolutisme":['1','2'
 sheet.column_set_answer_in_group(265,266,createDicoGroup({"Absolutisme":['1','2','3','6'],"Evaluatisme":['4','5','7'],"Multiplisme":['8']}),line_end=866)
 sheet.column_set_answer_in_group(267,268,createDicoGroup({"Absolutisme":['4','5'],"Evaluatisme":['1','2'],"Multiplisme":['3']}),line_end=866)
 sheet.column_set_answer_in_group(269,270,createDicoGroup({"Absolutisme":['1','3'],"Evaluatisme":['4','5'],"Multiplisme":['2']}),line_end=866)
-
+"""
 """
 sheet = mpe.Sheet('currency.xlsx','Active',path = 'fichiers_xls/')
 

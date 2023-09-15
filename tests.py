@@ -198,7 +198,17 @@ class TestStr(TestCase):
         
         self.assertEqual(tuple_of_str,("partie 1 : Vrai"," partie 2 : Faux"," partie 3 : Vrai"," partie 4 : Vrai"," partie 5 : Vrai"))
 
-    
+    def test_convert_time_in_minutes(self):
+        duration1 = Str("2 jours 2 heures")
+        duration2 = Str("1 heure 25 min")
+        duration3 = Str("16 min 35 s")
+        
+        self.assertEqual(duration1.convert_time_in_minutes(), '3000 min')
+        self.assertEqual(duration2.convert_time_in_minutes(), '85 min')
+        self.assertEqual(duration3.convert_time_in_minutes(), '16.58 min')
+
+
+
         
 
 if __name__== "__main__":

@@ -80,6 +80,32 @@ class Sheet(File):
  
         self.writebook.save(self.path + self.name_file)
 
+    def column_convert_in_minutes(self,column_read,column_write,line_beginning = 2, line_end = 100, insert = True, security = True):
+        """
+        Fonction qui prend une colonne de str et qui renvoie une colonne avec 
+        L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne à remplir.
+        Input : column_read : la colonne de lecture des réponses.
+                colum_write : la colonne d'écriture des 0 et 1. 
+                line_beggining, line_end : intervalle de ligne dans lequel l'utilisateur veut appliquer sa transformation
+        
+        Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
+        """
+
+        if insert == False and security == True and self.column_security(column_write) == False:
+            msg = "La colonne n'est pas vide. Si vous voulez vraiment y écrire, mettez security = False en argument."
+            print(msg)
+            return msg
+
+        if insert == True:
+            self.sheet.insert_cols(column_write)
+
+        for i in range(line_beginning,line_end):
+            chaine_object = Str(self.sheet.cell(i,column_read).value)  
+            bool = chaine_object.clean_string().convert_time_in_minutes() 
+            self.sheet.cell(i,column_write).value = bool
+ 
+        self.writebook.save(self.path + self.name_file)
+
     def column_set_answer_in_group(self,column_read,column_write,groups_of_responses,line_beginning = 2, line_end = 100, insert = True, security = True):
         """
         Fonction qui prend une colonne de str et qui renvoie une colonne remplie de str correspondant à des noms de groupes.
@@ -105,7 +131,7 @@ class Sheet(File):
             chaine_object = Str(self.sheet.cell(i,column_read).value)  
             group = chaine_object.clean_string().set_answer_in_group(groups_of_responses) 
             self.sheet.cell(i,column_write).value = group
- 
+            
         self.writebook.save(self.path + self.name_file)
     
     def column_security(self,column):
@@ -373,6 +399,41 @@ class Str():
 
         parts = parts + (chaine[debut_part:],) 
         return parts
+    
+    def convert_time_in_minutes(self):
+        """
+        Function which takes a str of the form and return a string giving the conversion in unity.
+
+        Output : str
+        """
+        parts = self.cut_str_in_parts(" ")
+        
+        if parts[1] in ["jour","jours"]:
+            duration = 24 * 60 * float(parts[0]) 
+            if len(parts) > 2:
+                if parts[3] in ['heure', 'heures']:
+                    duration += float(parts[2]) * 60
+                elif parts[3] == 'min':
+                    duration +=  float(parts[2])
+                else:
+                    duration += round(float(parts[2])/60,2)
+        elif parts[1] in ['heure', 'heures']:
+            duration = float(parts[0]) * 60
+            if len(parts) > 2:
+                if parts[3] == "min":
+                    duration += float(parts[2])
+                else:
+                    duration += round(float(parts[2])/60,2)
+        else:
+            duration = float(parts[0])
+            if len(parts) > 2:
+                duration += round(float(parts[2])/60,2)
+    
+        conversion = str(duration)
+        return conversion
+
+
+        
 
     
 

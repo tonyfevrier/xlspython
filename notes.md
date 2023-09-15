@@ -76,7 +76,7 @@ Pour la programmation par classe, la logique voudrait une classe File parent, un
     FAIT : Ecrire la fonction équivalente à xlsparse.
     FAIT : Ecrire un test pr la 4)
     FAIT : Programmer la 4) 
-    Voir pour regrouper les deux fonctions column_transform_string_in_binary et columnsetansweringroup la première étant un cas particulier de la seconde. 
+    Voir pour regrouper les trois fonctions column_transform_string_in_binary et columnsetansweringroup, columnconvertinminutes la première étant un cas particulier de la seconde. 
     Ecrire une documentation pour un utilisateur lambda.
     Prendre un temps pour réfléchir à quelle interface on pourrait utiliser pour qu'un utilisateur n'ait pas à utiliser python. Faire un freeplane.
     
