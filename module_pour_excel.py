@@ -402,7 +402,7 @@ class Str():
     
     def convert_time_in_minutes(self):
         """
-        Function which takes a str of the form and return a string giving the conversion in unity.
+        Function which takes a str of the form "10 jour 5 heures" and return a string giving the conversion in unity.
 
         Output : str
         """
@@ -424,10 +424,12 @@ class Str():
                     duration += float(parts[2])
                 else:
                     duration += round(float(parts[2])/60,2)
-        else:
+        elif parts[1] == "s":
             duration = float(parts[0])
             if len(parts) > 2:
                 duration += round(float(parts[2])/60,2)
+        else:
+            duration = round(float(parts[0])/60,2)
     
         conversion = str(duration)
         return conversion
