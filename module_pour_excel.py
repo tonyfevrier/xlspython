@@ -46,6 +46,22 @@ class File():
         
         file_copy.save(self.path  + name_file_no_extension + '_date_' + datetime.now().strftime("%Y-%m-%d_%Hh%M") + '.xlsx') 
 
+    def create_one_onglet_by_participant(self):
+        """
+        Fonction qui prend une feuille dont la première colonne contient des chaînes de caractères.
+        Chaque chaîne de caractères peut apparaître plusieurs fois. 
+        La fonction retourne un fichier contenant un onglet par chaîne de caractères. Chaque onglet contient toutes les
+        lignes correspondant à cette chaîne de caractères.
+
+        Input :
+        Output : 
+
+        Parcourir la première colonne
+        si le numéro n'est pas dans la liste des onglets créés, on le crée et on y copie la ligne
+        sinon on copie la ligne dans le bon onglet. 
+        """
+        pass
+
 class Sheet(File): 
     def __init__(self, name_file, name_onglet,path = 'fichiers_xls/'): 
         super().__init__(name_file,path)
