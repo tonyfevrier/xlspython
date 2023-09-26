@@ -55,7 +55,7 @@ class Sheet(File):
 
     def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2, line_end = 100, insert = True, security = True):
         """
-        Fonction qui prend une colonne de str et qui renvoie une colonne de 0 ou de 1
+        Fonction qui prend une colonne de chaîne de caractères et qui renvoie une colonne de 0 ou de 1
         L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où mettre les 0 ou 1.
         Input : good_answers : une séquence d'un nb quelconque de bonnes réponses qui valent 1pt. Chaque mot ne doit pas contenir d'espace ni au début ni à la fin.
                 column_read : la colonne de lecture des réponses.
