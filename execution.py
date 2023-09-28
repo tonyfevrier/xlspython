@@ -3,7 +3,9 @@ import json
 #file = mpe.File('temps_SPOC.xlsx',path = 'dataset_dulcinee/')
 #file.sauvegarde()
 
-sheet = mpe.Sheet('dataset_final_25092023.xlsx','COPIE ',path = 'dataset_dulcinee/')
+sheet = mpe.Sheet('Stroop_AMV.xlsx','Stroops_test (7)',path = 'dataset_dulcinee/')
+sheet.create_one_onglet_by_participant(1,2,852)
+
 #sheet.add_column_in_sheet_differently_sorted(3, 258,['questionnaire_de_fin.xlsx','2023_SPOCS&amp;S Questionnaire ',3,[i for i in range(8,16)]])
 
 def createDicoGroup(dicoOrigin):
@@ -14,7 +16,7 @@ def createDicoGroup(dicoOrigin):
     return dico
 
 #sheet.column_set_answer_in_group(258,259,createDicoGroup({"Absolutisme":['1','4','5','6'],"Evaluatisme":['3'],"Multiplisme":['2']}),line_end=1337)
-
+"""
 sheet.column_set_answer_in_group(260,261,createDicoGroup({"Absolutisme":['4','6','7'],"Evaluatisme":['2','3','5'],"Multiplisme":[]}),line_end=1337)
 sheet.column_set_answer_in_group(262,263,createDicoGroup({"Absolutisme":[],"Evaluatisme":[],"Multiplisme":[]}),line_end=1337)
 sheet.column_set_answer_in_group(264,265,createDicoGroup({"Absolutisme":['1','4','5'],"Evaluatisme":['2','3'],"Multiplisme":['6']}),line_end=1337)
@@ -22,7 +24,7 @@ sheet.column_set_answer_in_group(266,267,createDicoGroup({"Absolutisme":['1','2'
 sheet.column_set_answer_in_group(268,269,createDicoGroup({"Absolutisme":['1','2','3','6'],"Evaluatisme":['4','5','7'],"Multiplisme":['8']}),line_end=1337)
 sheet.column_set_answer_in_group(270,271,createDicoGroup({"Absolutisme":['4','5'],"Evaluatisme":['1','2'],"Multiplisme":['3']}),line_end=1337)
 sheet.column_set_answer_in_group(272,273,createDicoGroup({"Absolutisme":['1','3'],"Evaluatisme":['4','5'],"Multiplisme":['2']}),line_end=1337) 
-
+"""
 
 
 

@@ -46,22 +46,6 @@ class File():
         
         file_copy.save(self.path  + name_file_no_extension + '_date_' + datetime.now().strftime("%Y-%m-%d_%Hh%M") + '.xlsx') 
 
-    def create_one_onglet_by_participant(self):
-        """
-        Fonction qui prend une feuille dont la première colonne contient des chaînes de caractères.
-        Chaque chaîne de caractères peut apparaître plusieurs fois. 
-        La fonction retourne un fichier contenant un onglet par chaîne de caractères. Chaque onglet contient toutes les
-        lignes correspondant à cette chaîne de caractères.
-
-        Input :
-        Output : 
-
-        Parcourir la première colonne
-        si le numéro n'est pas dans la liste des onglets créés, on le crée et on y copie la ligne
-        sinon on copie la ligne dans le bon onglet. 
-        """
-        pass
-
 class Sheet(File): 
     def __init__(self, name_file, name_onglet,path = 'fichiers_xls/'): 
         super().__init__(name_file,path)
@@ -324,6 +308,59 @@ class Sheet(File):
                 dico[key] = self.sheet.cell(i,column_values).value
         return dico
 
+    def copy_paste_line(self,row_origin, row_number, onglet):
+        """
+        Fonction qui prend une ligne de la feuille et qui la copie dans un autre onglet.
+
+        Inputs : 
+            - row_origin : ligne de la feuille à copier.
+            - onglet : dans quel onglet copier la ligne.
+            - row_number : la ligne où il faut coller dans l'onglet.
+        """
+        for j in range(1, self.sheet.max_column + 1): 
+            onglet.cell(row_number,j).value = self.sheet.cell(row_origin, j).value 
+        
+
+    def add_line_at_bottom(self, row_origin, onglet):
+        """
+        Fonction qui copie une ligne spécifique de la feuille à la fin d'un autre onglet.
+
+        Input : 
+            - row_origin : le numéro de la ligne à copier dans sheet
+            - onglet : la feuille correspondant à l'onglet dans lequel copier la ligne
+        """ 
+        self.copy_paste_line(row_origin, onglet.max_row + 1, onglet)  
+
+            
+
+    def create_one_onglet_by_participant(self, column_read, first_line, last_line):
+        """
+        Fonction qui prend une feuille dont la première colonne contient des chaînes de caractères.
+        Chaque chaîne de caractères peut apparaître plusieurs fois. 
+        La fonction retourne un fichier contenant un onglet par chaîne de caractères. Chaque onglet contient toutes les
+        lignes correspondant à cette chaîne de caractères.
+
+        Input : 
+            column_read : la colonne qui contient les chaînes de caractères.
+            first_line : ligne où commencer à parcourir.
+            last_line : ligne de fin de parcours
+ 
+        """
+        onglets = []
+        for i in range(first_line, last_line + 1):
+            onglet = str(self.sheet.cell(i,column_read).value)
+            if onglet not in onglets:
+                self.writebook.create_sheet(onglet)
+                self.copy_paste_line(1, 1, self.writebook[onglet])
+                onglets.append(onglet)
+                print(onglet)
+            self.add_line_at_bottom(i, self.writebook[onglet])
+        
+        self.writebook.save(self.path + self.name_file) 
+
+        
+        
+
 class Str():
     def __init__(self,chaine):
         self.chaine = str(chaine)
@@ -440,7 +477,7 @@ class Str():
                     duration += float(parts[2])
                 else:
                     duration += round(float(parts[2])/60,2)
-        elif parts[1] == "s":
+        elif parts[1] == "min":
             duration = float(parts[0])
             if len(parts) > 2:
                 duration += round(float(parts[2])/60,2)

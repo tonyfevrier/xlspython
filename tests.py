@@ -1,18 +1,21 @@
 from unittest import TestCase, main
 from module_pour_excel import *
 
+"""IMPORTANT : pour faire refonctionner les tests il faut que je retrouve un récent test.xlsx qui 
+n'est pas corrompu."""
 
 class TestFile(TestCase):
     
     def test_open_and_copy(self):
-        file = File('test.xlsx')
+        file = File('test_copie.xlsx')
         self.assertNotEqual(file.writebook,None) 
 
         print(datetime.now().strftime("%Y-%m-%d %Hh%M"))
 
     def test_files_identical(self):
         """On prend deux fichiers excel, on vérifie qu'ils ont les mêmes onglets et que dans chaque onglet on a les mêmes cellules."""
-
+        self.verify_files_identical(File('test_date_2023-05-20.xlsx'),File('test_copie.xlsx'))
+        """
         file1 = File('test_date_2023-05-20.xlsx')
         #file1.sauvegarde()
         
@@ -26,7 +29,17 @@ class TestFile(TestCase):
             for i in range(1,sheet1.max_row+1):
                 for j in range(1,sheet1.max_column+1):
                     self.assertEqual(sheet1.cell(i,j).value,sheet2.cell(i,j).value)
+        """
 
+    def verify_files_identical(self, file1, file2):
+        self.assertEqual(file1.sheets_name,file2.sheets_name)
+
+        for onglet in file1.sheets_name: 
+            sheet1 = file1.writebook[onglet]
+            sheet2 = file2.writebook[onglet]
+            for i in range(1,sheet1.max_row+1):
+                for j in range(1,sheet1.max_column+1):
+                    self.assertEqual(sheet1.cell(i,j).value,sheet2.cell(i,j).value)
         
 
 class TestSheet(TestCase):
@@ -144,6 +157,14 @@ class TestSheet(TestCase):
         self.column_identical('test.xlsx','test.xlsx',9,10, 5, 5)
         self.column_identical('test.xlsx','test.xlsx',9,10, 6, 6)
 
+    def test_create_one_onglet_by_participant(self): 
+
+        sheet = Sheet('test_create_one_onglet_by_participant.xlsx','Stroops_test (7)')
+        sheet.create_one_onglet_by_participant(1,2,21)
+        TestFile().verify_files_identical(File('test_create_one_onglet_by_participant_before.xlsx'),File('test_create_one_onglet_by_participant.xlsx'))
+        
+
+
 
 class TestStr(TestCase):
     def test_transform_string_in_binary(self):
@@ -203,10 +224,9 @@ class TestStr(TestCase):
         duration2 = Str("1 heure 25 min")
         duration3 = Str("16 min 35 s")
         
-        self.assertEqual(duration1.convert_time_in_minutes(), '3000 min')
-        self.assertEqual(duration2.convert_time_in_minutes(), '85 min')
-        self.assertEqual(duration3.convert_time_in_minutes(), '16.58 min')
-
+        self.assertEqual(duration1.convert_time_in_minutes(), '3000.0')
+        self.assertEqual(duration2.convert_time_in_minutes(), '85.0')
+        self.assertEqual(duration3.convert_time_in_minutes(), '16.58')
 
 
         
