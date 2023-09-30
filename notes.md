@@ -78,6 +78,7 @@ Pour la programmation par classe, la logique voudrait une classe File parent, un
     FAIT : Programmer la 4) 
     Récupérer un vieux test.xlsx dans les commit précédents.
     Mettre toutes les micro fonctions utilisées dans Sheet dans un fichier à part qu'on importe pour ne garder que les grosses fonctions de la classe Sheet qui font les gros changements.
+    line_end vraiment utile dans les fonctions : max_row ne suffit pas?
     Voir pour regrouper les trois fonctions column_transform_string_in_binary et columnsetansweringroup, columnconvertinminutes la première étant un cas particulier de la seconde. 
     Ecrire une documentation pour un utilisateur lambda.
     Prendre un temps pour réfléchir à quelle interface on pourrait utiliser pour qu'un utilisateur n'ait pas à utiliser python. Faire un freeplane.

@@ -40,6 +40,18 @@ class TestFile(TestCase):
             for i in range(1,sheet1.max_row+1):
                 for j in range(1,sheet1.max_column+1):
                     self.assertEqual(sheet1.cell(i,j).value,sheet2.cell(i,j).value)
+
+    def test_create_one_onglet_by_participant(self): 
+
+        file = File('test_create_one_onglet_by_participant.xlsx')
+        file.create_one_onglet_by_participant('Stroops_test (7)', 1)
+ 
+        file = File('test_create_one_onglet_by_participant.xlsx')
+        self.verify_files_identical(File('test_create_one_onglet_by_participant_before.xlsx'),file)
+         
+        for i in range(1,len(file.sheets_name)): 
+            del file.writebook[file.sheets_name[i]]
+        file.writebook.save(file.path + 'test_create_one_onglet_by_participant.xlsx')
         
 
 class TestSheet(TestCase):
@@ -157,13 +169,16 @@ class TestSheet(TestCase):
         self.column_identical('test.xlsx','test.xlsx',9,10, 5, 5)
         self.column_identical('test.xlsx','test.xlsx',9,10, 6, 6)
 
+    """
     def test_create_one_onglet_by_participant(self): 
 
         sheet = Sheet('test_create_one_onglet_by_participant.xlsx','Stroops_test (7)')
         sheet.create_one_onglet_by_participant(1,2,21)
         TestFile().verify_files_identical(File('test_create_one_onglet_by_participant_before.xlsx'),File('test_create_one_onglet_by_participant.xlsx'))
         
-
+        #il faut supprimer les trois onglets créés pour que le test futur marche toujours.
+        sheet.writebook.save(sheet.path + 'test_create_one_onglet_by_participant.xlsx')
+    """
 
 
 class TestStr(TestCase):
