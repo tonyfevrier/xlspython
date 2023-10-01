@@ -4,7 +4,7 @@ import openpyxl
 from openpyxl.styles import PatternFill
 from copy import copy
 from datetime import date, datetime
-from utils import *
+from utils import UtilsForFile, UtilsForSheet, Str
 
 class Path():
     def __init__(self,path = 'fichiers_xls/'):
@@ -17,7 +17,7 @@ class Path():
         pass 
 
 
-class File(): 
+class File(UtilsForFile): 
     def __init__(self, name_file, path = 'fichiers_xls/'):
         """L'utilisateur sera invité à mettre son fichier xslx dans un dossier nommé fichiers_xls
         """
@@ -51,43 +51,6 @@ class File():
         name_file_no_extension = Str(self.name_file).del_extension() 
         
         file_copy.save(self.path  + name_file_no_extension + '_date_' + datetime.now().strftime("%Y-%m-%d_%Hh%M") + '.xlsx') 
-
-
-
-    def copy_paste_line(self,onglet_from,row_from, onglet_to, row_to ):
-        """
-        Fonction qui prend une ligne de la feuille et qui la copie dans un autre onglet.
-
-        Inputs : 
-            - onglet_from : onglet d'où on copie
-            - row_from : ligne de l'onglet d'origine.
-            - onglet_to : onglet où coller.
-            - row_to : la ligne où il faut coller dans l'onglet à modifier.
-
-        Exemple d'utilisation : 
-      
-            file = File('dataset.xlsx')
-            file.copy_paste_line('onglet1', 1, 'onglet2', 1)
-        """
-
-        for j in range(1, onglet_from.max_column + 1): 
-            onglet_to.cell(row_to,j).value = onglet_from.cell(row_from, j).value 
-        
-
-    def add_line_at_bottom(self, onglet_from, row_from, onglet_to):
-        """
-        Fonction qui copie une ligne spécifique de la feuille à la fin d'un autre onglet.
-
-        Input : 
-            - row_origin : ligne de l'onglet d'origine.
-            - onglet : l'onglet à modifier où on copie la ligne.
-
-        Exemple d'utilisation : 
-     
-            file = File('dataset.xlsx')
-            file.copy_paste_line('onglet1', 1, 'onglet2')
-        """ 
-        self.copy_paste_line(onglet_from, row_from, onglet_to, onglet_to.max_row + 1)  
 
             
 
@@ -125,7 +88,7 @@ class File():
 
 
 
-class Sheet(File): 
+class Sheet(File,UtilsForSheet): 
     def __init__(self, name_file, name_onglet,path = 'fichiers_xls/'): 
         super().__init__(name_file,path)
         self.name_onglet = name_onglet  
@@ -240,19 +203,6 @@ class Sheet(File):
             self.sheet.cell(i,column_write).value = group
             
         self.writebook.save(self.path + self.name_file)
-    
-    def column_security(self,column):
-        """
-        Fonction qui prend une colonne et regarde si la colonne est vide.
-        Input : column
-        Output : True si elle ne contient rien, False sinon
-        """
-        bool = True
-        for i in range(1,self.sheet.max_row+1): 
-            if self.sheet.cell(i,column).value != None:
-                bool = False
-                break
-        return bool 
         
     def color_special_cases_in_column(self,column,chainecolor):
         """
@@ -349,24 +299,6 @@ class Sheet(File):
         
         self.writebook.save(self.path + self.name_file)
 
-    def color_line(self, color, row_number):
-        """
-        Fonction qui colore une ligne spécifique
-
-        Input :
-            - color : une couleur indiquée en haxadécimal par l'utilisateur.
-            - row_number : le numéro de la ligne à colorer
-
-        Exemple d'utilisation : 
-    
-            sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.color_line('#FF0000', 3) 
-        
-        """
-
-        for j in range(1, self.sheet.max_column + 1):
-            self.sheet.cell(row_number,j).fill = PatternFill(fill_type = 'solid', start_color = color)
-
 
     def color_lines_containing_chaines(self,color,*chaines):
         """
@@ -396,7 +328,7 @@ class Sheet(File):
         
         self.writebook.save(self.path + self.name_file)
 
-    def column_cut_str_in_parts(self,column_to_cut,column_insertion,separator):
+    def column_cut_string_in_parts(self,column_to_cut,column_insertion,separator):
         """
         Fonction qui prend une colonne dont chaque cellule contient une grande chaîne de
           caractères. Toutes les chaînes sont composés du nombre de morceaux délimités par un séparateur,
@@ -410,14 +342,14 @@ class Sheet(File):
         Exemple d'utilisation : 
     
             sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.column_cut_str_in_parts(3, 10, ';') 
+            sheet.column_cut_string_in_parts(3, 10, ';') 
         
         """
         
         for i in range(2, self.sheet.max_row + 1):
             value = self.sheet.cell(i,column_to_cut).value
             chaine_object = Str(value)
-            parts = chaine_object.cut_str_in_parts(separator)
+            parts = chaine_object.cut_string_in_parts(separator)
             if i == 2:
                 self.sheet.insert_cols(column_insertion,len(parts))
             for j in range(len(parts)):
@@ -446,227 +378,7 @@ class Sheet(File):
         self.writebook.save(self.path + self.name_file)
 
 
-    def create_dico_from_columns(self, column_keys:int, column_values:int, first_line, last_line):
-        """
-        Function returning a dictionnary whose keys are elements of a column
-          if they are not empty and values are elements of an other column
-        
-        Inputs :
-            column_keys : column whose elements are the keys of the dictionnary.
-            column_values : same with values
-            first_line : the line we begin to read the file
-
-        Output : 
-            dico : dictionary. 
-        """
-
-        dico = {}
-        for i in range(first_line,last_line):
-            key = self.sheet.cell(i,column_keys).value 
-            
-            print(key,self.sheet.max_row+1)
-            if key != "":
-                dico[key] = self.sheet.cell(i,column_values).value
-        return dico
-
-    #def copy_paste_line(self,row_origin, row_number, onglet):
-        """
-        Fonction qui prend une ligne de la feuille et qui la copie dans un autre onglet.
-
-        Inputs : 
-            - row_origin : ligne de l'onglet d'origine.
-            - row_number : la ligne où il faut coller dans l'onglet à modifier.
-            - onglet : l'onglet à modifier où on copie la ligne.
-
-        Exemple d'utilisation : 
-    
-            sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.copy_paste_line(3, 12, 'onglet2') 
-            
-        """
-    #    for j in range(1, self.sheet.max_column + 1): 
-    #        onglet.cell(row_number,j).value = self.sheet.cell(row_origin, j).value 
-        
-
-    #def add_line_at_bottom(self, row_origin, onglet):
-        """
-        Fonction qui copie une ligne spécifique de la feuille à la fin d'un autre onglet.
-
-        Input : 
-            - row_origin : ligne de l'onglet d'origine.
-            - onglet : l'onglet à modifier où on copie la ligne.
-
-        Exemple d'utilisation : 
-    
-            sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.add_line_at_bottom(3, 'onglet2') 
-        """ 
-    #    self.copy_paste_line(row_origin, onglet.max_row + 1, onglet)  
-
-            
-
-    #def create_one_onglet_by_participant(self, column_read, first_line=2, last_line=100):
-        """
-        Fonction qui prend un onglet dont une colonne contient des chaînes de caractères.
-        Chaque chaîne de caractères peut apparaître plusieurs fois dans cette colonne. 
-        La fonction retourne un fichier contenant un onglet par chaîne de caractères.
-          Chaque onglet contient toutes les lignes correspondant à cette chaîne de caractères.
-
-        Input : 
-            column_read : la colonne qui contient les chaînes de caractères.
-            first_line : ligne où commencer à parcourir.
-            last_line : ligne de fin de parcours
- 
-        Exemple d'utilisation : 
-    
-            sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.create_one_onglet_by_participant(3) 
-        """
-
-    #    onglets = []
-    #    for i in range(first_line, last_line + 1):
-    #        onglet = str(self.sheet.cell(i,column_read).value)
-    #        if onglet not in onglets:
-    #            self.writebook.create_sheet(onglet)
-    #            self.copy_paste_line(1, 1, self.writebook[onglet])
-    #            onglets.append(onglet)
-    #            print(onglet)
-    #        self.add_line_at_bottom(i, self.writebook[onglet])
-        
-    #    self.writebook.save(self.path + self.name_file) 
-
-        
-        
-
-# class Str():
-#     def __init__(self,chaine):
-#         self.chaine = str(chaine)
-        
-
-#     def transform_string_in_binary(self,*args):
-#         """
-#         Fonction qui prend un str et qui le transforme en 0 ou 1
-
-#         Inputs : args : des chaînes de caractère devant renvoyer 1 
-#         Outputs : bool : 0 ou 1.
-#         """
-#         bool = 0
-#         if self.chaine in args:
-#             bool = 1
-#         return bool
-    
-#     def set_answer_in_group(self, groups_of_response):
-#         """
-#         Function which takes a response and return a string of the group containing the response.
-        
-#         Input : groups_of_response : dictionnary whick keys are response groups and which values are a list of responses 
-#         associated to this group.
-#         Output : the string of the group containing the response. 
-#         """
-
-#         """
-#         for group in groups_of_response.keys():
-#             if self.chaine in groups_of_response[group] :
-#                 return group
-#         return ""
-#         """
-#         if self.chaine in groups_of_response.keys():
-#             return groups_of_response[self.chaine]
-#         else:
-#             return ""
-        
-    
-#     def clean_string(self):
-#         """
-#         Fonction qui prend une chaîne de caractère et qui élimine tous les espaces de début et de fin.
-#         Fonction qui nettoie également les espaces insécables \xa0 par un espace régulier.
-#         Ceci rendra une chaîne de caractère qui remplacera l'attribut chaine de la classe.  
-#         On pourra ainsi éviter les erreurs liées à une différence d'un seul espace.      
-#         """
-#         depart = 0
-#         fin = len(self.chaine)
-#         while self.chaine[depart] == ' ' or self.chaine[fin-1] == ' ':
-#             if self.chaine[depart] == ' ':
-#                 depart += 1
-#             if self.chaine[fin-1] == ' ':
-#                 fin -= 1
-#         self.chaine = self.chaine[depart:fin]
- 
-#         chaine2 = self.chaine.replace('\xa0', ' ')
-#         self.chaine = chaine2
-#         return self
-    
-#     def del_extension(self):
-#         """Fonction 
-#             - qui enlève l'extension d'un nom de fichier si le nom ne contient pas de date
-#             - qui ne garde que la partie avant _date_ pour un fichier nommé test_date_****-**-**.xlsx. 
-#             - qui sert à la sauvegarde et permet ainsi d'éviter des noms à rallonge.
-#         """
-#         position = self.chaine.find('_date_')
-#         if position == -1: 
-#            position = self.chaine.find('.xlsx')
-
-#         return self.chaine[:position]
-    
-#     def cut_str_in_parts(self, separator):
-#         """
-#         Fonction qui prend une chaîne de caractères contenant plusieurs sous-chaînes séparées par un séparateur et qui les sépare en plusieurs sous-chaînes.
-
-#         Input : separator
-
-#         Output : Un tuple contenant les morceaux de chaînes.
-#         """ 
-
-#         parts = ()
-#         chaine = self.chaine
-
-#         debut_part = 0
-
-#         for i in range(len(chaine)):
-#             if chaine[i] == separator:
-#                 parts = parts + (chaine[debut_part:i],) 
-#                 debut_part = i+1
-
-#         parts = parts + (chaine[debut_part:],) 
-#         return parts
-    
-#     def convert_time_in_minutes(self):
-#         """
-#         Function which takes a str of the form "10 jour 5 heures" and return a string giving the conversion in unity.
-
-#         Output : str
-#         """
-#         parts = self.cut_str_in_parts(" ")
-        
-#         if parts[1] in ["jour","jours"]:
-#             duration = 24 * 60 * float(parts[0]) 
-#             if len(parts) > 2:
-#                 if parts[3] in ['heure', 'heures']:
-#                     duration += float(parts[2]) * 60
-#                 elif parts[3] == 'min':
-#                     duration +=  float(parts[2])
-#                 else:
-#                     duration += round(float(parts[2])/60,2)
-#         elif parts[1] in ['heure', 'heures']:
-#             duration = float(parts[0]) * 60
-#             if len(parts) > 2:
-#                 if parts[3] == "min":
-#                     duration += float(parts[2])
-#                 else:
-#                     duration += round(float(parts[2])/60,2)
-#         elif parts[1] == "min":
-#             duration = float(parts[0])
-#             if len(parts) > 2:
-#                 duration += round(float(parts[2])/60,2)
-#         else:
-#             duration = round(float(parts[0])/60,2)
-    
-#         conversion = str(duration)
-#         return conversion
-
-
-        
-
-    
+   
+      
 
 

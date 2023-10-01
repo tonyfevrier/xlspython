@@ -76,8 +76,10 @@ Pour la programmation par classe, la logique voudrait une classe File parent, un
     FAIT : Ecrire la fonction équivalente à xlsparse.
     FAIT : Ecrire un test pr la 4)
     FAIT : Programmer la 4) 
-    Récupérer un vieux test.xlsx dans les commit précédents.
+    FAIT : Récupérer un vieux test.xlsx dans les commit précédents.
     Mettre toutes les micro fonctions utilisées dans Sheet dans un fichier à part qu'on importe pour ne garder que les grosses fonctions de la classe Sheet qui font les gros changements.
+    Fonction qui prend pleins d'onglets de structure identiques et qui copie une même colonne choisie dans chaque onglet (ou dans un sous ensemble d'onglets) dans une nouvelle feuille en mettant le numéro de l'onglet en haut.
+    Fonction qui prend pleins d'onglets et qui copie les formules d'une colonne (H par exemple) créée dans un onglet (le premier) pour la reproduire sur toutes les colonnes H des autres onglets.
     line_end vraiment utile dans les fonctions : max_row ne suffit pas?
     Voir pour regrouper les trois fonctions column_transform_string_in_binary et columnsetansweringroup, columnconvertinminutes la première étant un cas particulier de la seconde. 
     Ecrire une documentation pour un utilisateur lambda.

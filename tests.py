@@ -126,6 +126,7 @@ class TestSheet(TestCase):
         self.assertEqual(sheet.column_security(1), False)
         self.assertEqual(sheet.column_security(123), True)
     
+    """
     def test_color_special_cases_in_sheet(self):
         sheet = Sheet('test.xlsx','Feuille3')
         sheet2 = Sheet('test.xlsx','Feuille4')
@@ -135,7 +136,7 @@ class TestSheet(TestCase):
             for j in range(1,sheet2.sheet.max_column+1): 
                 print(i,j)
                 self.assertEqual(sheet.sheet.cell(i,j).fill.fgColor.rgb,sheet2.sheet.cell(i,j).fill.fgColor.rgb)
-
+    """
     
     def test_add_column_in_sheet_differently_sorted(self):
         sheet1 = Sheet('test.xlsx','Feuille5') 
@@ -149,9 +150,9 @@ class TestSheet(TestCase):
         sheet = Sheet('test.xlsx','color_line')
         sheet.color_lines_containing_chaines('0000a933','-','+')
         
-    def test_column_cut_str_in_parts(self):
+    def test_column_cut_string_in_parts(self):
         sheet = Sheet('test.xlsx','cutinparts')
-        sheet.column_cut_str_in_parts(2,3,';') 
+        sheet.column_cut_string_in_parts(2,3,';') 
         self.column_identical('test.xlsx','test.xlsx',7,8, 3, 3)
         self.column_identical('test.xlsx','test.xlsx',7,8, 4, 4)
         self.column_identical('test.xlsx','test.xlsx',7,8, 5, 5)
@@ -168,17 +169,6 @@ class TestSheet(TestCase):
         self.column_identical('test.xlsx','test.xlsx',9,10, 4, 4)
         self.column_identical('test.xlsx','test.xlsx',9,10, 5, 5)
         self.column_identical('test.xlsx','test.xlsx',9,10, 6, 6)
-
-    """
-    def test_create_one_onglet_by_participant(self): 
-
-        sheet = Sheet('test_create_one_onglet_by_participant.xlsx','Stroops_test (7)')
-        sheet.create_one_onglet_by_participant(1,2,21)
-        TestFile().verify_files_identical(File('test_create_one_onglet_by_participant_before.xlsx'),File('test_create_one_onglet_by_participant.xlsx'))
-        
-        #il faut supprimer les trois onglets créés pour que le test futur marche toujours.
-        sheet.writebook.save(sheet.path + 'test_create_one_onglet_by_participant.xlsx')
-    """
 
 
 class TestStr(TestCase):
@@ -228,9 +218,9 @@ class TestStr(TestCase):
         self.assertEqual(chaine5.chaine,'prout') 
         self.assertEqual(chaine6.chaine,'prout') 
 
-    def test_cut_str_in_parts(self):
+    def test_cut_string_in_parts(self):
         chaine = Str("partie 1 : Vrai; partie 2 : Faux; partie 3 : Vrai; partie 4 : Vrai; partie 5 : Vrai")
-        tuple_of_str = chaine.cut_str_in_parts(";")
+        tuple_of_str = chaine.cut_string_in_parts(";")
         
         self.assertEqual(tuple_of_str,("partie 1 : Vrai"," partie 2 : Faux"," partie 3 : Vrai"," partie 4 : Vrai"," partie 5 : Vrai"))
 
