@@ -52,7 +52,18 @@ class TestFile(TestCase):
         for i in range(1,len(file.sheets_name)): 
             del file.writebook[file.sheets_name[i]]
         file.writebook.save(file.path + 'test_create_one_onglet_by_participant.xlsx')
-        
+
+    def test_extract_column_from_all_sheets(self):
+        file = File('test_extract_column.xlsx')
+        file.extract_column_from_all_sheets(2)
+
+        file = File('test_extract_column.xlsx')
+        self.verify_files_identical(File('test_extract_column_ref.xlsx'),file)
+
+        del file.writebook[file.sheets_name[-1]]
+        file.writebook.save(file.path + 'test_extract_column.xlsx')
+
+
 
 class TestSheet(TestCase):
     def test_sheet_correctly_opened(self):

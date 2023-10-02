@@ -86,6 +86,25 @@ class File(UtilsForFile):
         
         self.writebook.save(self.path + self.name_file) 
 
+    def extract_column_from_all_sheets(self,column):
+        """
+        Fonction qui récupère une colonne dans chaque onglet pour former une nouvelle feuille
+        contenant toutes les colonnes. La première cellule de chaque colonne correspond alors 
+        au nom de l'onglet. Attention, en l'état, il faut que tous les onglets aient la même structure.
+
+        Inputs : 
+            column : int. Le numéro de la colonne à récupérer 
+        """ 
+        new_sheet = self.writebook.create_sheet(f"gather_{column}")
+        num_col = 1
+        for name_onglet in self.sheets_name:
+            onglet = self.writebook[name_onglet] 
+            self.copy_paste_column(onglet,column,new_sheet,num_col)
+            num_col = new_sheet.max_column + 1
+            new_sheet.cell(1,new_sheet.max_column).value = name_onglet 
+            
+        self.writebook.save(self.path + self.name_file) 
+
 
 
 class Sheet(File,UtilsForSheet): 
@@ -259,11 +278,7 @@ class Sheet(File,UtilsForSheet):
         triés dans des ordres différents.
         La fonction récupère un ou plusieurs éléments d'une ligne déterminée par un identifiant.
         Elle recherche l'identifiant dans la seconde feuille et insère les éléments
-        dans la ligne correspondante. 
-
-        Je passe en revue dans l'ordre les identifiants du premier fichier et je crée un dictionnaire dont les clés sont ces identifiants et les valeurs sont une liste de valeurs à récupérer.
-        Je passe en revue dans l'ordre (qui est différent du premier) les identifiants du second fichier et j'y insère les valeurs si les identifiants sont dans les clés du dico, sinon je laisse les cases vides. 
-        Cela évite de parcourir pleins de fois les identifiants en les recherchant.
+        dans la ligne correspondante.
 
         Inputs :
             - column_identifiant : numéro de la colonne où sont situés les identifiants dans l'onglet qu'on souhaite modifier.
@@ -283,13 +298,15 @@ class Sheet(File,UtilsForSheet):
         columns_to_copy = other_sheet[3]
         dico = {}
 
+        #Passage en revue les identifiants du premier fichier et création d'un dictionnaire dont les clés sont ces identifiants et les valeurs sont une liste de valeurs à récupérer.
         for i in range(1,sheet_to_copy.max_row + 1):
             value = sheet_to_copy.cell(i,other_sheet[2]).value
             dico[value] = [sheet_to_copy.cell(i,j) for j in columns_to_copy]
 
-
         self.sheet.insert_cols(column_insertion,len(columns_to_copy)) 
 
+        #Passage en revue des identifiants du second fichier et insertion des valeurs si les identifiants sont dans les clés du dico
+        #. 
         for i in range(1,self.sheet.max_row+1):
             key = self.sheet.cell(i,column_identifiant).value
             if key in dico.keys():

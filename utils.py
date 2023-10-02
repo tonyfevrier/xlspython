@@ -21,6 +21,14 @@ class UtilsForFile():
         for j in range(1, onglet_from.max_column + 1): 
             onglet_to.cell(row_to,j).value = onglet_from.cell(row_from, j).value 
 
+    def copy_paste_column(self ,onglet_from ,column_from , onglet_to, column_to ):
+        """
+        Fonction qui prend une colonne de la feuille et qui la copie dans un autre onglet.
+        """
+
+        for i in range(1, onglet_from.max_row + 1): 
+            onglet_to.cell(i,column_to).value = onglet_from.cell(i,column_from).value 
+
     def add_line_at_bottom(self, onglet_from, row_from, onglet_to):
         """
         Fonction qui copie une ligne spécifique de la feuille à la fin d'un autre onglet.
