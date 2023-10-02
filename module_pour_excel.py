@@ -18,12 +18,12 @@ class Path():
 
 
 class File(UtilsForFile): 
-    def __init__(self, name_file, path = 'fichiers_xls/'):
+    def __init__(self, name_file, path = 'fichiers_xls/', dataonly = True):
         """L'utilisateur sera invité à mettre son fichier xslx dans un dossier nommé fichiers_xls
         """
         self.name_file = name_file  
         self.path = path
-        self.writebook = openpyxl.load_workbook(self.path + self.name_file, data_only=True)
+        self.writebook = openpyxl.load_workbook(self.path + self.name_file, data_only = dataonly)
         self.sheets_name = self.writebook.sheetnames
 
     def sauvegarde(self):
@@ -33,6 +33,10 @@ class File(UtilsForFile):
 
         Exemple d'utilisation : 
             file = File('dataset.xlsx')
+            file.sauvegarde()
+
+            Si on veut copier les formules et pas seulement les valeurs des cellules : 
+            file = File('dataset.xlsx', dataonly = False)
             file.sauvegarde()
         """
         file_copy = openpyxl.Workbook()
@@ -51,7 +55,7 @@ class File(UtilsForFile):
         name_file_no_extension = Str(self.name_file).del_extension() 
         
         file_copy.save(self.path  + name_file_no_extension + '_date_' + datetime.now().strftime("%Y-%m-%d_%Hh%M") + '.xlsx') 
-
+        return file_copy
             
 
     def create_one_onglet_by_participant(self, onglet_from, column_read, first_line=2):
@@ -92,18 +96,63 @@ class File(UtilsForFile):
         contenant toutes les colonnes. La première cellule de chaque colonne correspond alors 
         au nom de l'onglet. Attention, en l'état, il faut que tous les onglets aient la même structure.
 
-        Inputs : 
-            column : int. Le numéro de la colonne à récupérer 
+        Input : 
+            column : int. Le numéro de la colonne à récupérer dans chaque onglet
+
+        Exemple d'utilisation : 
+    
+            file = File('dataset.xlsx')
+            file.extract_column_from_all_sheets(2) 
+
+            Si on veut extraire les formules
+
+            file = File('dataset.xlsx',dataonly = False)
+            file.extract_column_from_all_sheets(2) 
         """ 
         new_sheet = self.writebook.create_sheet(f"gather_{column}")
-        num_col = 1
+        column_to = 1
         for name_onglet in self.sheets_name:
             onglet = self.writebook[name_onglet] 
-            self.copy_paste_column(onglet,column,new_sheet,num_col)
-            num_col = new_sheet.max_column + 1
+            self.copy_paste_column(onglet,column,new_sheet,column_to)
+            column_to = new_sheet.max_column + 1
             new_sheet.cell(1,new_sheet.max_column).value = name_onglet 
             
         self.writebook.save(self.path + self.name_file) 
+
+    def apply_column_formula_on_all_sheets(self, *column_list):
+        """
+        Fonction qui reproduit les formules d'une colonne ou plusieurs colonnes
+          du premier onglet sur toutes les colonnes situées à la même position dans les 
+          autres onglets.
+
+        Input : 
+            -column_list : int. les positions des colonnes où récupérer et coller.
+
+        Exemples d'utilisation : 
+
+            Bien veiller à mettre dataonly = False sinon il ne copiera pas les formules mais
+            les valeurs des cellules. On peut aussi copier les valeurs des cellules : pour cela,
+            enlever dataonly = False.
+
+            Sur une colonne
+                file = File('dataset.xlsx', dataonly = False)
+                file.apply_column_formula_on_all_sheets(2) 
+
+            Sur trois colonnes
+                file = File('dataset.xlsx', dataonly = False)
+                file.apply_column_formula_on_all_sheets(2,5,10) 
+
+            Sur toutes les colonnes du fichier à partir de la colonne colmin jusque la colonne colmax :
+                file = File('dataset.xlsx', dataonly = False)
+                file.apply_column_formula_on_all_sheets(*[i for i in range(colmin,colmax + 1)]) 
+        """
+
+        #on applique les copies dans tous les onglets sauf le premier
+        for name_onglet in self.sheets_name[1:]:
+            for column in column_list:
+                self.copy_paste_column(self.writebook[self.sheets_name[0]],column,self.writebook[name_onglet],column)
+
+        self.writebook.save(self.path + self.name_file)
 
 
 

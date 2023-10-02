@@ -1,0 +1,477 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module module_pour_excel</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>module_pour_excel</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Ctonyf%5Cdocuments%5Ctony%5Cdeveloppement%20info%5Ccode_xls%5Cmodule_pour_excel.py">c:\users\tonyf\documents\tony\developpement info\code_xls\module_pour_excel.py</a></font></td></tr></table>
+    <p><tt>#from&nbsp;xlutils.copy&nbsp;import&nbsp;copy</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="openpyxl.html">openpyxl</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="module_pour_excel.html#Path">Path</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="utils.html#UtilsForFile">utils.UtilsForFile</a>(<a href="builtins.html#object">builtins.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="module_pour_excel.html#File">File</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="module_pour_excel.html#Sheet">Sheet</a>(<a href="module_pour_excel.html#File">File</a>, <a href="utils.html#UtilsForSheet">utils.UtilsForSheet</a>)
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="File">class <strong>File</strong></a>(<a href="utils.html#UtilsForFile">utils.UtilsForFile</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#File">File</a>(name_file,&nbsp;path='fichiers_xls/',&nbsp;dataonly=True)<br>
+&nbsp;<br>
+<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="module_pour_excel.html#File">File</a></dd>
+<dd><a href="utils.html#UtilsForFile">utils.UtilsForFile</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="File-__init__"><strong>__init__</strong></a>(self, name_file, path='fichiers_xls/', dataonly=True)</dt><dd><tt>L'utilisateur&nbsp;sera&nbsp;invité&nbsp;à&nbsp;mettre&nbsp;son&nbsp;fichier&nbsp;xslx&nbsp;dans&nbsp;un&nbsp;dossier&nbsp;nommé&nbsp;fichiers_xls</tt></dd></dl>
+
+<dl><dt><a name="File-apply_column_formula_on_all_sheets"><strong>apply_column_formula_on_all_sheets</strong></a>(self, *column_list)</dt><dd><tt>Fonction&nbsp;qui&nbsp;reproduit&nbsp;les&nbsp;formules&nbsp;d'une&nbsp;colonne&nbsp;ou&nbsp;plusieurs&nbsp;colonnes<br>
+&nbsp;&nbsp;du&nbsp;premier&nbsp;onglet&nbsp;sur&nbsp;toutes&nbsp;les&nbsp;colonnes&nbsp;situées&nbsp;à&nbsp;la&nbsp;même&nbsp;position&nbsp;dans&nbsp;les&nbsp;<br>
+&nbsp;&nbsp;autres&nbsp;onglets.<br>
+&nbsp;<br>
+Input&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-column_list&nbsp;:&nbsp;int.&nbsp;les&nbsp;positions&nbsp;des&nbsp;colonnes&nbsp;où&nbsp;récupérer&nbsp;et&nbsp;coller.<br>
+&nbsp;<br>
+Exemples&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Bien&nbsp;veiller&nbsp;à&nbsp;mettre&nbsp;dataonly&nbsp;=&nbsp;False&nbsp;sinon&nbsp;il&nbsp;ne&nbsp;copiera&nbsp;pas&nbsp;les&nbsp;formules&nbsp;mais<br>
+&nbsp;&nbsp;&nbsp;&nbsp;les&nbsp;valeurs&nbsp;des&nbsp;cellules.&nbsp;On&nbsp;peut&nbsp;aussi&nbsp;copier&nbsp;les&nbsp;valeurs&nbsp;des&nbsp;cellules&nbsp;:&nbsp;pour&nbsp;cela,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enlever&nbsp;dataonly&nbsp;=&nbsp;False.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Sur&nbsp;une&nbsp;colonne<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;=&nbsp;<a href="#File">File</a>('dataset.xlsx',&nbsp;dataonly&nbsp;=&nbsp;False)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file.<a href="#File-apply_column_formula_on_all_sheets">apply_column_formula_on_all_sheets</a>(2)&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Sur&nbsp;trois&nbsp;colonnes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;=&nbsp;<a href="#File">File</a>('dataset.xlsx',&nbsp;dataonly&nbsp;=&nbsp;False)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file.<a href="#File-apply_column_formula_on_all_sheets">apply_column_formula_on_all_sheets</a>(2,5,10)&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Sur&nbsp;toutes&nbsp;les&nbsp;colonnes&nbsp;du&nbsp;fichier&nbsp;à&nbsp;partir&nbsp;de&nbsp;la&nbsp;colonne&nbsp;colmin&nbsp;jusque&nbsp;la&nbsp;colonne&nbsp;colmax&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;=&nbsp;<a href="#File">File</a>('dataset.xlsx',&nbsp;dataonly&nbsp;=&nbsp;False)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file.<a href="#File-apply_column_formula_on_all_sheets">apply_column_formula_on_all_sheets</a>(*[i&nbsp;for&nbsp;i&nbsp;in&nbsp;range(colmin,colmax&nbsp;+&nbsp;1)])</tt></dd></dl>
+
+<dl><dt><a name="File-create_one_onglet_by_participant"><strong>create_one_onglet_by_participant</strong></a>(self, onglet_from, column_read, first_line=2)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;un&nbsp;onglet&nbsp;dont&nbsp;une&nbsp;colonne&nbsp;contient&nbsp;des&nbsp;chaînes&nbsp;de&nbsp;caractères.<br>
+Chaque&nbsp;chaîne&nbsp;de&nbsp;caractères&nbsp;peut&nbsp;apparaître&nbsp;plusieurs&nbsp;fois&nbsp;dans&nbsp;cette&nbsp;colonne.&nbsp;<br>
+La&nbsp;fonction&nbsp;retourne&nbsp;un&nbsp;fichier&nbsp;contenant&nbsp;un&nbsp;onglet&nbsp;par&nbsp;chaîne&nbsp;de&nbsp;caractères.<br>
+&nbsp;&nbsp;Chaque&nbsp;onglet&nbsp;contient&nbsp;toutes&nbsp;les&nbsp;lignes&nbsp;correspondant&nbsp;à&nbsp;cette&nbsp;chaîne&nbsp;de&nbsp;caractères.<br>
+&nbsp;<br>
+Input&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;onglet_from&nbsp;:&nbsp;onglet&nbsp;de&nbsp;référence.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;column_read&nbsp;:&nbsp;la&nbsp;colonne&nbsp;qui&nbsp;contient&nbsp;les&nbsp;chaînes&nbsp;de&nbsp;caractères.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;first_line&nbsp;:&nbsp;ligne&nbsp;où&nbsp;commencer&nbsp;à&nbsp;parcourir.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;last_line&nbsp;:&nbsp;ligne&nbsp;de&nbsp;fin&nbsp;de&nbsp;parcours<br>
+&nbsp;<br>
+Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;=&nbsp;<a href="#File">File</a>('dataset.xlsx')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file.<a href="#File-create_one_onglet_by_participant">create_one_onglet_by_participant</a>('onglet1',&nbsp;1)</tt></dd></dl>
+
+<dl><dt><a name="File-extract_column_from_all_sheets"><strong>extract_column_from_all_sheets</strong></a>(self, column)</dt><dd><tt>Fonction&nbsp;qui&nbsp;récupère&nbsp;une&nbsp;colonne&nbsp;dans&nbsp;chaque&nbsp;onglet&nbsp;pour&nbsp;former&nbsp;une&nbsp;nouvelle&nbsp;feuille<br>
+contenant&nbsp;toutes&nbsp;les&nbsp;colonnes.&nbsp;La&nbsp;première&nbsp;cellule&nbsp;de&nbsp;chaque&nbsp;colonne&nbsp;correspond&nbsp;alors&nbsp;<br>
+au&nbsp;nom&nbsp;de&nbsp;l'onglet.&nbsp;Attention,&nbsp;en&nbsp;l'état,&nbsp;il&nbsp;faut&nbsp;que&nbsp;tous&nbsp;les&nbsp;onglets&nbsp;aient&nbsp;la&nbsp;même&nbsp;structure.<br>
+&nbsp;<br>
+Input&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;column&nbsp;:&nbsp;int.&nbsp;Le&nbsp;numéro&nbsp;de&nbsp;la&nbsp;colonne&nbsp;à&nbsp;récupérer&nbsp;dans&nbsp;chaque&nbsp;onglet<br>
+&nbsp;<br>
+Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;=&nbsp;<a href="#File">File</a>('dataset.xlsx')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file.<a href="#File-extract_column_from_all_sheets">extract_column_from_all_sheets</a>(2)&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Si&nbsp;on&nbsp;veut&nbsp;extraire&nbsp;les&nbsp;formules<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;=&nbsp;<a href="#File">File</a>('dataset.xlsx',dataonly&nbsp;=&nbsp;False)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file.<a href="#File-extract_column_from_all_sheets">extract_column_from_all_sheets</a>(2)</tt></dd></dl>
+
+<dl><dt><a name="File-sauvegarde"><strong>sauvegarde</strong></a>(self)</dt><dd><tt>Fonction&nbsp;qui&nbsp;crée&nbsp;une&nbsp;sauvegarde&nbsp;du&nbsp;fichier&nbsp;name_file&nbsp;et&nbsp;<br>
+qui&nbsp;l'appelle&nbsp;name_file_time&nbsp;où&nbsp;time&nbsp;est&nbsp;le&nbsp;moment&nbsp;d'enregistrement.<br>
+&nbsp;<br>
+Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;=&nbsp;<a href="#File">File</a>('dataset.xlsx')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file.<a href="#File-sauvegarde">sauvegarde</a>()</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="utils.html#UtilsForFile">utils.UtilsForFile</a>:<br>
+<dl><dt><a name="File-add_line_at_bottom"><strong>add_line_at_bottom</strong></a>(self, onglet_from, row_from, onglet_to)</dt><dd><tt>Fonction&nbsp;qui&nbsp;copie&nbsp;une&nbsp;ligne&nbsp;spécifique&nbsp;de&nbsp;la&nbsp;feuille&nbsp;à&nbsp;la&nbsp;fin&nbsp;d'un&nbsp;autre&nbsp;onglet.<br>
+&nbsp;<br>
+Input&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;row_origin&nbsp;:&nbsp;ligne&nbsp;de&nbsp;l'onglet&nbsp;d'origine.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;onglet&nbsp;:&nbsp;l'onglet&nbsp;à&nbsp;modifier&nbsp;où&nbsp;on&nbsp;copie&nbsp;la&nbsp;ligne.<br>
+&nbsp;<br>
+Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;=&nbsp;<a href="#File">File</a>('dataset.xlsx')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file.<a href="#File-copy_paste_line">copy_paste_line</a>('onglet1',&nbsp;1,&nbsp;'onglet2')</tt></dd></dl>
+
+<dl><dt><a name="File-copy_paste_column"><strong>copy_paste_column</strong></a>(self, onglet_from, column_from, onglet_to, column_to)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;une&nbsp;colonne&nbsp;de&nbsp;la&nbsp;feuille&nbsp;et&nbsp;qui&nbsp;la&nbsp;copie&nbsp;dans&nbsp;un&nbsp;autre&nbsp;onglet.</tt></dd></dl>
+
+<dl><dt><a name="File-copy_paste_line"><strong>copy_paste_line</strong></a>(self, onglet_from, row_from, onglet_to, row_to)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;une&nbsp;ligne&nbsp;de&nbsp;la&nbsp;feuille&nbsp;et&nbsp;qui&nbsp;la&nbsp;copie&nbsp;dans&nbsp;un&nbsp;autre&nbsp;onglet.<br>
+&nbsp;<br>
+Inputs&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;onglet_from&nbsp;:&nbsp;onglet&nbsp;d'où&nbsp;on&nbsp;copie<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;row_from&nbsp;:&nbsp;ligne&nbsp;de&nbsp;l'onglet&nbsp;d'origine.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;onglet_to&nbsp;:&nbsp;onglet&nbsp;où&nbsp;coller.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;row_to&nbsp;:&nbsp;la&nbsp;ligne&nbsp;où&nbsp;il&nbsp;faut&nbsp;coller&nbsp;dans&nbsp;l'onglet&nbsp;à&nbsp;modifier.<br>
+&nbsp;<br>
+Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;=&nbsp;<a href="#File">File</a>('dataset.xlsx')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file.<a href="#File-copy_paste_line">copy_paste_line</a>('onglet1',&nbsp;1,&nbsp;'onglet2',&nbsp;1)</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="utils.html#UtilsForFile">utils.UtilsForFile</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Path">class <strong>Path</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Path">Path</a>(path='fichiers_xls/')<br>
+&nbsp;<br>
+<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Path-__init__"><strong>__init__</strong></a>(self, path='fichiers_xls/')</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt><a name="Path-act_on_files"><strong>act_on_files</strong></a>(self, fonction)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;tous&nbsp;les&nbsp;fichiers&nbsp;d'un&nbsp;dossier&nbsp;et&nbsp;qui&nbsp;applique&nbsp;une&nbsp;même&nbsp;action&nbsp;à&nbsp;ces&nbsp;fichiers.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Sheet">class <strong>Sheet</strong></a>(<a href="module_pour_excel.html#File">File</a>, <a href="utils.html#UtilsForSheet">utils.UtilsForSheet</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Sheet">Sheet</a>(name_file,&nbsp;name_onglet,&nbsp;path='fichiers_xls/')<br>
+&nbsp;<br>
+<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="module_pour_excel.html#Sheet">Sheet</a></dd>
+<dd><a href="module_pour_excel.html#File">File</a></dd>
+<dd><a href="utils.html#UtilsForFile">utils.UtilsForFile</a></dd>
+<dd><a href="utils.html#UtilsForSheet">utils.UtilsForSheet</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Sheet-__init__"><strong>__init__</strong></a>(self, name_file, name_onglet, path='fichiers_xls/')</dt><dd><tt>L'utilisateur&nbsp;sera&nbsp;invité&nbsp;à&nbsp;mettre&nbsp;son&nbsp;fichier&nbsp;xslx&nbsp;dans&nbsp;un&nbsp;dossier&nbsp;nommé&nbsp;fichiers_xls</tt></dd></dl>
+
+<dl><dt><a name="Sheet-add_column_in_sheet_differently_sorted"><strong>add_column_in_sheet_differently_sorted</strong></a>(self, column_identifiant, column_insertion, other_sheet)</dt><dd><tt>Fonction&nbsp;qui&nbsp;insère&nbsp;dans&nbsp;un&nbsp;onglet&nbsp;des&nbsp;colonnes&nbsp;d'un&nbsp;autre&nbsp;onglet&nbsp;de&nbsp;référence.&nbsp;<br>
+Les&nbsp;deux&nbsp;feuilles&nbsp;ont&nbsp;une&nbsp;colonne&nbsp;d'identifiants&nbsp;communs&nbsp;(exemple&nbsp;:&nbsp;des&nbsp;mails)&nbsp;mais&nbsp;qui&nbsp;peut&nbsp;être<br>
+triés&nbsp;dans&nbsp;des&nbsp;ordres&nbsp;différents.<br>
+La&nbsp;fonction&nbsp;récupère&nbsp;un&nbsp;ou&nbsp;plusieurs&nbsp;éléments&nbsp;d'une&nbsp;ligne&nbsp;déterminée&nbsp;par&nbsp;un&nbsp;identifiant.<br>
+Elle&nbsp;recherche&nbsp;l'identifiant&nbsp;dans&nbsp;la&nbsp;seconde&nbsp;feuille&nbsp;et&nbsp;insère&nbsp;les&nbsp;éléments<br>
+dans&nbsp;la&nbsp;ligne&nbsp;correspondante.<br>
+&nbsp;<br>
+Inputs&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;column_identifiant&nbsp;:&nbsp;numéro&nbsp;de&nbsp;la&nbsp;colonne&nbsp;où&nbsp;sont&nbsp;situés&nbsp;les&nbsp;identifiants&nbsp;dans&nbsp;l'onglet&nbsp;qu'on&nbsp;souhaite&nbsp;modifier.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;column_insertion&nbsp;:&nbsp;numéro&nbsp;de&nbsp;la&nbsp;colonne&nbsp;où&nbsp;on&nbsp;insère&nbsp;les&nbsp;colonnes&nbsp;à&nbsp;récupérer.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;other_sheet&nbsp;:&nbsp;liste&nbsp;représentant&nbsp;l'onglet&nbsp;duquel&nbsp;on&nbsp;récupère&nbsp;les&nbsp;colonnes&nbsp;&nbsp;['namefile','namesheet',numéro&nbsp;de&nbsp;la&nbsp;colonne&nbsp;où&nbsp;sont&nbsp;les&nbsp;identifiants,[numéros&nbsp;des&nbsp;colonnes&nbsp;à&nbsp;récupérer&nbsp;sous&nbsp;forme&nbsp;de&nbsp;liste]]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;namefile&nbsp;doit&nbsp;être&nbsp;au&nbsp;format&nbsp;.xlsx&nbsp;et&nbsp;mis&nbsp;dans&nbsp;le&nbsp;dossier&nbsp;fichier_xls.<br>
+&nbsp;<br>
+Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet&nbsp;=&nbsp;<a href="#Sheet">Sheet</a>('dataset.xlsx','onglet1')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-add_column_in_sheet_differently_sorted">add_column_in_sheet_differently_sorted</a>(2,3,['file.xlsx',&nbsp;'onglet2',&nbsp;2,&nbsp;[5,6,7,8]])</tt></dd></dl>
+
+<dl><dt><a name="Sheet-color_lines_containing_chaines"><strong>color_lines_containing_chaines</strong></a>(self, color, *chaines)</dt><dd><tt>Fonction&nbsp;qui&nbsp;colore&nbsp;les&nbsp;lignes&nbsp;dont&nbsp;une&nbsp;des&nbsp;cases&nbsp;contient&nbsp;une&nbsp;str&nbsp;particulière.<br>
+&nbsp;<br>
+Input&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;color&nbsp;:&nbsp;une&nbsp;couleur&nbsp;indiquée&nbsp;en&nbsp;haxadécimal&nbsp;par&nbsp;l'utilisateur.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;chaines&nbsp;:&nbsp;des&nbsp;chaines&nbsp;de&nbsp;caractères&nbsp;que&nbsp;l'utilisateur&nbsp;entre&nbsp;et&nbsp;qui&nbsp;entraînent&nbsp;la&nbsp;coloration&nbsp;de&nbsp;la&nbsp;ligne.<br>
+&nbsp;<br>
+Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet&nbsp;=&nbsp;<a href="#Sheet">Sheet</a>('dataset.xlsx','onglet1')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet.color_lines_containing_chaine('#FF0000',&nbsp;'vrai',&nbsp;'hello',&nbsp;'heeenri',&nbsp;'ficheux')</tt></dd></dl>
+
+<dl><dt><a name="Sheet-color_special_cases_in_column"><strong>color_special_cases_in_column</strong></a>(self, column, chainecolor)</dt><dd><tt>Fonction&nbsp;qui&nbsp;regarde&nbsp;pour&nbsp;une&nbsp;colonne&nbsp;donnée&nbsp;colore&nbsp;les&nbsp;cases&nbsp;correspondant&nbsp;à&nbsp;certaines&nbsp;chaînes&nbsp;de&nbsp;caractères.<br>
+&nbsp;<br>
+Input&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;column&nbsp;:&nbsp;le&nbsp;numéro&nbsp;de&nbsp;la&nbsp;colonne.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;chainecolor&nbsp;:&nbsp;les&nbsp;chaînes&nbsp;de&nbsp;caractères&nbsp;qui&nbsp;vont&nbsp;être&nbsp;colorées&nbsp;et&nbsp;les&nbsp;couleurs&nbsp;qui&nbsp;correspondent&nbsp;à&nbsp;écrire&nbsp;avec&nbsp;la&nbsp;syntaxe&nbsp;suivante&nbsp;{'vrai':'couleur1','autre':couleur2}.&nbsp;Attention,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;la&nbsp;couleur&nbsp;doit&nbsp;être&nbsp;entrée&nbsp;en&nbsp;hexadécimal&nbsp;et&nbsp;les&nbsp;chaînes&nbsp;de&nbsp;caractères&nbsp;ne&nbsp;doivent&nbsp;pas&nbsp;avoir&nbsp;d'espace&nbsp;au&nbsp;début&nbsp;ou&nbsp;à&nbsp;la&nbsp;fin.<br>
+&nbsp;<br>
+Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet&nbsp;=&nbsp;<a href="#Sheet">Sheet</a>('dataset.xlsx','onglet1')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-color_special_cases_in_column">color_special_cases_in_column</a>(12,&nbsp;{'vrai':&nbsp;'#FF0000','faux':&nbsp;'#00FF00'})</tt></dd></dl>
+
+<dl><dt><a name="Sheet-color_special_cases_in_sheet"><strong>color_special_cases_in_sheet</strong></a>(self, chainecolor)</dt><dd><tt>Fonction&nbsp;qui&nbsp;colore&nbsp;les&nbsp;cases&nbsp;contenant&nbsp;à&nbsp;certaines&nbsp;chaînes&nbsp;de&nbsp;caractères&nbsp;d'une&nbsp;feuille<br>
+&nbsp;<br>
+Input&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;column&nbsp;:&nbsp;le&nbsp;numéro&nbsp;de&nbsp;la&nbsp;colonne.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;chainecolor&nbsp;:&nbsp;les&nbsp;chaînes&nbsp;de&nbsp;caractères&nbsp;qui&nbsp;vont&nbsp;être&nbsp;colorées&nbsp;et&nbsp;les&nbsp;couleurs&nbsp;qui&nbsp;correspondent&nbsp;à&nbsp;écrire&nbsp;avec&nbsp;la&nbsp;syntaxe&nbsp;suivante&nbsp;{'vrai':'couleur1','autre':couleur2}.&nbsp;Attention,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;la&nbsp;couleur&nbsp;doit&nbsp;être&nbsp;entrée&nbsp;en&nbsp;hexadécimal&nbsp;et&nbsp;les&nbsp;chaînes&nbsp;de&nbsp;caractères&nbsp;ne&nbsp;doivent&nbsp;pas&nbsp;avoir&nbsp;d'espace&nbsp;au&nbsp;début&nbsp;ou&nbsp;à&nbsp;la&nbsp;fin.<br>
+&nbsp;<br>
+Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet&nbsp;=&nbsp;<a href="#Sheet">Sheet</a>('dataset.xlsx','onglet1')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-color_special_cases_in_sheet">color_special_cases_in_sheet</a>({'vrai':&nbsp;'#FF0000','faux':&nbsp;'#00FF00'})</tt></dd></dl>
+
+<dl><dt><a name="Sheet-column_convert_in_minutes"><strong>column_convert_in_minutes</strong></a>(self, column_read, column_write, line_beginning=2, line_end=100, insert=True, security=True)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;une&nbsp;colonne&nbsp;de&nbsp;chaines&nbsp;de&nbsp;caractères&nbsp;de&nbsp;la&nbsp;forme&nbsp;"10&nbsp;jour&nbsp;5&nbsp;heures"&nbsp;<br>
+ou&nbsp;"5&nbsp;heures&nbsp;10&nbsp;min"&nbsp;ou&nbsp;"10&nbsp;min&nbsp;5s"&nbsp;ou&nbsp;"5s"&nbsp;et&nbsp;qui&nbsp;renvoie&nbsp;le&nbsp;temps&nbsp;en&nbsp;minutes.<br>
+L'utilisateur&nbsp;doit&nbsp;indiquer&nbsp;un&nbsp;numéro&nbsp;de&nbsp;colonne&nbsp;de&nbsp;lecture&nbsp;et&nbsp;un&nbsp;numéro&nbsp;de&nbsp;colonne&nbsp;à&nbsp;remplir.<br>
+Input&nbsp;:&nbsp;column_read&nbsp;:&nbsp;la&nbsp;colonne&nbsp;de&nbsp;lecture&nbsp;des&nbsp;réponses.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;colum_write&nbsp;:&nbsp;la&nbsp;colonne&nbsp;d'écriture.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;line_beggining,&nbsp;line_end&nbsp;:&nbsp;(optionnel&nbsp;par&nbsp;défaut&nbsp;égaux&nbsp;à&nbsp;2&nbsp;et&nbsp;100)&nbsp;intervalle&nbsp;de&nbsp;ligne&nbsp;dans&nbsp;lequel&nbsp;l'utilisateur&nbsp;veut&nbsp;appliquer&nbsp;sa&nbsp;transformation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;insert&nbsp;:&nbsp;(paramètre&nbsp;optionnel)&nbsp;le&nbsp;mettre&nbsp;à&nbsp;False&nbsp;si&nbsp;on&nbsp;ne&nbsp;veut&nbsp;pas&nbsp;insérer&nbsp;une&nbsp;colonne.<br>
+&nbsp;<br>
+Output&nbsp;:&nbsp;rien&nbsp;sauf&nbsp;si&nbsp;la&nbsp;security&nbsp;est&nbsp;enclenchée&nbsp;et&nbsp;que&nbsp;l'on&nbsp;écrit&nbsp;dans&nbsp;une&nbsp;colonne&nbsp;déjà&nbsp;remplie.<br>
+&nbsp;<br>
+Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet&nbsp;=&nbsp;<a href="#Sheet">Sheet</a>('dataset.xlsx','onglet1')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-column_convert_in_minutes">column_convert_in_minutes</a>(1,2,line_beggining&nbsp;=&nbsp;3,line_end&nbsp;=&nbsp;1600)</tt></dd></dl>
+
+<dl><dt><a name="Sheet-column_cut_string_in_parts"><strong>column_cut_string_in_parts</strong></a>(self, column_to_cut, column_insertion, separator)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;une&nbsp;colonne&nbsp;dont&nbsp;chaque&nbsp;cellule&nbsp;contient&nbsp;une&nbsp;grande&nbsp;chaîne&nbsp;de<br>
+&nbsp;&nbsp;caractères.&nbsp;Toutes&nbsp;les&nbsp;chaînes&nbsp;sont&nbsp;composés&nbsp;du&nbsp;nombre&nbsp;de&nbsp;morceaux&nbsp;délimités&nbsp;par&nbsp;un&nbsp;séparateur,<br>
+La&nbsp;fonction&nbsp;insère&nbsp;autant&nbsp;de&nbsp;colonnes&nbsp;que&nbsp;de&nbsp;morceaux&nbsp;et&nbsp;place&nbsp;un&nbsp;morceau&nbsp;par&nbsp;colonne&nbsp;dans&nbsp;l'ordre&nbsp;des&nbsp;morceaux.<br>
+&nbsp;<br>
+Inputs&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;column_to_cut&nbsp;:&nbsp;colonne&nbsp;contenant&nbsp;les&nbsp;grandes&nbsp;str.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;column_insertion&nbsp;:&nbsp;où&nbsp;insérer&nbsp;les&nbsp;colonnes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;separator&nbsp;le&nbsp;séparateur<br>
+&nbsp;<br>
+Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet&nbsp;=&nbsp;<a href="#Sheet">Sheet</a>('dataset.xlsx','onglet1')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-column_cut_string_in_parts">column_cut_string_in_parts</a>(3,&nbsp;10,&nbsp;';')</tt></dd></dl>
+
+<dl><dt><a name="Sheet-column_set_answer_in_group"><strong>column_set_answer_in_group</strong></a>(self, column_read, column_write, groups_of_responses, line_beginning=2, line_end=100, insert=True, security=True)</dt><dd><tt>Dans&nbsp;le&nbsp;cas&nbsp;où&nbsp;il&nbsp;y&nbsp;a&nbsp;des&nbsp;groupes&nbsp;de&nbsp;réponses,&nbsp;cette&nbsp;fonction&nbsp;qui&nbsp;prend&nbsp;une&nbsp;colonne&nbsp;de&nbsp;chaîne&nbsp;de&nbsp;caractères&nbsp;<br>
+et&nbsp;qui&nbsp;renvoie&nbsp;une&nbsp;colonne&nbsp;remplie&nbsp;de&nbsp;chaînes&nbsp;contenant&nbsp;les&nbsp;groupes&nbsp;associés.<br>
+L'utilisateur&nbsp;doit&nbsp;indiquer&nbsp;un&nbsp;numéro&nbsp;de&nbsp;colonne&nbsp;de&nbsp;lecture&nbsp;et&nbsp;un&nbsp;numéro&nbsp;de&nbsp;colonne&nbsp;où&nbsp;écrire.<br>
+&nbsp;<br>
+Input&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_read&nbsp;:&nbsp;la&nbsp;colonne&nbsp;de&nbsp;lecture&nbsp;des&nbsp;réponses.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;colum_write&nbsp;:&nbsp;la&nbsp;colonne&nbsp;d'écriture&nbsp;des&nbsp;0&nbsp;et&nbsp;1.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;groups_of_response&nbsp;:&nbsp;dictionnary&nbsp;which&nbsp;keys&nbsp;are&nbsp;response&nbsp;groups&nbsp;and&nbsp;which&nbsp;values&nbsp;are&nbsp;a&nbsp;list&nbsp;of&nbsp;responses&nbsp;<br>
+associated&nbsp;to&nbsp;this&nbsp;group.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;line_beggining,&nbsp;line_end&nbsp;:&nbsp;(paramètres&nbsp;optionnels&nbsp;par&nbsp;défaut&nbsp;égaux&nbsp;à&nbsp;2&nbsp;et&nbsp;100)&nbsp;intervalle&nbsp;de&nbsp;ligne&nbsp;dans&nbsp;lequel&nbsp;l'utilisateur&nbsp;veut&nbsp;appliquer&nbsp;sa&nbsp;transformation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;insert&nbsp;:&nbsp;(paramètre&nbsp;optionnel)&nbsp;le&nbsp;mettre&nbsp;à&nbsp;False&nbsp;si&nbsp;on&nbsp;ne&nbsp;veut&nbsp;pas&nbsp;insérer&nbsp;une&nbsp;colonne.<br>
+&nbsp;<br>
+Output&nbsp;:&nbsp;rien&nbsp;sauf&nbsp;si&nbsp;la&nbsp;security&nbsp;est&nbsp;enclenchée&nbsp;et&nbsp;que&nbsp;l'on&nbsp;écrit&nbsp;dans&nbsp;une&nbsp;colonne&nbsp;déjà&nbsp;remplie.<br>
+&nbsp;<br>
+Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet&nbsp;=&nbsp;<a href="#Sheet">Sheet</a>('dataset.xlsx','onglet1')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-column_set_answer_in_group">column_set_answer_in_group</a>(1,&nbsp;2,&nbsp;{'groupe1':[1,4,3],'groupe2':[5,2]}&nbsp;,line_beggining&nbsp;=&nbsp;3,line_end&nbsp;=&nbsp;1600)</tt></dd></dl>
+
+<dl><dt><a name="Sheet-column_transform_string_in_binary"><strong>column_transform_string_in_binary</strong></a>(self, column_read, column_write, *good_answers, line_beginning=2, line_end=100, insert=True, security=True)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;une&nbsp;colonne&nbsp;de&nbsp;chaîne&nbsp;de&nbsp;caractères&nbsp;et&nbsp;qui&nbsp;renvoie&nbsp;une&nbsp;colonne&nbsp;de&nbsp;0&nbsp;ou&nbsp;de&nbsp;1<br>
+L'utilisateur&nbsp;doit&nbsp;indiquer&nbsp;un&nbsp;numéro&nbsp;de&nbsp;colonne&nbsp;de&nbsp;lecture&nbsp;et&nbsp;un&nbsp;numéro&nbsp;de&nbsp;colonne&nbsp;où&nbsp;mettre&nbsp;les&nbsp;0&nbsp;ou&nbsp;1.<br>
+&nbsp;<br>
+Inputs&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_read&nbsp;:&nbsp;la&nbsp;colonne&nbsp;de&nbsp;lecture&nbsp;des&nbsp;réponses.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;colum_write&nbsp;:&nbsp;la&nbsp;colonne&nbsp;d'écriture&nbsp;des&nbsp;0&nbsp;et&nbsp;1.&nbsp;Par&nbsp;défaut,&nbsp;une&nbsp;colonne&nbsp;est&nbsp;insérée&nbsp;à&nbsp;cette&nbsp;position.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;good_answers&nbsp;:&nbsp;une&nbsp;séquence&nbsp;d'un&nbsp;nombre&nbsp;quelconque&nbsp;de&nbsp;bonnes&nbsp;réponses&nbsp;qui&nbsp;valent&nbsp;1pt.&nbsp;Chaque&nbsp;mot&nbsp;ne&nbsp;doit&nbsp;pas&nbsp;contenir&nbsp;d'espace&nbsp;ni&nbsp;au&nbsp;début&nbsp;ni&nbsp;à&nbsp;la&nbsp;fin.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;line_beggining,&nbsp;line_end&nbsp;:&nbsp;(paramètres&nbsp;optionnels&nbsp;par&nbsp;défaut&nbsp;égaux&nbsp;à&nbsp;2&nbsp;et&nbsp;100)&nbsp;intervalle&nbsp;de&nbsp;ligne&nbsp;dans&nbsp;lequel&nbsp;l'utilisateur&nbsp;veut&nbsp;appliquer&nbsp;sa&nbsp;transformation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;insert&nbsp;:&nbsp;(paramètre&nbsp;optionnel)&nbsp;le&nbsp;mettre&nbsp;à&nbsp;False&nbsp;si&nbsp;on&nbsp;ne&nbsp;veut&nbsp;pas&nbsp;insérer&nbsp;une&nbsp;colonne.<br>
+&nbsp;<br>
+Output&nbsp;:&nbsp;rien&nbsp;sauf&nbsp;si&nbsp;la&nbsp;security&nbsp;est&nbsp;enclenchée&nbsp;et&nbsp;que&nbsp;l'on&nbsp;écrit&nbsp;dans&nbsp;une&nbsp;colonne&nbsp;déjà&nbsp;remplie.<br>
+&nbsp;<br>
+Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet&nbsp;=&nbsp;<a href="#Sheet">Sheet</a>('dataset.xlsx','onglet1')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-column_transform_string_in_binary">column_transform_string_in_binary</a>(1,2,'reponse1','reponse2',line_end&nbsp;=&nbsp;1600)&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;#Bien&nbsp;mettre&nbsp;les&nbsp;réponses&nbsp;de&nbsp;good_answers&nbsp;entre&nbsp;''.</tt></dd></dl>
+
+<dl><dt><a name="Sheet-delete_lines"><strong>delete_lines</strong></a>(self, column, *chaines)</dt><dd><tt>Fonction&nbsp;qui&nbsp;parcourt&nbsp;une&nbsp;colonne&nbsp;et&nbsp;qui&nbsp;supprime&nbsp;la&nbsp;ligne&nbsp;si&nbsp;celle-ci&nbsp;contient&nbsp;une&nbsp;chaîne&nbsp;particulière.<br>
+&nbsp;<br>
+Inputs&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-column&nbsp;:&nbsp;la&nbsp;colonne&nbsp;à&nbsp;parcourir.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-chaines&nbsp;:&nbsp;les&nbsp;chaînes&nbsp;de&nbsp;caractères&nbsp;qui&nbsp;doivent&nbsp;engendrer&nbsp;la&nbsp;suppression&nbsp;de&nbsp;la&nbsp;ligne.<br>
+&nbsp;<br>
+Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet&nbsp;=&nbsp;<a href="#Sheet">Sheet</a>('dataset.xlsx','onglet1')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-delete_lines">delete_lines</a>(3,&nbsp;'chaine1',&nbsp;'chaine2',&nbsp;'chaine3',&nbsp;'chaine4')</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="module_pour_excel.html#File">File</a>:<br>
+<dl><dt><a name="Sheet-apply_column_formula_on_all_sheets"><strong>apply_column_formula_on_all_sheets</strong></a>(self, *column_list)</dt><dd><tt>Fonction&nbsp;qui&nbsp;reproduit&nbsp;les&nbsp;formules&nbsp;d'une&nbsp;colonne&nbsp;ou&nbsp;plusieurs&nbsp;colonnes<br>
+&nbsp;&nbsp;du&nbsp;premier&nbsp;onglet&nbsp;sur&nbsp;toutes&nbsp;les&nbsp;colonnes&nbsp;situées&nbsp;à&nbsp;la&nbsp;même&nbsp;position&nbsp;dans&nbsp;les&nbsp;<br>
+&nbsp;&nbsp;autres&nbsp;onglets.<br>
+&nbsp;<br>
+Input&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-column_list&nbsp;:&nbsp;int.&nbsp;les&nbsp;positions&nbsp;des&nbsp;colonnes&nbsp;où&nbsp;récupérer&nbsp;et&nbsp;coller.<br>
+&nbsp;<br>
+Exemples&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Bien&nbsp;veiller&nbsp;à&nbsp;mettre&nbsp;dataonly&nbsp;=&nbsp;False&nbsp;sinon&nbsp;il&nbsp;ne&nbsp;copiera&nbsp;pas&nbsp;les&nbsp;formules&nbsp;mais<br>
+&nbsp;&nbsp;&nbsp;&nbsp;les&nbsp;valeurs&nbsp;des&nbsp;cellules.&nbsp;On&nbsp;peut&nbsp;aussi&nbsp;copier&nbsp;les&nbsp;valeurs&nbsp;des&nbsp;cellules&nbsp;:&nbsp;pour&nbsp;cela,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enlever&nbsp;dataonly&nbsp;=&nbsp;False.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Sur&nbsp;une&nbsp;colonne<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;=&nbsp;<a href="#File">File</a>('dataset.xlsx',&nbsp;dataonly&nbsp;=&nbsp;False)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file.<a href="#Sheet-apply_column_formula_on_all_sheets">apply_column_formula_on_all_sheets</a>(2)&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Sur&nbsp;trois&nbsp;colonnes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;=&nbsp;<a href="#File">File</a>('dataset.xlsx',&nbsp;dataonly&nbsp;=&nbsp;False)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file.<a href="#Sheet-apply_column_formula_on_all_sheets">apply_column_formula_on_all_sheets</a>(2,5,10)&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Sur&nbsp;toutes&nbsp;les&nbsp;colonnes&nbsp;du&nbsp;fichier&nbsp;à&nbsp;partir&nbsp;de&nbsp;la&nbsp;colonne&nbsp;colmin&nbsp;jusque&nbsp;la&nbsp;colonne&nbsp;colmax&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;=&nbsp;<a href="#File">File</a>('dataset.xlsx',&nbsp;dataonly&nbsp;=&nbsp;False)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file.<a href="#Sheet-apply_column_formula_on_all_sheets">apply_column_formula_on_all_sheets</a>(*[i&nbsp;for&nbsp;i&nbsp;in&nbsp;range(colmin,colmax&nbsp;+&nbsp;1)])</tt></dd></dl>
+
+<dl><dt><a name="Sheet-create_one_onglet_by_participant"><strong>create_one_onglet_by_participant</strong></a>(self, onglet_from, column_read, first_line=2)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;un&nbsp;onglet&nbsp;dont&nbsp;une&nbsp;colonne&nbsp;contient&nbsp;des&nbsp;chaînes&nbsp;de&nbsp;caractères.<br>
+Chaque&nbsp;chaîne&nbsp;de&nbsp;caractères&nbsp;peut&nbsp;apparaître&nbsp;plusieurs&nbsp;fois&nbsp;dans&nbsp;cette&nbsp;colonne.&nbsp;<br>
+La&nbsp;fonction&nbsp;retourne&nbsp;un&nbsp;fichier&nbsp;contenant&nbsp;un&nbsp;onglet&nbsp;par&nbsp;chaîne&nbsp;de&nbsp;caractères.<br>
+&nbsp;&nbsp;Chaque&nbsp;onglet&nbsp;contient&nbsp;toutes&nbsp;les&nbsp;lignes&nbsp;correspondant&nbsp;à&nbsp;cette&nbsp;chaîne&nbsp;de&nbsp;caractères.<br>
+&nbsp;<br>
+Input&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;onglet_from&nbsp;:&nbsp;onglet&nbsp;de&nbsp;référence.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;column_read&nbsp;:&nbsp;la&nbsp;colonne&nbsp;qui&nbsp;contient&nbsp;les&nbsp;chaînes&nbsp;de&nbsp;caractères.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;first_line&nbsp;:&nbsp;ligne&nbsp;où&nbsp;commencer&nbsp;à&nbsp;parcourir.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;last_line&nbsp;:&nbsp;ligne&nbsp;de&nbsp;fin&nbsp;de&nbsp;parcours<br>
+&nbsp;<br>
+Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;=&nbsp;<a href="#File">File</a>('dataset.xlsx')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file.<a href="#Sheet-create_one_onglet_by_participant">create_one_onglet_by_participant</a>('onglet1',&nbsp;1)</tt></dd></dl>
+
+<dl><dt><a name="Sheet-extract_column_from_all_sheets"><strong>extract_column_from_all_sheets</strong></a>(self, column)</dt><dd><tt>Fonction&nbsp;qui&nbsp;récupère&nbsp;une&nbsp;colonne&nbsp;dans&nbsp;chaque&nbsp;onglet&nbsp;pour&nbsp;former&nbsp;une&nbsp;nouvelle&nbsp;feuille<br>
+contenant&nbsp;toutes&nbsp;les&nbsp;colonnes.&nbsp;La&nbsp;première&nbsp;cellule&nbsp;de&nbsp;chaque&nbsp;colonne&nbsp;correspond&nbsp;alors&nbsp;<br>
+au&nbsp;nom&nbsp;de&nbsp;l'onglet.&nbsp;Attention,&nbsp;en&nbsp;l'état,&nbsp;il&nbsp;faut&nbsp;que&nbsp;tous&nbsp;les&nbsp;onglets&nbsp;aient&nbsp;la&nbsp;même&nbsp;structure.<br>
+&nbsp;<br>
+Input&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;column&nbsp;:&nbsp;int.&nbsp;Le&nbsp;numéro&nbsp;de&nbsp;la&nbsp;colonne&nbsp;à&nbsp;récupérer&nbsp;dans&nbsp;chaque&nbsp;onglet<br>
+&nbsp;<br>
+Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;=&nbsp;<a href="#File">File</a>('dataset.xlsx')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file.<a href="#Sheet-extract_column_from_all_sheets">extract_column_from_all_sheets</a>(2)&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Si&nbsp;on&nbsp;veut&nbsp;extraire&nbsp;les&nbsp;formules<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;=&nbsp;<a href="#File">File</a>('dataset.xlsx',dataonly&nbsp;=&nbsp;False)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file.<a href="#Sheet-extract_column_from_all_sheets">extract_column_from_all_sheets</a>(2)</tt></dd></dl>
+
+<dl><dt><a name="Sheet-sauvegarde"><strong>sauvegarde</strong></a>(self)</dt><dd><tt>Fonction&nbsp;qui&nbsp;crée&nbsp;une&nbsp;sauvegarde&nbsp;du&nbsp;fichier&nbsp;name_file&nbsp;et&nbsp;<br>
+qui&nbsp;l'appelle&nbsp;name_file_time&nbsp;où&nbsp;time&nbsp;est&nbsp;le&nbsp;moment&nbsp;d'enregistrement.<br>
+&nbsp;<br>
+Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;=&nbsp;<a href="#File">File</a>('dataset.xlsx')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file.<a href="#Sheet-sauvegarde">sauvegarde</a>()</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="utils.html#UtilsForFile">utils.UtilsForFile</a>:<br>
+<dl><dt><a name="Sheet-add_line_at_bottom"><strong>add_line_at_bottom</strong></a>(self, onglet_from, row_from, onglet_to)</dt><dd><tt>Fonction&nbsp;qui&nbsp;copie&nbsp;une&nbsp;ligne&nbsp;spécifique&nbsp;de&nbsp;la&nbsp;feuille&nbsp;à&nbsp;la&nbsp;fin&nbsp;d'un&nbsp;autre&nbsp;onglet.<br>
+&nbsp;<br>
+Input&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;row_origin&nbsp;:&nbsp;ligne&nbsp;de&nbsp;l'onglet&nbsp;d'origine.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;onglet&nbsp;:&nbsp;l'onglet&nbsp;à&nbsp;modifier&nbsp;où&nbsp;on&nbsp;copie&nbsp;la&nbsp;ligne.<br>
+&nbsp;<br>
+Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;=&nbsp;<a href="#File">File</a>('dataset.xlsx')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file.<a href="#Sheet-copy_paste_line">copy_paste_line</a>('onglet1',&nbsp;1,&nbsp;'onglet2')</tt></dd></dl>
+
+<dl><dt><a name="Sheet-copy_paste_column"><strong>copy_paste_column</strong></a>(self, onglet_from, column_from, onglet_to, column_to)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;une&nbsp;colonne&nbsp;de&nbsp;la&nbsp;feuille&nbsp;et&nbsp;qui&nbsp;la&nbsp;copie&nbsp;dans&nbsp;un&nbsp;autre&nbsp;onglet.</tt></dd></dl>
+
+<dl><dt><a name="Sheet-copy_paste_line"><strong>copy_paste_line</strong></a>(self, onglet_from, row_from, onglet_to, row_to)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;une&nbsp;ligne&nbsp;de&nbsp;la&nbsp;feuille&nbsp;et&nbsp;qui&nbsp;la&nbsp;copie&nbsp;dans&nbsp;un&nbsp;autre&nbsp;onglet.<br>
+&nbsp;<br>
+Inputs&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;onglet_from&nbsp;:&nbsp;onglet&nbsp;d'où&nbsp;on&nbsp;copie<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;row_from&nbsp;:&nbsp;ligne&nbsp;de&nbsp;l'onglet&nbsp;d'origine.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;onglet_to&nbsp;:&nbsp;onglet&nbsp;où&nbsp;coller.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;row_to&nbsp;:&nbsp;la&nbsp;ligne&nbsp;où&nbsp;il&nbsp;faut&nbsp;coller&nbsp;dans&nbsp;l'onglet&nbsp;à&nbsp;modifier.<br>
+&nbsp;<br>
+Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;=&nbsp;<a href="#File">File</a>('dataset.xlsx')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file.<a href="#Sheet-copy_paste_line">copy_paste_line</a>('onglet1',&nbsp;1,&nbsp;'onglet2',&nbsp;1)</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="utils.html#UtilsForFile">utils.UtilsForFile</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="utils.html#UtilsForSheet">utils.UtilsForSheet</a>:<br>
+<dl><dt><a name="Sheet-color_line"><strong>color_line</strong></a>(self, color, row_number)</dt><dd><tt>Fonction&nbsp;qui&nbsp;colore&nbsp;une&nbsp;ligne&nbsp;spécifique<br>
+&nbsp;<br>
+Input&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;color&nbsp;:&nbsp;une&nbsp;couleur&nbsp;indiquée&nbsp;en&nbsp;haxadécimal&nbsp;par&nbsp;l'utilisateur.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;row_number&nbsp;:&nbsp;le&nbsp;numéro&nbsp;de&nbsp;la&nbsp;ligne&nbsp;à&nbsp;colorer<br>
+&nbsp;<br>
+Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet&nbsp;=&nbsp;<a href="#Sheet">Sheet</a>('dataset.xlsx','onglet1')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-color_line">color_line</a>('#FF0000',&nbsp;3)</tt></dd></dl>
+
+<dl><dt><a name="Sheet-column_security"><strong>column_security</strong></a>(self, column)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;une&nbsp;colonne&nbsp;et&nbsp;regarde&nbsp;si&nbsp;la&nbsp;colonne&nbsp;est&nbsp;vide.<br>
+Input&nbsp;:&nbsp;column<br>
+Output&nbsp;:&nbsp;True&nbsp;si&nbsp;elle&nbsp;ne&nbsp;contient&nbsp;rien,&nbsp;False&nbsp;sinon</tt></dd></dl>
+
+<dl><dt><a name="Sheet-create_dico_from_columns"><strong>create_dico_from_columns</strong></a>(self, column_keys: int, column_values: int, first_line, last_line)</dt><dd><tt>Function&nbsp;returning&nbsp;a&nbsp;dictionnary&nbsp;whose&nbsp;keys&nbsp;are&nbsp;elements&nbsp;of&nbsp;a&nbsp;column<br>
+&nbsp;&nbsp;if&nbsp;they&nbsp;are&nbsp;not&nbsp;empty&nbsp;and&nbsp;values&nbsp;are&nbsp;elements&nbsp;of&nbsp;an&nbsp;other&nbsp;column<br>
+&nbsp;<br>
+Inputs&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;column_keys&nbsp;:&nbsp;column&nbsp;whose&nbsp;elements&nbsp;are&nbsp;the&nbsp;keys&nbsp;of&nbsp;the&nbsp;dictionnary.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;column_values&nbsp;:&nbsp;same&nbsp;with&nbsp;values<br>
+&nbsp;&nbsp;&nbsp;&nbsp;first_line&nbsp;:&nbsp;the&nbsp;line&nbsp;we&nbsp;begin&nbsp;to&nbsp;read&nbsp;the&nbsp;file<br>
+&nbsp;<br>
+Output&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dico&nbsp;:&nbsp;dictionary.</tt></dd></dl>
+
+</td></tr></table></td></tr></table>
+</body></html>

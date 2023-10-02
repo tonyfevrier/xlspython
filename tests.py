@@ -63,7 +63,21 @@ class TestFile(TestCase):
         del file.writebook[file.sheets_name[-1]]
         file.writebook.save(file.path + 'test_extract_column.xlsx')
 
+"""
+    def test_apply_column_formula_on_all_sheets(self):
+        file = File('dataset.xlsx', dataonly = False)
 
+        #sauvegarde du fichier initial
+        file2 = file.sauvegarde()
+        # test sur trois colonnes réparties au hasard
+        file.apply_column_formula_on_all_sheets(2,5,10)
+        #vérifier sur tous les onglets que ces trois colonnes sont identiques au fichier de réf.
+        # on supprime file et on renomme file2 avec le nom de file pour retrouver le fichier initial.
+        
+        # test sur toutes les colonnes à partir de la colonne 2 
+        file.apply_column_formula_on_all_sheets(*[i for i in range(2,6)]) 
+        #on refait ce qui a été fait ci-dessus.
+"""
 
 class TestSheet(TestCase):
     def test_sheet_correctly_opened(self):
