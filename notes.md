@@ -79,13 +79,14 @@ Pour la programmation par classe, la logique voudrait une classe File parent, un
     FAIT : Récupérer un vieux test.xlsx dans les commit précédents.
     FAIT : Mettre toutes les micro fonctions utilisées dans Sheet dans un fichier à part qu'on importe pour ne garder que les grosses fonctions de la classe Sheet qui font les gros changements.
     FAIT : Fonction qui prend pleins d'onglets de structure identiques et qui copie une même colonne choisie dans chaque onglet (ou dans un sous ensemble d'onglets) dans une nouvelle feuille en mettant le numéro de l'onglet en haut.
+    Modifier les fonctions afin d'injecter non pas le numéro de la colonne mais la lettre. Traitement particulier à réserver à addsheetdifferentlysorted, revoir la façon dont je transmets l'autre fichier.
     Fonction qui prend pleins d'onglets et qui copie les formules d'une colonne (H par exemple) créée dans un onglet (le premier) pour la reproduire sur toutes les colonnes H des autres onglets.
-    Voir comment générer automatiquement une doc à partir de mes docstrings.
+    FAIT:Voir comment générer automatiquement une doc à partir de mes docstrings.
     Vérifier que quand je sauvegarde un fichier avec formules avec dataonly = True, il ne garde que les valeurs. Si oui modifier la doc pour signaler ce point. Voir s'il vaut mieux garder par défaut à True ou le passer à False. Qui est majoritaire?
     Modifier les fonctions pour qu'on puisse aussi entrer les arguments par la lettre de colonne et pas le numéro peu pratique quand il y a beaucoup de colonnes.
     line_end vraiment utile dans les fonctions : max_row ne suffit pas?
     Voir pour regrouper les trois fonctions column_transform_string_in_binary et columnsetansweringroup, columnconvertinminutes la première étant un cas particulier de la seconde. 
-    Ecrire une documentation pour un utilisateur lambda.
+    FAIT: Ecrire une documentation pour un utilisateur lambda.
     Prendre un temps pour réfléchir à quelle interface on pourrait utiliser pour qu'un utilisateur n'ait pas à utiliser python. Faire un freeplane.
     
     Créer une classe Path avec attribut nom de dossier

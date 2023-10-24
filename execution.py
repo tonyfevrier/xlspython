@@ -1,10 +1,13 @@
 import module_pour_excel as mpe
 import json
+
 #file = mpe.File('temps_SPOC.xlsx',path = 'dataset_dulcinee/')
 #file.sauvegarde()
+ 
 
-sheet = mpe.Sheet('Stroop_AMV.xlsx','Stroops_test (7)',path = 'dataset_dulcinee/')
-sheet.create_one_onglet_by_participant(1,2,852)
+
+
+#sheet.create_one_onglet_by_participant(1,2,852)
 
 #sheet.add_column_in_sheet_differently_sorted(3, 258,['questionnaire_de_fin.xlsx','2023_SPOCS&amp;S Questionnaire ',3,[i for i in range(8,16)]])
 

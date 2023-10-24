@@ -2,6 +2,7 @@
 
 import openpyxl 
 from openpyxl.styles import PatternFill
+from openpyxl.utils import column_index_from_string
 from copy import copy
 from datetime import date, datetime
 from utils import UtilsForFile, UtilsForSheet, Str
@@ -58,7 +59,7 @@ class File(UtilsForFile):
         return file_copy
             
 
-    def create_one_onglet_by_participant(self, onglet_from, column_read, first_line=2):
+    def create_one_onglet_by_participant(self, onglet_from, column_read, first_line=2, label=True ):
         """
         Fonction qui prend un onglet dont une colonne contient des chaînes de caractères.
         Chaque chaîne de caractères peut apparaître plusieurs fois dans cette colonne. 
@@ -67,15 +68,19 @@ class File(UtilsForFile):
 
         Input : 
             onglet_from : onglet de référence.
-            column_read : la colonne qui contient les chaînes de caractères.
+            column_read : l'étiquette de la colonne qui contient les chaînes de caractères.
             first_line : ligne où commencer à parcourir.
             last_line : ligne de fin de parcours
+            label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
  
         Exemple d'utilisation : 
     
             file = File('dataset.xlsx')
-            file.create_one_onglet_by_participant('onglet1', 1) 
+            file.create_one_onglet_by_participant('onglet1', 'A') 
         """
+    
+        if label == True:
+            column_read = column_index_from_string(column_read) 
 
         onglets = []
         sheet = self.writebook[onglet_from] 
@@ -90,25 +95,29 @@ class File(UtilsForFile):
         
         self.writebook.save(self.path + self.name_file) 
 
-    def extract_column_from_all_sheets(self,column):
+    def extract_column_from_all_sheets(self,column,label = True):
         """
         Fonction qui récupère une colonne dans chaque onglet pour former une nouvelle feuille
         contenant toutes les colonnes. La première cellule de chaque colonne correspond alors 
         au nom de l'onglet. Attention, en l'état, il faut que tous les onglets aient la même structure.
 
         Input : 
-            column : int. Le numéro de la colonne à récupérer dans chaque onglet
+            column : str. L'étiquette de la colonne à récupérer dans chaque onglet
+            label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
 
         Exemple d'utilisation : 
     
             file = File('dataset.xlsx')
-            file.extract_column_from_all_sheets(2) 
+            file.extract_column_from_all_sheets('B') 
 
             Si on veut extraire les formules
 
             file = File('dataset.xlsx',dataonly = False)
-            file.extract_column_from_all_sheets(2) 
+            file.extract_column_from_all_sheets('B') 
         """ 
+        if label == True:
+            column = column_index_from_string(column)
+         
         new_sheet = self.writebook.create_sheet(f"gather_{column}")
         column_to = 1
         for name_onglet in self.sheets_name:
@@ -163,27 +172,31 @@ class Sheet(File,UtilsForSheet):
         self.sheet = self.writebook[self.name_onglet]
         del self.sheets_name
 
-    def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2, line_end = 100, insert = True, security = True):
+    def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2, line_end = 100, insert = True, security = True,label = True):
         """
         Fonction qui prend une colonne de chaîne de caractères et qui renvoie une colonne de 0 ou de 1
         L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où mettre les 0 ou 1.
 
         Inputs :
-                column_read : la colonne de lecture des réponses.
-                colum_write : la colonne d'écriture des 0 et 1. Par défaut, une colonne est insérée à cette position.
+                column_read : l'étiquette de la colonne de lecture des réponses.
+                colum_write : l'étiquette de la colonne d'écriture des 0 et 1. Par défaut, une colonne est insérée à cette position.
                 good_answers : une séquence d'un nombre quelconque de bonnes réponses qui valent 1pt. Chaque mot ne doit pas contenir d'espace ni au début ni à la fin.
                 line_beggining, line_end : (paramètres optionnels par défaut égaux à 2 et 100) intervalle de ligne dans lequel l'utilisateur veut appliquer sa transformation
                 insert : (paramètre optionnel) le mettre à False si on ne veut pas insérer une colonne.
-        
+                label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
+
         Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
 
         Exemple d'utilisation : 
         
             sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.column_transform_string_in_binary(1,2,'reponse1','reponse2',line_end = 1600) 
+            sheet.column_transform_string_in_binary('A','B','reponse1','reponse2',line_end = 1600) 
 
             #Bien mettre les réponses de good_answers entre ''. 
-        """
+        """  
+        if label == True:
+            column_read = column_index_from_string(column_read) 
+            column_write = column_index_from_string(column_write)
 
         if insert == False and security == True and self.column_security(column_write) == False:
             msg = "La colonne n'est pas vide. Si vous voulez vraiment y écrire, mettez security = False en argument."
@@ -200,24 +213,28 @@ class Sheet(File,UtilsForSheet):
  
         self.writebook.save(self.path + self.name_file)
 
-    def column_convert_in_minutes(self,column_read,column_write,line_beginning = 2, line_end = 100, insert = True, security = True):
+    def column_convert_in_minutes(self,column_read,column_write,line_beginning = 2, line_end = 100, insert = True, security = True,label = True):
         """
         Fonction qui prend une colonne de chaines de caractères de la forme "10 jour 5 heures" 
         ou "5 heures 10 min" ou "10 min 5s" ou "5s" et qui renvoie le temps en minutes.
         L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne à remplir.
-        Input : column_read : la colonne de lecture des réponses.
-                colum_write : la colonne d'écriture. 
+        Input : column_read : l'étiquette de la colonne de lecture des réponses.
+                colum_write : l'étiquette de la colonne d'écriture. 
                 line_beggining, line_end : (optionnel par défaut égaux à 2 et 100) intervalle de ligne dans lequel l'utilisateur veut appliquer sa transformation
                 insert : (paramètre optionnel) le mettre à False si on ne veut pas insérer une colonne.
+                label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
 
         Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
         
         Exemple d'utilisation : 
         
             sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.column_convert_in_minutes(1,2,line_beggining = 3,line_end = 1600) 
+            sheet.column_convert_in_minutes('A','B',line_beggining = 3,line_end = 1600) 
 
         """
+        if label == True:
+            column_read = column_index_from_string(column_read) 
+            column_write = column_index_from_string(column_write)
 
         if insert == False and security == True and self.column_security(column_write) == False:
             msg = "La colonne n'est pas vide. Si vous voulez vraiment y écrire, mettez security = False en argument."
@@ -234,28 +251,32 @@ class Sheet(File,UtilsForSheet):
  
         self.writebook.save(self.path + self.name_file)
 
-    def column_set_answer_in_group(self,column_read,column_write,groups_of_responses,line_beginning = 2, line_end = 100, insert = True, security = True):
+    def column_set_answer_in_group(self,column_read,column_write,groups_of_responses,line_beginning = 2, line_end = 100, insert = True, security = True, label = True):
         """
         Dans le cas où il y a des groupes de réponses, cette fonction qui prend une colonne de chaîne de caractères 
         et qui renvoie une colonne remplie de chaînes contenant les groupes associés.
         L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où écrire.
 
         Input : 
-                column_read : la colonne de lecture des réponses.
-                colum_write : la colonne d'écriture des 0 et 1. 
+                column_read : l'étiquette de la colonne de lecture des réponses.
+                colum_write : l'étiquette de la colonne d'écriture des 0 et 1. 
                 groups_of_response : dictionnary which keys are response groups and which values are a list of responses 
         associated to this group.
                 line_beggining, line_end : (paramètres optionnels par défaut égaux à 2 et 100) intervalle de ligne dans lequel l'utilisateur veut appliquer sa transformation
                 insert : (paramètre optionnel) le mettre à False si on ne veut pas insérer une colonne.
+                label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
 
         Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
         
         Exemple d'utilisation : 
         
             sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.column_set_answer_in_group(1, 2, {'groupe1':[1,4,3],'groupe2':[5,2]} ,line_beggining = 3,line_end = 1600) 
+            sheet.column_set_answer_in_group('A', 'B', {'groupe1':[1,4,3],'groupe2':[5,2]} ,line_beggining = 3,line_end = 1600) 
 
         """
+        if label == True:
+            column_read = column_index_from_string(column_read) 
+            column_write = column_index_from_string(column_write)
 
         if insert == False and security == True and self.column_security(column_write) == False:
             msg = "La colonne n'est pas vide. Si vous voulez vraiment y écrire, mettez security = False en argument."
@@ -272,7 +293,7 @@ class Sheet(File,UtilsForSheet):
             
         self.writebook.save(self.path + self.name_file)
         
-    def color_special_cases_in_column(self,column,chainecolor):
+    def color_special_cases_in_column(self,column,chainecolor,label = True):
         """
         Fonction qui regarde pour une colonne donnée colore les cases correspondant à certaines chaînes de caractères.
 
@@ -280,14 +301,17 @@ class Sheet(File,UtilsForSheet):
             - column : le numéro de la colonne.
             - chainecolor : les chaînes de caractères qui vont être colorées et les couleurs qui correspondent à écrire avec la syntaxe suivante {'vrai':'couleur1','autre':couleur2}. Attention,
                 la couleur doit être entrée en hexadécimal et les chaînes de caractères ne doivent pas avoir d'espace au début ou à la fin.
+            - label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
         
         Exemple d'utilisation : 
         
             sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.color_special_cases_in_column(12, {'vrai': '#FF0000','faux': '#00FF00'}) 
+            sheet.color_special_cases_in_column('L', {'vrai': '#FF0000','faux': '#00FF00'}) 
 
         """
-        
+        if label == True:
+            column = column_index_from_string(column)
+
         for i in range(1,self.sheet.max_row + 1):
             cellule = self.sheet.cell(i,column) 
 
@@ -309,7 +333,7 @@ class Sheet(File,UtilsForSheet):
             - column : le numéro de la colonne.
             - chainecolor : les chaînes de caractères qui vont être colorées et les couleurs qui correspondent à écrire avec la syntaxe suivante {'vrai':'couleur1','autre':couleur2}. Attention,
                 la couleur doit être entrée en hexadécimal et les chaînes de caractères ne doivent pas avoir d'espace au début ou à la fin.
-        
+            
         Exemple d'utilisation : 
     
             sheet = Sheet('dataset.xlsx','onglet1')
@@ -318,7 +342,7 @@ class Sheet(File,UtilsForSheet):
         """
 
         for j in range(1, self.sheet.max_column + 1):
-            self.color_special_cases_in_column(j,chainecolor)
+            self.color_special_cases_in_column(j,chainecolor,label=False)
 
     def add_column_in_sheet_differently_sorted(self,column_identifiant, column_insertion, other_sheet):
         """
@@ -334,7 +358,7 @@ class Sheet(File,UtilsForSheet):
             - column_insertion : numéro de la colonne où on insère les colonnes à récupérer.
             - other_sheet : liste représentant l'onglet duquel on récupère les colonnes  ['namefile','namesheet',numéro de la colonne où sont les identifiants,[numéros des colonnes à récupérer sous forme de liste]]
                 namefile doit être au format .xlsx et mis dans le dossier fichier_xls.
-
+            
         Exemple d'utilisation : 
     
             sheet = Sheet('dataset.xlsx','onglet1')
@@ -373,7 +397,7 @@ class Sheet(File,UtilsForSheet):
         Input : 
             - color : une couleur indiquée en haxadécimal par l'utilisateur.
             - chaines : des chaines de caractères que l'utilisateur entre et qui entraînent la coloration de la ligne.
-        
+            
         Exemple d'utilisation : 
     
             sheet = Sheet('dataset.xlsx','onglet1')
@@ -394,7 +418,7 @@ class Sheet(File,UtilsForSheet):
         
         self.writebook.save(self.path + self.name_file)
 
-    def column_cut_string_in_parts(self,column_to_cut,column_insertion,separator):
+    def column_cut_string_in_parts(self,column_to_cut,column_insertion,separator, label = True):
         """
         Fonction qui prend une colonne dont chaque cellule contient une grande chaîne de
           caractères. Toutes les chaînes sont composés du nombre de morceaux délimités par un séparateur,
@@ -404,13 +428,18 @@ class Sheet(File,UtilsForSheet):
             - column_to_cut : colonne contenant les grandes str.
             - column_insertion : où insérer les colonnes
             - separator le séparateur
+            - label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
 
         Exemple d'utilisation : 
     
             sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.column_cut_string_in_parts(3, 10, ';') 
+            sheet.column_cut_string_in_parts('C', 'J', ';') 
         
         """
+
+        if label == True:
+            column_to_cut = column_index_from_string(column_to_cut) 
+            column_insertion = column_index_from_string(column_insertion)
         
         for i in range(2, self.sheet.max_row + 1):
             value = self.sheet.cell(i,column_to_cut).value
