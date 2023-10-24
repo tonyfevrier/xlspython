@@ -344,7 +344,7 @@ class Sheet(File,UtilsForSheet):
         for j in range(1, self.sheet.max_column + 1):
             self.color_special_cases_in_column(j,chainecolor,label=False)
 
-    def add_column_in_sheet_differently_sorted(self,column_identifiant, column_insertion, other_sheet):
+    def add_column_in_sheet_differently_sorted(self,column_identifiant, column_insertion, other_sheet,label = True):
         """
         Fonction qui insère dans un onglet des colonnes d'un autre onglet de référence. 
         Les deux feuilles ont une colonne d'identifiants communs (exemple : des mails) mais qui peut être
@@ -358,11 +358,12 @@ class Sheet(File,UtilsForSheet):
             - column_insertion : numéro de la colonne où on insère les colonnes à récupérer.
             - other_sheet : liste représentant l'onglet duquel on récupère les colonnes  ['namefile','namesheet',numéro de la colonne où sont les identifiants,[numéros des colonnes à récupérer sous forme de liste]]
                 namefile doit être au format .xlsx et mis dans le dossier fichier_xls.
+            - label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
             
         Exemple d'utilisation : 
     
             sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.add_column_in_sheet_differently_sorted(2,3,['file.xlsx', 'onglet2', 2, [5,6,7,8]]) 
+            sheet.add_column_in_sheet_differently_sorted('B','C',['file.xlsx', 'onglet2', 'B', ['E','F','H','AA]]) 
                   
         """
         
@@ -370,6 +371,12 @@ class Sheet(File,UtilsForSheet):
         sheet_to_copy = file_to_copy[other_sheet[1]]
         columns_to_copy = other_sheet[3]
         dico = {}
+
+        if label == True:
+            column_identifiant = column_index_from_string(column_identifiant)
+            column_insertion = column_index_from_string(column_insertion)
+            other_sheet[2] = column_index_from_string(other_sheet[2])
+            columns_to_copy = [column_index_from_string(column) for column in columns_to_copy]
 
         #Passage en revue les identifiants du premier fichier et création d'un dictionnaire dont les clés sont ces identifiants et les valeurs sont une liste de valeurs à récupérer.
         for i in range(1,sheet_to_copy.max_row + 1):

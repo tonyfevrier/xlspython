@@ -167,7 +167,12 @@ class TestSheet(TestCase):
     
     def test_add_column_in_sheet_differently_sorted(self):
         sheet1 = Sheet('test.xlsx','Feuille5') 
-        sheet1.add_column_in_sheet_differently_sorted(3,5,['test.xlsx','sheet1',3,[2,6]]) 
+        sheet1.add_column_in_sheet_differently_sorted('C','E',['test.xlsx','sheet1','C',['B','F']]) 
+        self.column_identical('test.xlsx','test.xlsx',4,5,5,5)
+        self.column_identical('test.xlsx','test.xlsx',4,5,6,6)
+        sheet1.sheet.delete_cols(5,2)
+
+        sheet1.add_column_in_sheet_differently_sorted(3,5,['test.xlsx','sheet1',3,[2,6]],label = False) 
         self.column_identical('test.xlsx','test.xlsx',4,5,5,5)
         self.column_identical('test.xlsx','test.xlsx',4,5,6,6)
         sheet1.sheet.delete_cols(5,2)
