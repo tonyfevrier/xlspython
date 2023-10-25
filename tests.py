@@ -101,7 +101,15 @@ class TestSheet(TestCase):
         self.assertEqual(sheet1.max_row,sheet2.max_row) 
         
         for i in range(2,sheet1.max_row+1 ): 
-            self.assertEqual(sheet1.cell(i,column1).value,sheet2.cell(i,column2).value) 
+            self.assertEqual(sheet1.cell(i,column1).value,sheet2.cell(i,column2).value)
+
+    def verify_sheets_identical(self, sheet1, sheet2):  
+        self.assertEqual(sheet1.sheet.max_row,sheet2.sheet.max_row)
+        self.assertEqual(sheet1.sheet.max_column,sheet2.sheet.max_column)
+
+        for i in range(1,sheet1.sheet.max_row+1):
+            for j in range(1,sheet1.sheet.max_column+1):
+                self.assertEqual(sheet1.sheet.cell(i,j).value,sheet2.sheet.cell(i,j).value) 
 
     def test_column_transform_string_in_binary(self):
         sheet = Sheet('test.xlsx','sheet1')  
@@ -201,6 +209,16 @@ class TestSheet(TestCase):
         self.column_identical('test.xlsx','test.xlsx',9,10, 4, 4)
         self.column_identical('test.xlsx','test.xlsx',9,10, 5, 5)
         self.column_identical('test.xlsx','test.xlsx',9,10, 6, 6)
+
+    def test_delete_doublons(self):
+        file = File('test_doublons.xlsx')
+        file.sauvegarde()
+
+        sheet1 = Sheet('test_doublons.xlsx','sheet1')
+        sheet2 = Sheet('test_doublons.xlsx','Feuille2')
+        sheet1.delete_doublons('C', color = True)
+        self.verify_sheets_identical(sheet1,sheet2)
+
 
 
 class TestStr(TestCase):

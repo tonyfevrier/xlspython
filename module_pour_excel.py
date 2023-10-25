@@ -479,6 +479,48 @@ class Sheet(File,UtilsForSheet):
 
         self.writebook.save(self.path + self.name_file)
 
+    def delete_doublons(self, column_identifiant, line_beggining = 2, color = False, label = True):
+        """
+        Certains participants répondent plusieurs fois. Cette fonction supprime les premières réponses
+        des participants dans ce cas. Elle ne garde que leur dernière réponse. On repère les participants
+        par leur identifiant unique donné dans colum_identifiant.
+
+        Inputs:
+            column_identifiant : str: lettre de la colonne qui contient les identifiants des participants.
+            color : boolean : True si on veut que la ligne des participants qui ont répondu plusieurs fois soit colorée dans le datasetfinal.
+        
+        Exemple d'utilisation : 
+    
+        si on ne veut pas repérer les personnes qui étaient en doublon:
+            sheet = Sheet('dataset.xlsx','onglet1')
+            sheet.delete_doublons('C')
+
+        si on veut les repérer :
+            sheet = Sheet('dataset.xlsx','onglet1')
+            sheet.delete_doublons('C', color = True)
+        """
+        if label == True:
+            column_identifiant = column_index_from_string(column_identifiant) 
+
+        participants = {} 
+
+        #On parcourt dans le sens inverse afin d'éviter que la suppression progressive impacte la position des lignes étudiées ensuite.
+        i = self.sheet.max_row 
+        while i != line_beggining:  
+            identifiant = Str(self.sheet.cell(i,column_identifiant).value).clean_string() 
+            if identifiant.chaine in participants.keys():
+                if color == True:
+                    self.color_line('0000a933', participants[identifiant.chaine])
+                self.sheet.delete_rows(i)
+                participants[identifiant.chaine] -= 1    
+            else:
+                participants[identifiant.chaine] = i 
+            i -= 1
+
+        self.writebook.save(self.path + self.name_file)
+    
+
+
 
    
       
