@@ -219,6 +219,18 @@ class TestSheet(TestCase):
         sheet1.delete_doublons('C', color = True)
         self.verify_sheets_identical(sheet1,sheet2)
 
+    def test_create_one_column_by_QCM_answer(self):
+        sheet = Sheet('test_create_one_column.xlsx','sheet1')  
+
+        sheet.create_one_column_by_QCM_answer('D','E',['OUI', 'NON'], 'Alain', 'Henri', 'Tony', 'Dulcinée') 
+        
+        self.column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 5, 5)
+        self.column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 6, 6) 
+        self.column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 7, 7) 
+        self.column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 8, 8) 
+
+        sheet.sheet.delete_cols(4,4)
+
 
 
 class TestStr(TestCase):

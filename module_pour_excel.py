@@ -519,6 +519,50 @@ class Sheet(File,UtilsForSheet):
 
         self.writebook.save(self.path + self.name_file)
     
+    def create_one_column_by_QCM_answer(self, column, column_insertion, list_string, *reponses, label = True):
+        """
+        Fonction qui regarde si des réponses sont inclus dans les cellules d'une colonne.
+        Chaque cellule contient l'ensemble des réponses au QCM du participant sous forme de str.
+        Elle regarde les cellules de column. Si une réponse est dans cette cellule, on l'indique dans la colonne
+        correspondante.
+
+        Inputs : 
+            - column :  str : la colonne avec les réponses.
+            - column_insertion : str : l'endroit où on insère les colonnes.
+            - list_string : list : liste de deux str indiquant si la réponse est présente ou non.
+            - reponses : les réponses du QCM.
+            - label : bool : True si on entre les colonnes par leurs étiquettes, False sinon.
+        
+        Exemple : 
+            sheet = Sheet('dataset.xlsx','onglet1')
+            sheet.delete_doublons('C','D', ['oui', 'non'], 'reponse1', 'reponse2', 'reponse3')
+
+        """
+ 
+        if label == True:
+            column = column_index_from_string(column) 
+            column_insertion = column_index_from_string(column_insertion) 
+
+        #on crée les colonnes pour chaque réponse
+        self.sheet.insert_cols(column_insertion,len(reponses))
+        for j in range(0,len(reponses)):
+            self.sheet.cell(1,j + column_insertion).value = reponses[j]
+
+        #on remplit les colonnes suivant que les réponses correspondantes sont ou non dans la cellule.
+        for i in range(2, self.sheet.max_row + 1):
+            for j in range(0,len(reponses)): 
+                if reponses[j] in self.sheet.cell(i,column).value:
+                    self.sheet.cell(i,j + column_insertion).value = list_string[0]
+                else:
+                    self.sheet.cell(i,j + column_insertion).value = list_string[1]
+
+        self.writebook.save(self.path + self.name_file)
+        
+
+        
+
+
+
 
 
 

@@ -343,6 +343,22 @@ Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;#Bien&nbsp;mettre&nbsp;les&nbsp;réponses&nbsp;de&nbsp;good_answers&nbsp;entre&nbsp;''.</tt></dd></dl>
 
+<dl><dt><a name="Sheet-create_one_column_by_QCM_answer"><strong>create_one_column_by_QCM_answer</strong></a>(self, column, column_insertion, list_string, *reponses, label=True)</dt><dd><tt>Fonction&nbsp;qui&nbsp;regarde&nbsp;si&nbsp;des&nbsp;réponses&nbsp;sont&nbsp;inclus&nbsp;dans&nbsp;les&nbsp;cellules&nbsp;d'une&nbsp;colonne.<br>
+Chaque&nbsp;cellule&nbsp;contient&nbsp;l'ensemble&nbsp;des&nbsp;réponses&nbsp;au&nbsp;QCM&nbsp;du&nbsp;participant&nbsp;sous&nbsp;forme&nbsp;de&nbsp;str.<br>
+Elle&nbsp;regarde&nbsp;les&nbsp;cellules&nbsp;de&nbsp;column.&nbsp;Si&nbsp;une&nbsp;réponse&nbsp;est&nbsp;dans&nbsp;cette&nbsp;cellule,&nbsp;on&nbsp;l'indique&nbsp;dans&nbsp;la&nbsp;colonne<br>
+correspondante.<br>
+&nbsp;<br>
+Inputs&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;column&nbsp;:&nbsp;&nbsp;str&nbsp;:&nbsp;la&nbsp;colonne&nbsp;avec&nbsp;les&nbsp;réponses.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;column_insertion&nbsp;:&nbsp;str&nbsp;:&nbsp;l'endroit&nbsp;où&nbsp;on&nbsp;insère&nbsp;les&nbsp;colonnes.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;list_string&nbsp;:&nbsp;list&nbsp;:&nbsp;liste&nbsp;de&nbsp;deux&nbsp;str&nbsp;indiquant&nbsp;si&nbsp;la&nbsp;réponse&nbsp;est&nbsp;présente&nbsp;ou&nbsp;non.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;reponses&nbsp;:&nbsp;les&nbsp;réponses&nbsp;du&nbsp;QCM.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;label&nbsp;:&nbsp;bool&nbsp;:&nbsp;True&nbsp;si&nbsp;on&nbsp;entre&nbsp;les&nbsp;colonnes&nbsp;par&nbsp;leurs&nbsp;étiquettes,&nbsp;False&nbsp;sinon.<br>
+&nbsp;<br>
+Exemple&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet&nbsp;=&nbsp;<a href="#Sheet">Sheet</a>('dataset.xlsx','onglet1')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-delete_doublons">delete_doublons</a>('C','D',&nbsp;['oui',&nbsp;'non'],&nbsp;'reponse1',&nbsp;'reponse2',&nbsp;'reponse3')</tt></dd></dl>
+
 <dl><dt><a name="Sheet-delete_doublons"><strong>delete_doublons</strong></a>(self, column_identifiant, line_beggining=2, color=False, label=True)</dt><dd><tt>Certains&nbsp;participants&nbsp;répondent&nbsp;plusieurs&nbsp;fois.&nbsp;Cette&nbsp;fonction&nbsp;supprime&nbsp;les&nbsp;premières&nbsp;réponses<br>
 des&nbsp;participants&nbsp;dans&nbsp;ce&nbsp;cas.&nbsp;Elle&nbsp;ne&nbsp;garde&nbsp;que&nbsp;leur&nbsp;dernière&nbsp;réponse.&nbsp;On&nbsp;repère&nbsp;les&nbsp;participants<br>
 par&nbsp;leur&nbsp;identifiant&nbsp;unique&nbsp;donné&nbsp;dans&nbsp;colum_identifiant.<br>
