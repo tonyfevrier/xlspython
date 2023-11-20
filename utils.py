@@ -226,3 +226,15 @@ class Str():
     
         conversion = str(duration)
         return conversion
+    
+class Other():
+    def reverse_dico_for_set_answer_in_group(self,dictionary):
+        """
+        Function taking a dictionary of the form {'group1':['a','b'],'group2':['c','d','e']} and returning the dictionary
+        {'a':'group1','b':'group1','c':'group2','d':'group2','e':'group2'}
+        """
+        reverse_dico = {}
+        for key, value in dictionary.items():
+            for reponse in value:
+                reverse_dico[reponse] = key
+        return reverse_dico

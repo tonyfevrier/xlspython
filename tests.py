@@ -79,7 +79,7 @@ class TestFile(TestCase):
         #on refait ce qui a été fait ci-dessus.
 """
 
-class TestSheet(TestCase):
+class TestSheet(TestCase, Other):
     def test_sheet_correctly_opened(self):
         """Ici je teste que l'attribut sheet de la classe sheet contient bien la bonne page correspondant à l'onglet.
         Pour cela, je génère la feuille via mes classes et par la préocédure habituelle et je regarde si la première colonne des deux fichiers se correspondent.""" 
@@ -136,9 +136,11 @@ class TestSheet(TestCase):
         sheet2.writebook.save(sheet2.path + 'test.xlsx') 
 
     def test_column_set_answer_in_group(self):
-        sheet = Sheet('test_column_set_answer.xlsx','sheet1') 
-        #groups_of_response = {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']}
-        groups_of_response = {}
+        sheet = Sheet('test_column_set_answer.xlsx','sheet1')  
+        
+        groups_of_response = {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']} 
+
+        """ groups_of_response = {}
         for elt in ['2','5','6']:
             groups_of_response[elt] = "group1"
         
@@ -147,7 +149,7 @@ class TestSheet(TestCase):
 
         for elt in ['1','3','4']:
             groups_of_response[elt] = "group3"
-        groups_of_response['10'] = "group4"
+        groups_of_response['10'] = "group4" """
 
         sheet.column_set_answer_in_group('B','C',groups_of_response,line_end= 16)
 
@@ -233,7 +235,7 @@ class TestSheet(TestCase):
 
 
 
-class TestStr(TestCase):
+class TestStr(TestCase, Other):
     def test_transform_string_in_binary(self):
         chaine = Str('prout') 
         
@@ -244,13 +246,11 @@ class TestStr(TestCase):
     def test_set_answer_in_group(self):
         chaine = Str(1)
         chaine2 = Str(9)
-        """
+        
         groups_of_response = {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']}
-
-        self.assertEqual(chaine.set_answer_in_group(groups_of_response), "group3")
-        self.assertEqual(chaine2.set_answer_in_group(groups_of_response), "group2")
-        """
-
+        reversed_group = self.reverse_dico_for_set_answer_in_group(groups_of_response)
+ 
+        """ 
         groups_of_response = {}
         for elt in ['2','5','6']:
             groups_of_response[elt] = "group1"
@@ -260,10 +260,10 @@ class TestStr(TestCase):
 
         for elt in ['1','3','4']:
             groups_of_response[elt] = "group3"
-        groups_of_response['10'] = "group4"
+        groups_of_response['10'] = "group4" """
         
-        self.assertEqual(chaine.set_answer_in_group(groups_of_response),"group3")
-        self.assertEqual(chaine2.set_answer_in_group(groups_of_response), "group2")
+        self.assertEqual(chaine.set_answer_in_group(reversed_group),"group3")
+        self.assertEqual(chaine2.set_answer_in_group(reversed_group), "group2")
 
 
     def test_clean_string(self):

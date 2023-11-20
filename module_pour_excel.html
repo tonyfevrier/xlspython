@@ -38,7 +38,7 @@
 <dt><font face="helvetica, arial"><a href="module_pour_excel.html#File">File</a>
 </font></dt><dd>
 <dl>
-<dt><font face="helvetica, arial"><a href="module_pour_excel.html#Sheet">Sheet</a>(<a href="module_pour_excel.html#File">File</a>, <a href="utils.html#UtilsForSheet">utils.UtilsForSheet</a>)
+<dt><font face="helvetica, arial"><a href="module_pour_excel.html#Sheet">Sheet</a>(<a href="module_pour_excel.html#File">File</a>, <a href="utils.html#UtilsForSheet">utils.UtilsForSheet</a>, <a href="utils.html#Other">utils.Other</a>)
 </font></dt></dl>
 </dd>
 </dl>
@@ -199,7 +199,7 @@ Data descriptors defined here:<br>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="Sheet">class <strong>Sheet</strong></a>(<a href="module_pour_excel.html#File">File</a>, <a href="utils.html#UtilsForSheet">utils.UtilsForSheet</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="Sheet">class <strong>Sheet</strong></a>(<a href="module_pour_excel.html#File">File</a>, <a href="utils.html#UtilsForSheet">utils.UtilsForSheet</a>, <a href="utils.html#Other">utils.Other</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan=2><tt><a href="#Sheet">Sheet</a>(name_file,&nbsp;name_onglet,&nbsp;path='fichiers_xls/')<br>
@@ -211,6 +211,7 @@ Data descriptors defined here:<br>
 <dd><a href="module_pour_excel.html#File">File</a></dd>
 <dd><a href="utils.html#UtilsForFile">utils.UtilsForFile</a></dd>
 <dd><a href="utils.html#UtilsForSheet">utils.UtilsForSheet</a></dd>
+<dd><a href="utils.html#Other">utils.Other</a></dd>
 <dd><a href="builtins.html#object">builtins.object</a></dd>
 </dl>
 <hr>
@@ -304,12 +305,12 @@ Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-column_cut_string_in_parts">column_cut_string_in_parts</a>('C',&nbsp;'J',&nbsp;';')</tt></dd></dl>
 
 <dl><dt><a name="Sheet-column_set_answer_in_group"><strong>column_set_answer_in_group</strong></a>(self, column_read, column_write, groups_of_responses, line_beginning=2, line_end=100, insert=True, security=True, label=True)</dt><dd><tt>Dans&nbsp;le&nbsp;cas&nbsp;où&nbsp;il&nbsp;y&nbsp;a&nbsp;des&nbsp;groupes&nbsp;de&nbsp;réponses,&nbsp;cette&nbsp;fonction&nbsp;qui&nbsp;prend&nbsp;une&nbsp;colonne&nbsp;de&nbsp;chaîne&nbsp;de&nbsp;caractères&nbsp;<br>
-et&nbsp;qui&nbsp;renvoie&nbsp;une&nbsp;colonne&nbsp;remplie&nbsp;de&nbsp;chaînes&nbsp;contenant&nbsp;les&nbsp;groupes&nbsp;associés.<br>
+et&nbsp;qui&nbsp;renvoie&nbsp;une&nbsp;colonne&nbsp;remplie&nbsp;de&nbsp;chaînes&nbsp;contenant&nbsp;pour&nbsp;chaque&nbsp;cellule&nbsp;le&nbsp;groupe&nbsp;associé.<br>
 L'utilisateur&nbsp;doit&nbsp;indiquer&nbsp;un&nbsp;numéro&nbsp;de&nbsp;colonne&nbsp;de&nbsp;lecture&nbsp;et&nbsp;un&nbsp;numéro&nbsp;de&nbsp;colonne&nbsp;où&nbsp;écrire.<br>
 &nbsp;<br>
 Input&nbsp;:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_read&nbsp;:&nbsp;l'étiquette&nbsp;de&nbsp;la&nbsp;colonne&nbsp;de&nbsp;lecture&nbsp;des&nbsp;réponses.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;colum_write&nbsp;:&nbsp;l'étiquette&nbsp;de&nbsp;la&nbsp;colonne&nbsp;d'écriture&nbsp;des&nbsp;0&nbsp;et&nbsp;1.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;colum_write&nbsp;:&nbsp;l'étiquette&nbsp;de&nbsp;la&nbsp;colonne&nbsp;d'écriture.&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;groups_of_response&nbsp;:&nbsp;dictionnary&nbsp;which&nbsp;keys&nbsp;are&nbsp;response&nbsp;groups&nbsp;and&nbsp;which&nbsp;values&nbsp;are&nbsp;a&nbsp;list&nbsp;of&nbsp;responses&nbsp;<br>
 associated&nbsp;to&nbsp;this&nbsp;group.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;line_beggining,&nbsp;line_end&nbsp;:&nbsp;(paramètres&nbsp;optionnels&nbsp;par&nbsp;défaut&nbsp;égaux&nbsp;à&nbsp;2&nbsp;et&nbsp;100)&nbsp;intervalle&nbsp;de&nbsp;ligne&nbsp;dans&nbsp;lequel&nbsp;l'utilisateur&nbsp;veut&nbsp;appliquer&nbsp;sa&nbsp;transformation<br>
@@ -321,7 +322,7 @@ Output&nbsp;:&nbsp;rien&nbsp;sauf&nbsp;si&nbsp;la&nbsp;security&nbsp;est&nbsp;en
 Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;sheet&nbsp;=&nbsp;<a href="#Sheet">Sheet</a>('dataset.xlsx','onglet1')<br>
-&nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-column_set_answer_in_group">column_set_answer_in_group</a>('A',&nbsp;'B',&nbsp;{'groupe1':[1,4,3],'groupe2':[5,2]}&nbsp;,line_beggining&nbsp;=&nbsp;3,line_end&nbsp;=&nbsp;1600)</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-column_set_answer_in_group">column_set_answer_in_group</a>('A',&nbsp;'B',&nbsp;{"group1":['2','5','6'],&nbsp;"group2":['7','8','9'],&nbsp;"group3":['1','3','4'],&nbsp;"group4":['10']}&nbsp;,line_beggining&nbsp;=&nbsp;3,line_end&nbsp;=&nbsp;1600)</tt></dd></dl>
 
 <dl><dt><a name="Sheet-column_transform_string_in_binary"><strong>column_transform_string_in_binary</strong></a>(self, column_read, column_write, *good_answers, line_beginning=2, line_end=100, insert=True, security=True, label=True)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;une&nbsp;colonne&nbsp;de&nbsp;chaîne&nbsp;de&nbsp;caractères&nbsp;et&nbsp;qui&nbsp;renvoie&nbsp;une&nbsp;colonne&nbsp;de&nbsp;0&nbsp;ou&nbsp;de&nbsp;1<br>
 L'utilisateur&nbsp;doit&nbsp;indiquer&nbsp;un&nbsp;numéro&nbsp;de&nbsp;colonne&nbsp;de&nbsp;lecture&nbsp;et&nbsp;un&nbsp;numéro&nbsp;de&nbsp;colonne&nbsp;où&nbsp;mettre&nbsp;les&nbsp;0&nbsp;ou&nbsp;1.<br>
@@ -343,8 +344,8 @@ Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;#Bien&nbsp;mettre&nbsp;les&nbsp;réponses&nbsp;de&nbsp;good_answers&nbsp;entre&nbsp;''.</tt></dd></dl>
 
-<dl><dt><a name="Sheet-create_one_column_by_QCM_answer"><strong>create_one_column_by_QCM_answer</strong></a>(self, column, column_insertion, list_string, *reponses, label=True)</dt><dd><tt>Fonction&nbsp;qui&nbsp;regarde&nbsp;si&nbsp;des&nbsp;réponses&nbsp;sont&nbsp;inclus&nbsp;dans&nbsp;les&nbsp;cellules&nbsp;d'une&nbsp;colonne.<br>
-Chaque&nbsp;cellule&nbsp;contient&nbsp;l'ensemble&nbsp;des&nbsp;réponses&nbsp;au&nbsp;QCM&nbsp;du&nbsp;participant&nbsp;sous&nbsp;forme&nbsp;de&nbsp;str.<br>
+<dl><dt><a name="Sheet-create_one_column_by_QCM_answer"><strong>create_one_column_by_QCM_answer</strong></a>(self, column, column_insertion, list_string, *reponses, label=True)</dt><dd><tt>Fonction&nbsp;qui&nbsp;regarde&nbsp;si&nbsp;des&nbsp;réponses&nbsp;sont&nbsp;incluses&nbsp;dans&nbsp;les&nbsp;cellules&nbsp;d'une&nbsp;colonne.<br>
+Chaque&nbsp;cellule&nbsp;contient&nbsp;l'ensemble&nbsp;des&nbsp;réponses&nbsp;à&nbsp;une&nbsp;question&nbsp;de&nbsp;QCM&nbsp;du&nbsp;participant&nbsp;sous&nbsp;forme&nbsp;de&nbsp;str.<br>
 Elle&nbsp;regarde&nbsp;les&nbsp;cellules&nbsp;de&nbsp;column.&nbsp;Si&nbsp;une&nbsp;réponse&nbsp;est&nbsp;dans&nbsp;cette&nbsp;cellule,&nbsp;on&nbsp;l'indique&nbsp;dans&nbsp;la&nbsp;colonne<br>
 correspondante.<br>
 &nbsp;<br>
@@ -357,7 +358,7 @@ Inputs&nbsp;:&nbsp;<br>
 &nbsp;<br>
 Exemple&nbsp;:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;sheet&nbsp;=&nbsp;<a href="#Sheet">Sheet</a>('dataset.xlsx','onglet1')<br>
-&nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-delete_doublons">delete_doublons</a>('C','D',&nbsp;['oui',&nbsp;'non'],&nbsp;'reponse1',&nbsp;'reponse2',&nbsp;'reponse3')</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-create_one_column_by_QCM_answer">create_one_column_by_QCM_answer</a>('C','D',&nbsp;['oui',&nbsp;'non'],&nbsp;'reponse1',&nbsp;'reponse2',&nbsp;'reponse3')</tt></dd></dl>
 
 <dl><dt><a name="Sheet-delete_doublons"><strong>delete_doublons</strong></a>(self, column_identifiant, line_beggining=2, color=False, label=True)</dt><dd><tt>Certains&nbsp;participants&nbsp;répondent&nbsp;plusieurs&nbsp;fois.&nbsp;Cette&nbsp;fonction&nbsp;supprime&nbsp;les&nbsp;premières&nbsp;réponses<br>
 des&nbsp;participants&nbsp;dans&nbsp;ce&nbsp;cas.&nbsp;Elle&nbsp;ne&nbsp;garde&nbsp;que&nbsp;leur&nbsp;dernière&nbsp;réponse.&nbsp;On&nbsp;repère&nbsp;les&nbsp;participants<br>
@@ -524,6 +525,11 @@ Inputs&nbsp;:<br>
 &nbsp;<br>
 Output&nbsp;:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;dico&nbsp;:&nbsp;dictionary.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="utils.html#Other">utils.Other</a>:<br>
+<dl><dt><a name="Sheet-reverse_dico_for_set_answer_in_group"><strong>reverse_dico_for_set_answer_in_group</strong></a>(self, dictionary)</dt><dd><tt>Function&nbsp;taking&nbsp;a&nbsp;dictionary&nbsp;of&nbsp;the&nbsp;form&nbsp;{'group1':['a','b'],'group2':['c','d','e']}&nbsp;and&nbsp;returning&nbsp;the&nbsp;dictionary<br>
+{'a':'group1','b':'group1','c':'group2','d':'group2','e':'group2'}</tt></dd></dl>
 
 </td></tr></table></td></tr></table>
 </body></html>

@@ -5,7 +5,7 @@ from openpyxl.styles import PatternFill
 from openpyxl.utils import column_index_from_string
 from copy import copy
 from datetime import date, datetime
-from utils import UtilsForFile, UtilsForSheet, Str
+from utils import UtilsForFile, UtilsForSheet, Str, Other
 
 class Path():
     def __init__(self,path = 'fichiers_xls/'):
@@ -165,7 +165,7 @@ class File(UtilsForFile):
 
 
 
-class Sheet(File,UtilsForSheet): 
+class Sheet(File,UtilsForSheet,Other): 
     def __init__(self, name_file, name_onglet,path = 'fichiers_xls/'): 
         super().__init__(name_file,path)
         self.name_onglet = name_onglet  
@@ -254,12 +254,12 @@ class Sheet(File,UtilsForSheet):
     def column_set_answer_in_group(self,column_read,column_write,groups_of_responses,line_beginning = 2, line_end = 100, insert = True, security = True, label = True):
         """
         Dans le cas où il y a des groupes de réponses, cette fonction qui prend une colonne de chaîne de caractères 
-        et qui renvoie une colonne remplie de chaînes contenant les groupes associés.
+        et qui renvoie une colonne remplie de chaînes contenant pour chaque cellule le groupe associé.
         L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où écrire.
 
         Input : 
                 column_read : l'étiquette de la colonne de lecture des réponses.
-                colum_write : l'étiquette de la colonne d'écriture des 0 et 1. 
+                colum_write : l'étiquette de la colonne d'écriture. 
                 groups_of_response : dictionnary which keys are response groups and which values are a list of responses 
         associated to this group.
                 line_beggining, line_end : (paramètres optionnels par défaut égaux à 2 et 100) intervalle de ligne dans lequel l'utilisateur veut appliquer sa transformation
@@ -271,7 +271,7 @@ class Sheet(File,UtilsForSheet):
         Exemple d'utilisation : 
         
             sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.column_set_answer_in_group('A', 'B', {'groupe1':[1,4,3],'groupe2':[5,2]} ,line_beggining = 3,line_end = 1600) 
+            sheet.column_set_answer_in_group('A', 'B', {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']} ,line_beggining = 3,line_end = 1600) 
 
         """
         if label == True:
@@ -286,9 +286,11 @@ class Sheet(File,UtilsForSheet):
         if insert == True:
             self.sheet.insert_cols(column_write)
 
+        reversed_group_of_responses = self.reverse_dico_for_set_answer_in_group(groups_of_responses)
+
         for i in range(line_beginning,line_end): 
             chaine_object = Str(self.sheet.cell(i,column_read).value)  
-            group = chaine_object.clean_string().set_answer_in_group(groups_of_responses) 
+            group = chaine_object.clean_string().set_answer_in_group(reversed_group_of_responses) 
             self.sheet.cell(i,column_write).value = group
             
         self.writebook.save(self.path + self.name_file)
@@ -521,8 +523,8 @@ class Sheet(File,UtilsForSheet):
     
     def create_one_column_by_QCM_answer(self, column, column_insertion, list_string, *reponses, label = True):
         """
-        Fonction qui regarde si des réponses sont inclus dans les cellules d'une colonne.
-        Chaque cellule contient l'ensemble des réponses au QCM du participant sous forme de str.
+        Fonction qui regarde si des réponses sont incluses dans les cellules d'une colonne.
+        Chaque cellule contient l'ensemble des réponses à une question de QCM du participant sous forme de str.
         Elle regarde les cellules de column. Si une réponse est dans cette cellule, on l'indique dans la colonne
         correspondante.
 
@@ -535,7 +537,7 @@ class Sheet(File,UtilsForSheet):
         
         Exemple : 
             sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.delete_doublons('C','D', ['oui', 'non'], 'reponse1', 'reponse2', 'reponse3')
+            sheet.create_one_column_by_QCM_answer('C','D', ['oui', 'non'], 'reponse1', 'reponse2', 'reponse3')
 
         """
  
@@ -550,11 +552,15 @@ class Sheet(File,UtilsForSheet):
 
         #on remplit les colonnes suivant que les réponses correspondantes sont ou non dans la cellule.
         for i in range(2, self.sheet.max_row + 1):
-            for j in range(0,len(reponses)): 
-                if reponses[j] in self.sheet.cell(i,column).value:
-                    self.sheet.cell(i,j + column_insertion).value = list_string[0]
-                else:
-                    self.sheet.cell(i,j + column_insertion).value = list_string[1]
+            if self.sheet.cell(i,column).value == None:
+                for j in range(0,len(reponses)):  
+                        self.sheet.cell(i,j + column_insertion).value = list_string[1]
+            else:
+                for j in range(0,len(reponses)):  
+                    if reponses[j] in self.sheet.cell(i,column).value:
+                        self.sheet.cell(i,j + column_insertion).value = list_string[0]
+                    else:
+                        self.sheet.cell(i,j + column_insertion).value = list_string[1]
 
         self.writebook.save(self.path + self.name_file)
         
