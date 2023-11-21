@@ -61,8 +61,8 @@ class File(UtilsForFile):
 
     def create_one_onglet_by_participant(self, onglet_from, column_read, first_line=2, label=True ):
         """
-        Fonction qui prend un onglet dont une colonne contient des chaînes de caractères.
-        Chaque chaîne de caractères peut apparaître plusieurs fois dans cette colonne. 
+        Fonction qui prend un onglet dont une colonne contient des chaînes de caractères comme par exemple un nom.
+        Chaque chaîne de caractères peut apparaître plusieurs fois dans cette colonne (exe : quand un participant répond plusieurs fois)
         La fonction retourne un fichier contenant un onglet par chaîne de caractères.
           Chaque onglet contient toutes les lignes correspondant à cette chaîne de caractères.
 
@@ -80,8 +80,8 @@ class File(UtilsForFile):
         """
     
         if label == True:
-            column_read = column_index_from_string(column_read) 
-
+            column_read = column_index_from_string(column_read)  
+            
         onglets = []
         sheet = self.writebook[onglet_from] 
 
