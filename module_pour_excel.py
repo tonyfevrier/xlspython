@@ -172,7 +172,7 @@ class Sheet(File,UtilsForSheet,Other):
         self.sheet = self.writebook[self.name_onglet]
         del self.sheets_name
 
-    def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2, line_end = 100, insert = True, security = True,label = True):
+    def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2, insert = True, security = True,label = True):
         """
         Fonction qui prend une colonne de chaîne de caractères et qui renvoie une colonne de 0 ou de 1
         L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où mettre les 0 ou 1.
@@ -181,7 +181,7 @@ class Sheet(File,UtilsForSheet,Other):
                 column_read : l'étiquette de la colonne de lecture des réponses.
                 colum_write : l'étiquette de la colonne d'écriture des 0 et 1. Par défaut, une colonne est insérée à cette position.
                 good_answers : une séquence d'un nombre quelconque de bonnes réponses qui valent 1pt. Chaque mot ne doit pas contenir d'espace ni au début ni à la fin.
-                line_beggining, line_end : (paramètres optionnels par défaut égaux à 2 et 100) intervalle de ligne dans lequel l'utilisateur veut appliquer sa transformation
+                line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction.
                 insert : (paramètre optionnel) le mettre à False si on ne veut pas insérer une colonne.
                 label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
 
@@ -190,7 +190,7 @@ class Sheet(File,UtilsForSheet,Other):
         Exemple d'utilisation : 
         
             sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.column_transform_string_in_binary('A','B','reponse1','reponse2',line_end = 1600) 
+            sheet.column_transform_string_in_binary('A','B','reponse1','reponse2') 
 
             #Bien mettre les réponses de good_answers entre ''. 
         """  
@@ -206,21 +206,21 @@ class Sheet(File,UtilsForSheet,Other):
         if insert == True:
             self.sheet.insert_cols(column_write)
 
-        for i in range(line_beginning,line_end):
+        for i in range(line_beginning, self.sheet.max_row + 1):
             chaine_object = Str(self.sheet.cell(i,column_read).value)  
             bool = chaine_object.clean_string().transform_string_in_binary(*good_answers) 
             self.sheet.cell(i,column_write).value = bool
  
         self.writebook.save(self.path + self.name_file)
 
-    def column_convert_in_minutes(self,column_read,column_write,line_beginning = 2, line_end = 100, insert = True, security = True,label = True):
+    def column_convert_in_minutes(self,column_read,column_write,line_beginning = 2, insert = True, security = True,label = True):
         """
         Fonction qui prend une colonne de chaines de caractères de la forme "10 jour 5 heures" 
         ou "5 heures 10 min" ou "10 min 5s" ou "5s" et qui renvoie le temps en minutes.
         L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne à remplir.
         Input : column_read : l'étiquette de la colonne de lecture des réponses.
                 colum_write : l'étiquette de la colonne d'écriture. 
-                line_beggining, line_end : (optionnel par défaut égaux à 2 et 100) intervalle de ligne dans lequel l'utilisateur veut appliquer sa transformation
+                line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction.
                 insert : (paramètre optionnel) le mettre à False si on ne veut pas insérer une colonne.
                 label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
 
@@ -229,7 +229,7 @@ class Sheet(File,UtilsForSheet,Other):
         Exemple d'utilisation : 
         
             sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.column_convert_in_minutes('A','B',line_beggining = 3,line_end = 1600) 
+            sheet.column_convert_in_minutes('A','B',line_beggining = 3) 
 
         """
         if label == True:
@@ -244,14 +244,14 @@ class Sheet(File,UtilsForSheet,Other):
         if insert == True:
             self.sheet.insert_cols(column_write)
 
-        for i in range(line_beginning,line_end):
+        for i in range(line_beginning,self.sheet.max_row + 1):
             chaine_object = Str(self.sheet.cell(i,column_read).value)  
             bool = chaine_object.clean_string().convert_time_in_minutes() 
             self.sheet.cell(i,column_write).value = bool
  
         self.writebook.save(self.path + self.name_file)
 
-    def column_set_answer_in_group(self,column_read,column_write,groups_of_responses,line_beginning = 2, line_end = 100, insert = True, security = True, label = True):
+    def column_set_answer_in_group(self,column_read,column_write,groups_of_responses,line_beginning = 2, insert = True, security = True, label = True):
         """
         Dans le cas où il y a des groupes de réponses, cette fonction qui prend une colonne de chaîne de caractères 
         et qui renvoie une colonne remplie de chaînes contenant pour chaque cellule le groupe associé.
@@ -262,7 +262,7 @@ class Sheet(File,UtilsForSheet,Other):
                 colum_write : l'étiquette de la colonne d'écriture. 
                 groups_of_response : dictionnary which keys are response groups and which values are a list of responses 
         associated to this group.
-                line_beggining, line_end : (paramètres optionnels par défaut égaux à 2 et 100) intervalle de ligne dans lequel l'utilisateur veut appliquer sa transformation
+                line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction.
                 insert : (paramètre optionnel) le mettre à False si on ne veut pas insérer une colonne.
                 label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
 
@@ -271,7 +271,7 @@ class Sheet(File,UtilsForSheet,Other):
         Exemple d'utilisation : 
         
             sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.column_set_answer_in_group('A', 'B', {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']} ,line_beggining = 3,line_end = 1600) 
+            sheet.column_set_answer_in_group('A', 'B', {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']} ,line_beggining = 3) 
 
         """
         if label == True:
@@ -288,7 +288,7 @@ class Sheet(File,UtilsForSheet,Other):
 
         reversed_group_of_responses = self.reverse_dico_for_set_answer_in_group(groups_of_responses)
 
-        for i in range(line_beginning,line_end): 
+        for i in range(line_beginning,self.sheet.max_row + 1): 
             chaine_object = Str(self.sheet.cell(i,column_read).value)  
             group = chaine_object.clean_string().set_answer_in_group(reversed_group_of_responses) 
             self.sheet.cell(i,column_write).value = group

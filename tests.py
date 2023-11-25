@@ -114,23 +114,23 @@ class TestSheet(TestCase, Other):
     def test_column_transform_string_in_binary(self):
         sheet = Sheet('test.xlsx','sheet1')  
 
-        sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',line_end= 15,security=False,insert=False,label = False)
+        sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',security=False,insert=False,label = False)
         self.column_identical('test.xlsx','test_generated.xlsx',0,0, 13, 13) 
-        sheet.column_transform_string_in_binary('L','M','partie 1 : Vrai',line_end= 15,security=False,insert=False)
+        sheet.column_transform_string_in_binary('L','M','partie 1 : Vrai',security=False,insert=False)
         self.column_identical('test.xlsx','test_generated.xlsx',0,0, 13, 13) 
-        sheet.column_transform_string_in_binary(14,15,'partie 2 : Vrai',line_end= 15,security=False,insert=False,label = False)
+        sheet.column_transform_string_in_binary(14,15,'partie 2 : Vrai',security=False,insert=False,label = False)
         self.column_identical('test.xlsx','test_generated.xlsx',0,0, 15, 15) 
-        sheet.column_transform_string_in_binary(16,17,'partie 3 : Vrai',line_end= 15,security=False,insert=False,label = False)
+        sheet.column_transform_string_in_binary(16,17,'partie 3 : Vrai',security=False,insert=False,label = False)
         self.column_identical('test.xlsx','test_generated.xlsx',0,0, 17, 17)
-        sheet.column_transform_string_in_binary(41,42,'Laser Interferometer Gravitational-Wave Observatory(LIGO)','virgo','Virgo',line_end= 15,security=False,insert=False,label = False)
+        sheet.column_transform_string_in_binary(41,42,'Laser Interferometer Gravitational-Wave Observatory(LIGO)','virgo','Virgo',security=False,insert=False,label = False)
         self.column_identical('test.xlsx','test_generated.xlsx',0,0, 42, 42)
 
-        self.assertEqual(type(sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',line_end= 15,insert=False,label=False)),str)
-        self.assertEqual(type(sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',line_end= 15,security=False,insert=False,label=False)),type(None))
+        self.assertEqual(type(sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',insert=False,label=False)),str)
+        self.assertEqual(type(sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',security=False,insert=False,label=False)),type(None))
 
         sheet2 = Sheet('test.xlsx', 'Feuille2')
          
-        sheet2.column_transform_string_in_binary(6,7,'partie 12 : Faux',1,line_end= 15,label = False)
+        sheet2.column_transform_string_in_binary(6,7,'partie 12 : Faux',1,label = False)
         self.column_identical('test.xlsx','test.xlsx', 1, 1, 7,8)
         sheet2.sheet.delete_cols(7) #sinon à chaque lancement de test.py il insère une colonne en plus.
         sheet2.writebook.save(sheet2.path + 'test.xlsx') 
@@ -151,7 +151,7 @@ class TestSheet(TestCase, Other):
             groups_of_response[elt] = "group3"
         groups_of_response['10'] = "group4" """
 
-        sheet.column_set_answer_in_group('B','C',groups_of_response,line_end= 16)
+        sheet.column_set_answer_in_group('B','C',groups_of_response)
 
         self.column_identical('test_column_set_answer.xlsx','test_column_set_answer.xlsx',0,1,3,3)
 

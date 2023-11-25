@@ -80,7 +80,7 @@ Pour la programmation par classe, la logique voudrait une classe File parent, un
     FAIT : Mettre toutes les micro fonctions utilisées dans Sheet dans un fichier à part qu'on importe pour ne garder que les grosses fonctions de la classe Sheet qui font les gros changements.
     FAIT : Fonction qui prend pleins d'onglets de structure identiques et qui copie une même colonne choisie dans chaque onglet (ou dans un sous ensemble d'onglets) dans une nouvelle feuille en mettant le numéro de l'onglet en haut.
     FAIT : Modifier les fonctions afin d'injecter non pas le numéro de la colonne mais la lettre. Traitement particulier à réserver à addsheetdifferentlysorted, revoir la façon dont je transmets l'autre fichier.
-    Fonction qui prend une feuille avec une colonne où des partcpts ont pu répondre plusieurs fois et qui met dans une feuille ceux qui ont répondu plusieurs fois avec des colonnes contenant la valeur d'une cellule donnée lors des différentes réponses (exemple : le temps de réponse lors des différentes réponses).
+    FAIT : Fonction qui prend une feuille avec une colonne où des partcpts ont pu répondre plusieurs fois et qui met dans une feuille ceux qui ont répondu plusieurs fois avec des colonnes contenant la valeur d'une cellule donnée lors des différentes réponses (exemple : le temps de réponse lors des différentes réponses).
     Ajouter des exemples avec label=False dans les docstrings.
     Fonction qui prend pleins d'onglets et qui copie les formules d'une colonne (H par exemple) créée dans un onglet (le premier) pour la reproduire sur toutes les colonnes H des autres onglets.
     FAIT:Voir comment générer automatiquement une doc à partir de mes docstrings.
