@@ -5,9 +5,22 @@ from typing_extensions import Annotated
 
 """ 
 Enlever to les lineend qui ne servent à rien en argument avec maxrow+1
+Ajouter un décorateur qui donne la docstring de la fonction avant qu'on ne demande les arguments à remplir.
+
+def docwrapper(func):
+    def wrapper(*args, **kwargs): 
+        print(func.__doc__)
+        return func(*args,**kwargs)
+    return wrapper
 """
 
+
+def docstring_and_execute(command_function):
+    print(command_function.__doc__)
+    command_function()
+
 app = typer.Typer()
+
 
 @app.command()
 def filesave(file : Annotated[str, typer.Option(prompt = 'Enter the file you want to save ')]):
@@ -20,10 +33,11 @@ def filesave(file : Annotated[str, typer.Option(prompt = 'Enter the file you wan
     fileobject.sauvegarde()
 
 
+
 @app.command()
 def multipletabs(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
                  tab : Annotated[str, typer.Option(prompt = 'Enter the sheet name ')],
-                 column_read : Annotated[str, typer.Option(prompt = 'Enter the column containing strings ')],
+                 column_read : Annotated[str, typer.Option(prompt = 'Enter the column letter containing strings ')],
                  line : Annotated[Optional[str], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
     """
     Fonction agissant sur un fichier.
@@ -36,16 +50,40 @@ def multipletabs(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
     
 
 @app.command()
-def extractcolsheets():
+def extractcolsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
+                     column_read : Annotated[str, typer.Option(prompt = 'Enter the column letter ')]
+                    ):
     """
     Fonction agissant sur un fichier.
+
+    Fonction qui récupère une même colonne dans chaque onglet pour former une nouvelle feuille contenant toutes les colonnes.
+    La première cellule de chaque colonne correspond alors au nom de l'onglet.
     """
-    pass
+    fileobject = File(file) 
+    fileobject.extract_column_from_all_sheets(column_read)
     
 @app.command()
 def formulaonsheets():
     """
     Fonction agissant sur un fichier.
+
+    Fonction qui reproduit les formules d'une colonne ou plusieurs colonnes
+          du premier onglet sur toutes les colonnes situées à la même position dans les 
+          autres onglets.
+
+        Input : 
+            -column_list : int. les positions des colonnes où récupérer et coller.
+
+        Exemples d'utilisation : 
+
+            Bien veiller à mettre dataonly = False sinon il ne copiera pas les formules mais
+            les valeurs des cellules. On peut aussi copier les valeurs des cellules : pour cela,
+            enlever dataonly = False
+
+            Sur une colonne
+                file = File('dataset.xlsx', dataonly = False)
+                file.apply_column_formula_on_all_sheets(2) 
+ 
     """
     pass
 

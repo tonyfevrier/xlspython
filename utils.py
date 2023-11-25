@@ -98,6 +98,45 @@ class UtilsForSheet():
             if key != "":
                 dico[key] = self.sheet.cell(i,column_values).value
         return dico
+    
+    def create_dico_to_store_multiple_answers_of_participants(self,column_read, column_store, line_beggining):
+        """
+        Fonction qui parcourt les identifiants d'un fichier et qui crée un dictionnaire contenant le nombre de réponses de chaque participant
+        et les valeurs d'une même donnée lors des différentes réponses.
+
+        Inputs : 
+            - column_read (str) : la colonne avec les identifiants des participants.
+            - column_store (str) : lettre de la colonne contenant la donnée qu'on veut stocker.
+            - line_beggining (int) : ligne où débute la recherche. 
+        """
+        dico = {}
+        for line in range(line_beggining,self.sheet.max_row + 1):
+            identifier = self.sheet.cell(line,column_read).value
+            value_to_store = self.sheet.cell(line,column_store).value 
+            if identifier in dico.keys():
+                dico[identifier][0] += 1
+                dico[identifier][1].append(value_to_store)
+            else: 
+                dico[identifier] = [1, [value_to_store]]
+        return dico
+    
+    def create_newsheet_storing_multiple_answers(self,storesheet,dico):
+        """
+        Fonction qui prend un dico issu de la fonction create_dico_to_store_multiple_answers_of_participants et qui crée une feuille 
+        présentant les participants ayant répondu plusieurs fois et les valeurs de la donnée stockée lors des différentes réponses.
+
+        Inputs:
+            - storesheet (openpyxl sheet) : feuille de stockage.
+            - dico (dict) : issu de create_dico_to_store_multiple_answers_of_participants.
+        """
+        storesheet.cell(1,1).value = 'Identifiers'
+        
+        for key,list in dico.items(): 
+            if list[0] >= 2:
+                firstline = storesheet.max_row + 1
+                storesheet.cell(firstline, 1).value = key
+                for i in range(len(list[1])):
+                    storesheet.cell(firstline, i+2).value = list[1][i]
 
 
 

@@ -214,7 +214,6 @@ class TestSheet(TestCase, Other):
 
     def test_delete_doublons(self):
         file = File('test_doublons.xlsx')
-        file.sauvegarde()
 
         sheet1 = Sheet('test_doublons.xlsx','sheet1')
         sheet2 = Sheet('test_doublons.xlsx','Feuille2')
@@ -233,6 +232,15 @@ class TestSheet(TestCase, Other):
 
         sheet.sheet.delete_cols(4,4)
 
+    def test_gather_multiple_answers(self):
+        sheet = Sheet('testongletbyparticipant.xlsx','test')  
+        sheet.gather_multiple_answers('A','B')
+
+        self.verify_sheets_identical(Sheet('testongletbyparticipant.xlsx','severalAnswers'),Sheet('testongletbyparticipant-result.xlsx','Feuille2') )
+        file = File('testongletbyparticipant.xlsx')
+        
+        del file.writebook[file.sheets_name[-1]]
+        file.writebook.save(file.path + 'testongletbyparticipant.xlsx')
 
 
 class TestStr(TestCase, Other):

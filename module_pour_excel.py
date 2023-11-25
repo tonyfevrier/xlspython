@@ -81,7 +81,7 @@ class File(UtilsForFile):
     
         if label == True:
             column_read = column_index_from_string(column_read)  
-            
+
         onglets = []
         sheet = self.writebook[onglet_from] 
 
@@ -564,6 +564,31 @@ class Sheet(File,UtilsForSheet,Other):
 
         self.writebook.save(self.path + self.name_file)
         
+    def gather_multiple_answers(self, column_read, column_store, line_beggining = 2, label = True):
+        """
+        Dans un onglet, nous avons les réponses de participants qui ont pu répondre plusieurs fois à un questionnaire.
+        Cette fonction parcourt les noms et met dans un autre onglet. La ligne du participant est alors constituée des différentes valeurs
+         d'une même donnée récupérée.
+        
+        Inputs :
+            - column_read (str) : la colonne avec les identifiants des participants.
+            - column_store (str) : lettre de la colonne contenant la donnée qu'on veut stocker.
+            - line_beggining (int) : ligne où débute la recherche.
+            - label (bool) : False si on veut entrer le numéro de la colonne et pas la lettre.
+        """ 
+        if label == True:
+            column_read = column_index_from_string(column_read) 
+            column_store = column_index_from_string(column_store) 
+
+        #we create a dictionary whose keys are the identifiers (of participants) and values are their number of answers and a list containing
+        #the data we want to store for each answer.
+        dico = self.create_dico_to_store_multiple_answers_of_participants(column_read,column_store,line_beggining)
+        
+        #we create the new sheet where we store participants answering multiple times and their data.
+        storesheet = self.writebook.create_sheet('severalAnswers')
+        self.create_newsheet_storing_multiple_answers(storesheet, dico)
+
+        self.writebook.save(self.path + self.name_file) 
 
         
 
