@@ -301,7 +301,7 @@ class Sheet(File,UtilsForSheet,Other):
 
         Input : 
             - column : le numéro de la colonne.
-            - chainecolor : les chaînes de caractères qui vont être colorées et les couleurs qui correspondent à écrire avec la syntaxe suivante {'vrai':'couleur1','autre':couleur2}. Attention,
+            - chainecolor (dict) : les chaînes de caractères qui vont être colorées et les couleurs qui correspondent à écrire avec la syntaxe suivante {'vrai':'couleur1','autre':couleur2}. Attention,
                 la couleur doit être entrée en hexadécimal et les chaînes de caractères ne doivent pas avoir d'espace au début ou à la fin.
             - label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
         
@@ -333,7 +333,7 @@ class Sheet(File,UtilsForSheet,Other):
         
         Input : 
             - column : le numéro de la colonne.
-            - chainecolor : les chaînes de caractères qui vont être colorées et les couleurs qui correspondent à écrire avec la syntaxe suivante {'vrai':'couleur1','autre':couleur2}. Attention,
+            - chainecolor (dict) : les chaînes de caractères qui vont être colorées et les couleurs qui correspondent à écrire avec la syntaxe suivante {'vrai':'couleur1','autre':couleur2}. Attention,
                 la couleur doit être entrée en hexadécimal et les chaînes de caractères ne doivent pas avoir d'espace au début ou à la fin.
             
         Exemple d'utilisation : 
@@ -418,7 +418,7 @@ class Sheet(File,UtilsForSheet,Other):
 
         for i in range(1, self.sheet.max_row + 1):
             for j in range(1, self.sheet.max_column + 1):
-                if self.sheet.cell(i,j).value in chaines:
+                if str(self.sheet.cell(i,j).value) in chaines:
                     lines_to_color.append(i)
                     break
         
@@ -461,7 +461,7 @@ class Sheet(File,UtilsForSheet,Other):
 
         self.writebook.save(self.path + self.name_file) 
 
-    def delete_lines(self,column,*chaines):
+    def delete_lines(self,column,*chaines,label = True):
         """
         Fonction qui parcourt une colonne et qui supprime la ligne si celle-ci contient une chaîne particulière.
 
@@ -474,14 +474,16 @@ class Sheet(File,UtilsForSheet,Other):
             sheet = Sheet('dataset.xlsx','onglet1')
             sheet.delete_lines(3, 'chaine1', 'chaine2', 'chaine3', 'chaine4') 
         """
+        if label == True:
+            column = column_index_from_string(column)  
 
-        for i in range(1,self.sheet.max_row + 1):  
-            if self.sheet.cell(i,column).value in chaines:
+        for i in range(1,self.sheet.max_row + 1):   
+            if str(self.sheet.cell(i,column).value) in chaines:
                 self.sheet.delete_rows(i)
 
         self.writebook.save(self.path + self.name_file)
 
-    def delete_doublons(self, column_identifiant, line_beggining = 2, color = False, label = True):
+    def delete_doublons(self, column_identifiant, line_beginning = 2, color = False, label = True):
         """
         Certains participants répondent plusieurs fois. Cette fonction supprime les premières réponses
         des participants dans ce cas. Elle ne garde que leur dernière réponse. On repère les participants
@@ -508,7 +510,7 @@ class Sheet(File,UtilsForSheet,Other):
 
         #On parcourt dans le sens inverse afin d'éviter que la suppression progressive impacte la position des lignes étudiées ensuite.
         i = self.sheet.max_row 
-        while i != line_beggining:  
+        while i != line_beginning:  
             identifiant = Str(self.sheet.cell(i,column_identifiant).value).clean_string() 
             if identifiant.chaine in participants.keys():
                 if color == True:

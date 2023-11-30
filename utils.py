@@ -1,5 +1,5 @@
 from openpyxl.styles import PatternFill
-
+import typer
 
 class UtilsForFile():
     def copy_paste_line(self,onglet_from,row_from, onglet_to, row_to ):
@@ -265,6 +265,52 @@ class Str():
     
         conversion = str(duration)
         return conversion
+    
+class UtilsForcommands():
+    def askArgumentUntilNone(args, message):
+        """
+        Fonction qui permet de demander en ligne de commande un nombre d'arguments indéterminé à l'utilisateur. S'arrête quand l'utilisateur ne rentre rien.
+        """
+        if not args:
+            args = []
+            while True:
+                user_input = typer.prompt(message, default="")
+                if not user_input:
+                    break
+                args.append(user_input)
+        return args
+    
+    def createDictByCmd(message1, message2):
+        """
+        Fonction qui demande à l'utilisateur de créer un dictionaire une clé, une valeur.
+        """
+        dictionary = {}
+        while True: 
+            key = typer.prompt(message1, default = "")
+            if not key:
+                break 
+            value = typer.prompt(message2, default = "")
+            dictionary[key] = value
+        return dictionary
+
+        
+    @classmethod
+    def createDictListValueByCmd(cls,message):
+        """
+        Fonction qui demande en ligne de commande à l'utilisateur de rentrer un par un les groupes de réponses et, pour chaque groupe, de rentrer
+        les réponses qui lui sont associées.
+        """ 
+        answers = None
+        dictionary = {} 
+        while True:
+            user_input = typer.prompt(message,default = "")
+            if not user_input:
+                break
+            else: 
+                values = cls.askArgumentUntilNone(answers,"") 
+            dictionary[user_input] = values
+        return dictionary
+            
     
 class Other():
     def reverse_dico_for_set_answer_in_group(self,dictionary):

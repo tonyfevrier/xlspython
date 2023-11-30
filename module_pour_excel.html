@@ -89,8 +89,8 @@ Exemples&nbsp;d'utilisation&nbsp;:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;=&nbsp;<a href="#File">File</a>('dataset.xlsx',&nbsp;dataonly&nbsp;=&nbsp;False)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file.<a href="#File-apply_column_formula_on_all_sheets">apply_column_formula_on_all_sheets</a>(*[i&nbsp;for&nbsp;i&nbsp;in&nbsp;range(colmin,colmax&nbsp;+&nbsp;1)])</tt></dd></dl>
 
-<dl><dt><a name="File-create_one_onglet_by_participant"><strong>create_one_onglet_by_participant</strong></a>(self, onglet_from, column_read, first_line=2, label=True)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;un&nbsp;onglet&nbsp;dont&nbsp;une&nbsp;colonne&nbsp;contient&nbsp;des&nbsp;chaînes&nbsp;de&nbsp;caractères.<br>
-Chaque&nbsp;chaîne&nbsp;de&nbsp;caractères&nbsp;peut&nbsp;apparaître&nbsp;plusieurs&nbsp;fois&nbsp;dans&nbsp;cette&nbsp;colonne.&nbsp;<br>
+<dl><dt><a name="File-create_one_onglet_by_participant"><strong>create_one_onglet_by_participant</strong></a>(self, onglet_from, column_read, first_line=2, label=True)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;un&nbsp;onglet&nbsp;dont&nbsp;une&nbsp;colonne&nbsp;contient&nbsp;des&nbsp;chaînes&nbsp;de&nbsp;caractères&nbsp;comme&nbsp;par&nbsp;exemple&nbsp;un&nbsp;nom.<br>
+Chaque&nbsp;chaîne&nbsp;de&nbsp;caractères&nbsp;peut&nbsp;apparaître&nbsp;plusieurs&nbsp;fois&nbsp;dans&nbsp;cette&nbsp;colonne&nbsp;(exe&nbsp;:&nbsp;quand&nbsp;un&nbsp;participant&nbsp;répond&nbsp;plusieurs&nbsp;fois)<br>
 La&nbsp;fonction&nbsp;retourne&nbsp;un&nbsp;fichier&nbsp;contenant&nbsp;un&nbsp;onglet&nbsp;par&nbsp;chaîne&nbsp;de&nbsp;caractères.<br>
 &nbsp;&nbsp;Chaque&nbsp;onglet&nbsp;contient&nbsp;toutes&nbsp;les&nbsp;lignes&nbsp;correspondant&nbsp;à&nbsp;cette&nbsp;chaîne&nbsp;de&nbsp;caractères.<br>
 &nbsp;<br>
@@ -273,12 +273,12 @@ Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;sheet&nbsp;=&nbsp;<a href="#Sheet">Sheet</a>('dataset.xlsx','onglet1')<br>
 &nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-color_special_cases_in_sheet">color_special_cases_in_sheet</a>({'vrai':&nbsp;'#FF0000','faux':&nbsp;'#00FF00'})</tt></dd></dl>
 
-<dl><dt><a name="Sheet-column_convert_in_minutes"><strong>column_convert_in_minutes</strong></a>(self, column_read, column_write, line_beginning=2, line_end=100, insert=True, security=True, label=True)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;une&nbsp;colonne&nbsp;de&nbsp;chaines&nbsp;de&nbsp;caractères&nbsp;de&nbsp;la&nbsp;forme&nbsp;"10&nbsp;jour&nbsp;5&nbsp;heures"&nbsp;<br>
+<dl><dt><a name="Sheet-column_convert_in_minutes"><strong>column_convert_in_minutes</strong></a>(self, column_read, column_write, line_beginning=2, insert=True, security=True, label=True)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;une&nbsp;colonne&nbsp;de&nbsp;chaines&nbsp;de&nbsp;caractères&nbsp;de&nbsp;la&nbsp;forme&nbsp;"10&nbsp;jour&nbsp;5&nbsp;heures"&nbsp;<br>
 ou&nbsp;"5&nbsp;heures&nbsp;10&nbsp;min"&nbsp;ou&nbsp;"10&nbsp;min&nbsp;5s"&nbsp;ou&nbsp;"5s"&nbsp;et&nbsp;qui&nbsp;renvoie&nbsp;le&nbsp;temps&nbsp;en&nbsp;minutes.<br>
 L'utilisateur&nbsp;doit&nbsp;indiquer&nbsp;un&nbsp;numéro&nbsp;de&nbsp;colonne&nbsp;de&nbsp;lecture&nbsp;et&nbsp;un&nbsp;numéro&nbsp;de&nbsp;colonne&nbsp;à&nbsp;remplir.<br>
 Input&nbsp;:&nbsp;column_read&nbsp;:&nbsp;l'étiquette&nbsp;de&nbsp;la&nbsp;colonne&nbsp;de&nbsp;lecture&nbsp;des&nbsp;réponses.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;colum_write&nbsp;:&nbsp;l'étiquette&nbsp;de&nbsp;la&nbsp;colonne&nbsp;d'écriture.&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;line_beggining,&nbsp;line_end&nbsp;:&nbsp;(optionnel&nbsp;par&nbsp;défaut&nbsp;égaux&nbsp;à&nbsp;2&nbsp;et&nbsp;100)&nbsp;intervalle&nbsp;de&nbsp;ligne&nbsp;dans&nbsp;lequel&nbsp;l'utilisateur&nbsp;veut&nbsp;appliquer&nbsp;sa&nbsp;transformation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;line_beggining:&nbsp;(optionnel&nbsp;par&nbsp;défaut&nbsp;égaux&nbsp;à&nbsp;2)&nbsp;:&nbsp;ligne&nbsp;où&nbsp;débute&nbsp;l'application&nbsp;de&nbsp;la&nbsp;fonction.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;insert&nbsp;:&nbsp;(paramètre&nbsp;optionnel)&nbsp;le&nbsp;mettre&nbsp;à&nbsp;False&nbsp;si&nbsp;on&nbsp;ne&nbsp;veut&nbsp;pas&nbsp;insérer&nbsp;une&nbsp;colonne.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;label&nbsp;:&nbsp;bool.&nbsp;Mettre&nbsp;sur&nbsp;False&nbsp;si&nbsp;on&nbsp;souhaite&nbsp;entrer&nbsp;les&nbsp;colonnes&nbsp;par&nbsp;leurs&nbsp;positions&nbsp;plutôt&nbsp;que&nbsp;leur&nbsp;label.<br>
 &nbsp;<br>
@@ -287,7 +287,7 @@ Output&nbsp;:&nbsp;rien&nbsp;sauf&nbsp;si&nbsp;la&nbsp;security&nbsp;est&nbsp;en
 Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;sheet&nbsp;=&nbsp;<a href="#Sheet">Sheet</a>('dataset.xlsx','onglet1')<br>
-&nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-column_convert_in_minutes">column_convert_in_minutes</a>('A','B',line_beggining&nbsp;=&nbsp;3,line_end&nbsp;=&nbsp;1600)</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-column_convert_in_minutes">column_convert_in_minutes</a>('A','B',line_beggining&nbsp;=&nbsp;3)</tt></dd></dl>
 
 <dl><dt><a name="Sheet-column_cut_string_in_parts"><strong>column_cut_string_in_parts</strong></a>(self, column_to_cut, column_insertion, separator, label=True)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;une&nbsp;colonne&nbsp;dont&nbsp;chaque&nbsp;cellule&nbsp;contient&nbsp;une&nbsp;grande&nbsp;chaîne&nbsp;de<br>
 &nbsp;&nbsp;caractères.&nbsp;Toutes&nbsp;les&nbsp;chaînes&nbsp;sont&nbsp;composés&nbsp;du&nbsp;nombre&nbsp;de&nbsp;morceaux&nbsp;délimités&nbsp;par&nbsp;un&nbsp;séparateur,<br>
@@ -304,7 +304,7 @@ Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;sheet&nbsp;=&nbsp;<a href="#Sheet">Sheet</a>('dataset.xlsx','onglet1')<br>
 &nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-column_cut_string_in_parts">column_cut_string_in_parts</a>('C',&nbsp;'J',&nbsp;';')</tt></dd></dl>
 
-<dl><dt><a name="Sheet-column_set_answer_in_group"><strong>column_set_answer_in_group</strong></a>(self, column_read, column_write, groups_of_responses, line_beginning=2, line_end=100, insert=True, security=True, label=True)</dt><dd><tt>Dans&nbsp;le&nbsp;cas&nbsp;où&nbsp;il&nbsp;y&nbsp;a&nbsp;des&nbsp;groupes&nbsp;de&nbsp;réponses,&nbsp;cette&nbsp;fonction&nbsp;qui&nbsp;prend&nbsp;une&nbsp;colonne&nbsp;de&nbsp;chaîne&nbsp;de&nbsp;caractères&nbsp;<br>
+<dl><dt><a name="Sheet-column_set_answer_in_group"><strong>column_set_answer_in_group</strong></a>(self, column_read, column_write, groups_of_responses, line_beginning=2, insert=True, security=True, label=True)</dt><dd><tt>Dans&nbsp;le&nbsp;cas&nbsp;où&nbsp;il&nbsp;y&nbsp;a&nbsp;des&nbsp;groupes&nbsp;de&nbsp;réponses,&nbsp;cette&nbsp;fonction&nbsp;qui&nbsp;prend&nbsp;une&nbsp;colonne&nbsp;de&nbsp;chaîne&nbsp;de&nbsp;caractères&nbsp;<br>
 et&nbsp;qui&nbsp;renvoie&nbsp;une&nbsp;colonne&nbsp;remplie&nbsp;de&nbsp;chaînes&nbsp;contenant&nbsp;pour&nbsp;chaque&nbsp;cellule&nbsp;le&nbsp;groupe&nbsp;associé.<br>
 L'utilisateur&nbsp;doit&nbsp;indiquer&nbsp;un&nbsp;numéro&nbsp;de&nbsp;colonne&nbsp;de&nbsp;lecture&nbsp;et&nbsp;un&nbsp;numéro&nbsp;de&nbsp;colonne&nbsp;où&nbsp;écrire.<br>
 &nbsp;<br>
@@ -313,7 +313,7 @@ Input&nbsp;:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;colum_write&nbsp;:&nbsp;l'étiquette&nbsp;de&nbsp;la&nbsp;colonne&nbsp;d'écriture.&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;groups_of_response&nbsp;:&nbsp;dictionnary&nbsp;which&nbsp;keys&nbsp;are&nbsp;response&nbsp;groups&nbsp;and&nbsp;which&nbsp;values&nbsp;are&nbsp;a&nbsp;list&nbsp;of&nbsp;responses&nbsp;<br>
 associated&nbsp;to&nbsp;this&nbsp;group.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;line_beggining,&nbsp;line_end&nbsp;:&nbsp;(paramètres&nbsp;optionnels&nbsp;par&nbsp;défaut&nbsp;égaux&nbsp;à&nbsp;2&nbsp;et&nbsp;100)&nbsp;intervalle&nbsp;de&nbsp;ligne&nbsp;dans&nbsp;lequel&nbsp;l'utilisateur&nbsp;veut&nbsp;appliquer&nbsp;sa&nbsp;transformation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;line_beggining:&nbsp;(optionnel&nbsp;par&nbsp;défaut&nbsp;égaux&nbsp;à&nbsp;2)&nbsp;:&nbsp;ligne&nbsp;où&nbsp;débute&nbsp;l'application&nbsp;de&nbsp;la&nbsp;fonction.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;insert&nbsp;:&nbsp;(paramètre&nbsp;optionnel)&nbsp;le&nbsp;mettre&nbsp;à&nbsp;False&nbsp;si&nbsp;on&nbsp;ne&nbsp;veut&nbsp;pas&nbsp;insérer&nbsp;une&nbsp;colonne.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;label&nbsp;:&nbsp;bool.&nbsp;Mettre&nbsp;sur&nbsp;False&nbsp;si&nbsp;on&nbsp;souhaite&nbsp;entrer&nbsp;les&nbsp;colonnes&nbsp;par&nbsp;leurs&nbsp;positions&nbsp;plutôt&nbsp;que&nbsp;leur&nbsp;label.<br>
 &nbsp;<br>
@@ -322,16 +322,16 @@ Output&nbsp;:&nbsp;rien&nbsp;sauf&nbsp;si&nbsp;la&nbsp;security&nbsp;est&nbsp;en
 Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;sheet&nbsp;=&nbsp;<a href="#Sheet">Sheet</a>('dataset.xlsx','onglet1')<br>
-&nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-column_set_answer_in_group">column_set_answer_in_group</a>('A',&nbsp;'B',&nbsp;{"group1":['2','5','6'],&nbsp;"group2":['7','8','9'],&nbsp;"group3":['1','3','4'],&nbsp;"group4":['10']}&nbsp;,line_beggining&nbsp;=&nbsp;3,line_end&nbsp;=&nbsp;1600)</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-column_set_answer_in_group">column_set_answer_in_group</a>('A',&nbsp;'B',&nbsp;{"group1":['2','5','6'],&nbsp;"group2":['7','8','9'],&nbsp;"group3":['1','3','4'],&nbsp;"group4":['10']}&nbsp;,line_beggining&nbsp;=&nbsp;3)</tt></dd></dl>
 
-<dl><dt><a name="Sheet-column_transform_string_in_binary"><strong>column_transform_string_in_binary</strong></a>(self, column_read, column_write, *good_answers, line_beginning=2, line_end=100, insert=True, security=True, label=True)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;une&nbsp;colonne&nbsp;de&nbsp;chaîne&nbsp;de&nbsp;caractères&nbsp;et&nbsp;qui&nbsp;renvoie&nbsp;une&nbsp;colonne&nbsp;de&nbsp;0&nbsp;ou&nbsp;de&nbsp;1<br>
+<dl><dt><a name="Sheet-column_transform_string_in_binary"><strong>column_transform_string_in_binary</strong></a>(self, column_read, column_write, *good_answers, line_beginning=2, insert=True, security=True, label=True)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;une&nbsp;colonne&nbsp;de&nbsp;chaîne&nbsp;de&nbsp;caractères&nbsp;et&nbsp;qui&nbsp;renvoie&nbsp;une&nbsp;colonne&nbsp;de&nbsp;0&nbsp;ou&nbsp;de&nbsp;1<br>
 L'utilisateur&nbsp;doit&nbsp;indiquer&nbsp;un&nbsp;numéro&nbsp;de&nbsp;colonne&nbsp;de&nbsp;lecture&nbsp;et&nbsp;un&nbsp;numéro&nbsp;de&nbsp;colonne&nbsp;où&nbsp;mettre&nbsp;les&nbsp;0&nbsp;ou&nbsp;1.<br>
 &nbsp;<br>
 Inputs&nbsp;:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_read&nbsp;:&nbsp;l'étiquette&nbsp;de&nbsp;la&nbsp;colonne&nbsp;de&nbsp;lecture&nbsp;des&nbsp;réponses.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;colum_write&nbsp;:&nbsp;l'étiquette&nbsp;de&nbsp;la&nbsp;colonne&nbsp;d'écriture&nbsp;des&nbsp;0&nbsp;et&nbsp;1.&nbsp;Par&nbsp;défaut,&nbsp;une&nbsp;colonne&nbsp;est&nbsp;insérée&nbsp;à&nbsp;cette&nbsp;position.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;good_answers&nbsp;:&nbsp;une&nbsp;séquence&nbsp;d'un&nbsp;nombre&nbsp;quelconque&nbsp;de&nbsp;bonnes&nbsp;réponses&nbsp;qui&nbsp;valent&nbsp;1pt.&nbsp;Chaque&nbsp;mot&nbsp;ne&nbsp;doit&nbsp;pas&nbsp;contenir&nbsp;d'espace&nbsp;ni&nbsp;au&nbsp;début&nbsp;ni&nbsp;à&nbsp;la&nbsp;fin.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;line_beggining,&nbsp;line_end&nbsp;:&nbsp;(paramètres&nbsp;optionnels&nbsp;par&nbsp;défaut&nbsp;égaux&nbsp;à&nbsp;2&nbsp;et&nbsp;100)&nbsp;intervalle&nbsp;de&nbsp;ligne&nbsp;dans&nbsp;lequel&nbsp;l'utilisateur&nbsp;veut&nbsp;appliquer&nbsp;sa&nbsp;transformation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;line_beggining:&nbsp;(optionnel&nbsp;par&nbsp;défaut&nbsp;égaux&nbsp;à&nbsp;2)&nbsp;:&nbsp;ligne&nbsp;où&nbsp;débute&nbsp;l'application&nbsp;de&nbsp;la&nbsp;fonction.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;insert&nbsp;:&nbsp;(paramètre&nbsp;optionnel)&nbsp;le&nbsp;mettre&nbsp;à&nbsp;False&nbsp;si&nbsp;on&nbsp;ne&nbsp;veut&nbsp;pas&nbsp;insérer&nbsp;une&nbsp;colonne.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;label&nbsp;:&nbsp;bool.&nbsp;Mettre&nbsp;sur&nbsp;False&nbsp;si&nbsp;on&nbsp;souhaite&nbsp;entrer&nbsp;les&nbsp;colonnes&nbsp;par&nbsp;leurs&nbsp;positions&nbsp;plutôt&nbsp;que&nbsp;leur&nbsp;label.<br>
 &nbsp;<br>
@@ -340,7 +340,7 @@ Output&nbsp;:&nbsp;rien&nbsp;sauf&nbsp;si&nbsp;la&nbsp;security&nbsp;est&nbsp;en
 Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;sheet&nbsp;=&nbsp;<a href="#Sheet">Sheet</a>('dataset.xlsx','onglet1')<br>
-&nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-column_transform_string_in_binary">column_transform_string_in_binary</a>('A','B','reponse1','reponse2',line_end&nbsp;=&nbsp;1600)&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-column_transform_string_in_binary">column_transform_string_in_binary</a>('A','B','reponse1','reponse2')&nbsp;<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;#Bien&nbsp;mettre&nbsp;les&nbsp;réponses&nbsp;de&nbsp;good_answers&nbsp;entre&nbsp;''.</tt></dd></dl>
 
@@ -389,6 +389,16 @@ Exemple&nbsp;d'utilisation&nbsp;:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;sheet&nbsp;=&nbsp;<a href="#Sheet">Sheet</a>('dataset.xlsx','onglet1')<br>
 &nbsp;&nbsp;&nbsp;&nbsp;sheet.<a href="#Sheet-delete_lines">delete_lines</a>(3,&nbsp;'chaine1',&nbsp;'chaine2',&nbsp;'chaine3',&nbsp;'chaine4')</tt></dd></dl>
 
+<dl><dt><a name="Sheet-gather_multiple_answers"><strong>gather_multiple_answers</strong></a>(self, column_read, column_store, line_beggining=2, label=True)</dt><dd><tt>Dans&nbsp;un&nbsp;onglet,&nbsp;nous&nbsp;avons&nbsp;les&nbsp;réponses&nbsp;de&nbsp;participants&nbsp;qui&nbsp;ont&nbsp;pu&nbsp;répondre&nbsp;plusieurs&nbsp;fois&nbsp;à&nbsp;un&nbsp;questionnaire.<br>
+Cette&nbsp;fonction&nbsp;parcourt&nbsp;les&nbsp;noms&nbsp;et&nbsp;met&nbsp;dans&nbsp;un&nbsp;autre&nbsp;onglet.&nbsp;La&nbsp;ligne&nbsp;du&nbsp;participant&nbsp;est&nbsp;alors&nbsp;constituée&nbsp;des&nbsp;différentes&nbsp;valeurs<br>
+&nbsp;d'une&nbsp;même&nbsp;donnée&nbsp;récupérée.<br>
+&nbsp;<br>
+Inputs&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;column_read&nbsp;(str)&nbsp;:&nbsp;la&nbsp;colonne&nbsp;avec&nbsp;les&nbsp;identifiants&nbsp;des&nbsp;participants.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;column_store&nbsp;(str)&nbsp;:&nbsp;lettre&nbsp;de&nbsp;la&nbsp;colonne&nbsp;contenant&nbsp;la&nbsp;donnée&nbsp;qu'on&nbsp;veut&nbsp;stocker.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;line_beggining&nbsp;(int)&nbsp;:&nbsp;ligne&nbsp;où&nbsp;débute&nbsp;la&nbsp;recherche.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;label&nbsp;(bool)&nbsp;:&nbsp;False&nbsp;si&nbsp;on&nbsp;veut&nbsp;entrer&nbsp;le&nbsp;numéro&nbsp;de&nbsp;la&nbsp;colonne&nbsp;et&nbsp;pas&nbsp;la&nbsp;lettre.</tt></dd></dl>
+
 <hr>
 Methods inherited from <a href="module_pour_excel.html#File">File</a>:<br>
 <dl><dt><a name="Sheet-apply_column_formula_on_all_sheets"><strong>apply_column_formula_on_all_sheets</strong></a>(self, *column_list)</dt><dd><tt>Fonction&nbsp;qui&nbsp;reproduit&nbsp;les&nbsp;formules&nbsp;d'une&nbsp;colonne&nbsp;ou&nbsp;plusieurs&nbsp;colonnes<br>
@@ -416,8 +426,8 @@ Exemples&nbsp;d'utilisation&nbsp;:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;=&nbsp;<a href="#File">File</a>('dataset.xlsx',&nbsp;dataonly&nbsp;=&nbsp;False)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file.<a href="#Sheet-apply_column_formula_on_all_sheets">apply_column_formula_on_all_sheets</a>(*[i&nbsp;for&nbsp;i&nbsp;in&nbsp;range(colmin,colmax&nbsp;+&nbsp;1)])</tt></dd></dl>
 
-<dl><dt><a name="Sheet-create_one_onglet_by_participant"><strong>create_one_onglet_by_participant</strong></a>(self, onglet_from, column_read, first_line=2, label=True)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;un&nbsp;onglet&nbsp;dont&nbsp;une&nbsp;colonne&nbsp;contient&nbsp;des&nbsp;chaînes&nbsp;de&nbsp;caractères.<br>
-Chaque&nbsp;chaîne&nbsp;de&nbsp;caractères&nbsp;peut&nbsp;apparaître&nbsp;plusieurs&nbsp;fois&nbsp;dans&nbsp;cette&nbsp;colonne.&nbsp;<br>
+<dl><dt><a name="Sheet-create_one_onglet_by_participant"><strong>create_one_onglet_by_participant</strong></a>(self, onglet_from, column_read, first_line=2, label=True)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;un&nbsp;onglet&nbsp;dont&nbsp;une&nbsp;colonne&nbsp;contient&nbsp;des&nbsp;chaînes&nbsp;de&nbsp;caractères&nbsp;comme&nbsp;par&nbsp;exemple&nbsp;un&nbsp;nom.<br>
+Chaque&nbsp;chaîne&nbsp;de&nbsp;caractères&nbsp;peut&nbsp;apparaître&nbsp;plusieurs&nbsp;fois&nbsp;dans&nbsp;cette&nbsp;colonne&nbsp;(exe&nbsp;:&nbsp;quand&nbsp;un&nbsp;participant&nbsp;répond&nbsp;plusieurs&nbsp;fois)<br>
 La&nbsp;fonction&nbsp;retourne&nbsp;un&nbsp;fichier&nbsp;contenant&nbsp;un&nbsp;onglet&nbsp;par&nbsp;chaîne&nbsp;de&nbsp;caractères.<br>
 &nbsp;&nbsp;Chaque&nbsp;onglet&nbsp;contient&nbsp;toutes&nbsp;les&nbsp;lignes&nbsp;correspondant&nbsp;à&nbsp;cette&nbsp;chaîne&nbsp;de&nbsp;caractères.<br>
 &nbsp;<br>
@@ -525,6 +535,21 @@ Inputs&nbsp;:<br>
 &nbsp;<br>
 Output&nbsp;:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;dico&nbsp;:&nbsp;dictionary.</tt></dd></dl>
+
+<dl><dt><a name="Sheet-create_dico_to_store_multiple_answers_of_participants"><strong>create_dico_to_store_multiple_answers_of_participants</strong></a>(self, column_read, column_store, line_beggining)</dt><dd><tt>Fonction&nbsp;qui&nbsp;parcourt&nbsp;les&nbsp;identifiants&nbsp;d'un&nbsp;fichier&nbsp;et&nbsp;qui&nbsp;crée&nbsp;un&nbsp;dictionnaire&nbsp;contenant&nbsp;le&nbsp;nombre&nbsp;de&nbsp;réponses&nbsp;de&nbsp;chaque&nbsp;participant<br>
+et&nbsp;les&nbsp;valeurs&nbsp;d'une&nbsp;même&nbsp;donnée&nbsp;lors&nbsp;des&nbsp;différentes&nbsp;réponses.<br>
+&nbsp;<br>
+Inputs&nbsp;:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;column_read&nbsp;(str)&nbsp;:&nbsp;la&nbsp;colonne&nbsp;avec&nbsp;les&nbsp;identifiants&nbsp;des&nbsp;participants.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;column_store&nbsp;(str)&nbsp;:&nbsp;lettre&nbsp;de&nbsp;la&nbsp;colonne&nbsp;contenant&nbsp;la&nbsp;donnée&nbsp;qu'on&nbsp;veut&nbsp;stocker.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;line_beggining&nbsp;(int)&nbsp;:&nbsp;ligne&nbsp;où&nbsp;débute&nbsp;la&nbsp;recherche.</tt></dd></dl>
+
+<dl><dt><a name="Sheet-create_newsheet_storing_multiple_answers"><strong>create_newsheet_storing_multiple_answers</strong></a>(self, storesheet, dico)</dt><dd><tt>Fonction&nbsp;qui&nbsp;prend&nbsp;un&nbsp;dico&nbsp;issu&nbsp;de&nbsp;la&nbsp;fonction&nbsp;create_dico_to_store_multiple_answers_of_participants&nbsp;et&nbsp;qui&nbsp;crée&nbsp;une&nbsp;feuille&nbsp;<br>
+présentant&nbsp;les&nbsp;participants&nbsp;ayant&nbsp;répondu&nbsp;plusieurs&nbsp;fois&nbsp;et&nbsp;les&nbsp;valeurs&nbsp;de&nbsp;la&nbsp;donnée&nbsp;stockée&nbsp;lors&nbsp;des&nbsp;différentes&nbsp;réponses.<br>
+&nbsp;<br>
+Inputs:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;storesheet&nbsp;(openpyxl&nbsp;sheet)&nbsp;:&nbsp;feuille&nbsp;de&nbsp;stockage.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;dico&nbsp;(dict)&nbsp;:&nbsp;issu&nbsp;de&nbsp;create_dico_to_store_multiple_answers_of_participants.</tt></dd></dl>
 
 <hr>
 Methods inherited from <a href="utils.html#Other">utils.Other</a>:<br>

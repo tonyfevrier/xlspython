@@ -138,18 +138,7 @@ class TestSheet(TestCase, Other):
     def test_column_set_answer_in_group(self):
         sheet = Sheet('test_column_set_answer.xlsx','sheet1')  
         
-        groups_of_response = {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']} 
-
-        """ groups_of_response = {}
-        for elt in ['2','5','6']:
-            groups_of_response[elt] = "group1"
-        
-        for elt in ['7','8','9']:
-            groups_of_response[elt] = "group2"
-
-        for elt in ['1','3','4']:
-            groups_of_response[elt] = "group3"
-        groups_of_response['10'] = "group4" """
+        groups_of_response = {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']}  
 
         sheet.column_set_answer_in_group('B','C',groups_of_response)
 
@@ -204,7 +193,7 @@ class TestSheet(TestCase, Other):
 
     def test_delete_lines(self):
         sheet = Sheet('test.xlsx','delete_lines') 
-        sheet.delete_lines(4,0)
+        sheet.delete_lines('D',0)
         self.column_identical('test.xlsx','test.xlsx',9,10, 1, 1)
         self.column_identical('test.xlsx','test.xlsx',9,10, 2, 2)
         self.column_identical('test.xlsx','test.xlsx',9,10, 3, 3)
