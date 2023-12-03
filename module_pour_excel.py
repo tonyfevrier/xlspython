@@ -128,7 +128,7 @@ class File(UtilsForFile):
             
         self.writebook.save(self.path + self.name_file) 
 
-    def apply_column_formula_on_all_sheets(self, *column_list):
+    def apply_column_formula_on_all_sheets(self, *column_list, label = True):
         """
         Fonction qui reproduit les formules d'une colonne ou plusieurs colonnes
           du premier onglet sur toutes les colonnes situées à la même position dans les 
@@ -155,10 +155,14 @@ class File(UtilsForFile):
                 file = File('dataset.xlsx', dataonly = False)
                 file.apply_column_formula_on_all_sheets(*[i for i in range(colmin,colmax + 1)]) 
         """
+        if label == True:
+            column_int_list = []
+            for column in column_list: 
+                column_int_list.append(column_index_from_string(column))  
 
         #on applique les copies dans tous les onglets sauf le premier
         for name_onglet in self.sheets_name[1:]:
-            for column in column_list:
+            for column in column_int_list:
                 self.copy_paste_column(self.writebook[self.sheets_name[0]],column,self.writebook[name_onglet],column)
 
         self.writebook.save(self.path + self.name_file)
@@ -215,7 +219,7 @@ class Sheet(File,UtilsForSheet,Other):
 
     def column_convert_in_minutes(self,column_read,column_write,line_beginning = 2, insert = True, security = True,label = True):
         """
-        Fonction qui prend une colonne de chaines de caractères de la forme "10 jour 5 heures" 
+        Fonction qui prend une colonne de chaines de caractères de la forme "10 jours 5 heures" 
         ou "5 heures 10 min" ou "10 min 5s" ou "5s" et qui renvoie le temps en minutes.
         L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne à remplir.
         Input : column_read : l'étiquette de la colonne de lecture des réponses.
