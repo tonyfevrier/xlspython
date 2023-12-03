@@ -5,7 +5,8 @@ from typing_extensions import Annotated
 from utils import UtilsForcommands as Ufc
 
 """      
-Ajouter une fonction qui prend n colonnes et qui crée deux grandes colonne à partir d'elles : une avec les valeurs et une avec les noms de la colonne correspondante en face. 
+Ajouter une fonction qui prend n colonnes et qui crée deux grandes colonne à partir d'elles : une avec les valeurs (de la première cellule de la colonne) et une avec les noms de la colonne correspondante en face. 
+Cette fonction est en général utilisée plusieurs fois à la suite sur un onglet.  Un onglet par paires de colonnes.
 """
 
 app = typer.Typer()

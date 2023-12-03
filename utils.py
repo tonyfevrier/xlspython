@@ -44,6 +44,17 @@ class UtilsForFile():
         """ 
         self.copy_paste_line(onglet_from, row_from, onglet_to, onglet_to.max_row + 1)  
 
+    def copy_column_tags_and_values_at_bottom(self,import_sheet, column, target_sheet):
+        """
+        Fonction qui prend une colonne de valeurs nommée C et la copie à la fin de la colonne 2 d'un onglet (à partir de la première cellule vide).
+        Cette fonction écrit également dans la colonne 1 les valeurs de la première cellule de C.
+        """
+        maxrow = target_sheet.max_row + 1
+        for line in range(2, import_sheet.max_row + 1):
+            target_sheet.cell(line - 2 + maxrow, 1).value = import_sheet.cell(1, column).value
+            target_sheet.cell(line - 2 + maxrow, 2).value = import_sheet.cell(line, column).value
+
+
 class UtilsForSheet():
     def column_security(self,column):
         """

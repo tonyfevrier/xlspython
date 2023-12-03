@@ -63,7 +63,7 @@ class TestFile(TestCase):
         del file.writebook[file.sheets_name[-1]]
         file.writebook.save(file.path + 'test_extract_column.xlsx')
 
-"""
+    """
     def test_apply_column_formula_on_all_sheets(self):
         file = File('dataset.xlsx', dataonly = False)
 
@@ -77,7 +77,17 @@ class TestFile(TestCase):
         # test sur toutes les colonnes à partir de la colonne 2 
         file.apply_column_formula_on_all_sheets(*[i for i in range(2,6)]) 
         #on refait ce qui a été fait ci-dessus.
-"""
+    """
+
+    def test_gather_columns_in_one(self):
+        file = File("test_gather_columns_in_one.xlsx")
+        file.gather_columns_in_one("test", ['C','D','E'], ['G','H','I'])
+
+        self.verify_files_identical(File("test_gather_columns_in_one - ref.xlsx"), File("test_gather_columns_in_one.xlsx"))
+
+        #del file.writebook[file.sheets_name[-1]]
+        #file.writebook.save(file.path + 'test_gather_columns_in_one.xlsx')
+        
 
 class TestSheet(TestCase, Other):
     def test_sheet_correctly_opened(self):
@@ -114,19 +124,16 @@ class TestSheet(TestCase, Other):
     def test_column_transform_string_in_binary(self):
         sheet = Sheet('test.xlsx','sheet1')  
 
-        sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',security=False,insert=False,label = False)
+        sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',insert=False,label = False)
         self.column_identical('test.xlsx','test_generated.xlsx',0,0, 13, 13) 
-        sheet.column_transform_string_in_binary('L','M','partie 1 : Vrai',security=False,insert=False)
+        sheet.column_transform_string_in_binary('L','M','partie 1 : Vrai',insert=False)
         self.column_identical('test.xlsx','test_generated.xlsx',0,0, 13, 13) 
-        sheet.column_transform_string_in_binary(14,15,'partie 2 : Vrai',security=False,insert=False,label = False)
+        sheet.column_transform_string_in_binary(14,15,'partie 2 : Vrai',insert=False,label = False)
         self.column_identical('test.xlsx','test_generated.xlsx',0,0, 15, 15) 
-        sheet.column_transform_string_in_binary(16,17,'partie 3 : Vrai',security=False,insert=False,label = False)
+        sheet.column_transform_string_in_binary(16,17,'partie 3 : Vrai',insert=False,label = False)
         self.column_identical('test.xlsx','test_generated.xlsx',0,0, 17, 17)
-        sheet.column_transform_string_in_binary(41,42,'Laser Interferometer Gravitational-Wave Observatory(LIGO)','virgo','Virgo',security=False,insert=False,label = False)
+        sheet.column_transform_string_in_binary(41,42,'Laser Interferometer Gravitational-Wave Observatory(LIGO)','virgo','Virgo',insert=False,label = False)
         self.column_identical('test.xlsx','test_generated.xlsx',0,0, 42, 42)
-
-        self.assertEqual(type(sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',insert=False,label=False)),str)
-        self.assertEqual(type(sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',security=False,insert=False,label=False)),type(None))
 
         sheet2 = Sheet('test.xlsx', 'Feuille2')
          

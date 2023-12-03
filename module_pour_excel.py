@@ -167,6 +167,26 @@ class File(UtilsForFile):
 
         self.writebook.save(self.path + self.name_file)
 
+    def gather_columns_in_one(self,onglet, *column_lists):
+        """
+        Vous avez des groupes de colonnes de valeurs avec une étiquette en première cellule. Pour chaque groupe, vous souhaitez former deux colonnes de valeurs : l'une qui contient
+        les valeurs rassemblées en une colonne, l'autre, à sa gauche, qui indique l'étiquette de la colonne dans laquelle elle a été prise.
+
+        Inputs : 
+            - onglet (str) : nom de l'onglet d'où on importe les colonnes.
+            - column_lists (list[list[str]]) : liste de groupes de colonnes. Chaque groupe est une liste de colonnes.
+        """
+        
+        #IDEALEMENT IL FAUDRAIT QUE L USER puisse entrer soit des colonnes soit deux chiffres et qu'on prenne automatiquement toutes les colonnes entre elles.
+        for list in column_lists:
+            tab_number = len(self.writebook.sheetnames)
+            self.writebook.create_sheet(f"onglet {tab_number}")
+            target_sheet = self.writebook[f"onglet {tab_number}"]
+            for column in list: 
+                self.copy_column_tags_and_values_at_bottom(self.writebook[onglet], column_index_from_string(column), target_sheet)
+
+        self.writebook.save(self.path + self.name_file) 
+        
 
 
 class Sheet(File,UtilsForSheet,Other): 
@@ -580,6 +600,8 @@ class Sheet(File,UtilsForSheet,Other):
         self.create_newsheet_storing_multiple_answers(storesheet, dico)
 
         self.writebook.save(self.path + self.name_file) 
+
+    
 
         
 
