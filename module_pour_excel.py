@@ -59,7 +59,7 @@ class File(UtilsForFile):
         return file_copy
             
 
-    def create_one_onglet_by_participant(self, onglet_from, column_read, first_line=2, label=True ):
+    def create_one_onglet_by_participant(self, onglet_from, column_read, first_line=2, label=True):
         """
         Fonction qui prend un onglet dont une colonne contient des chaînes de caractères comme par exemple un nom.
         Chaque chaîne de caractères peut apparaître plusieurs fois dans cette colonne (exe : quand un participant répond plusieurs fois)
@@ -176,7 +176,7 @@ class Sheet(File,UtilsForSheet,Other):
         self.sheet = self.writebook[self.name_onglet]
         del self.sheets_name
 
-    def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2, insert = True, security = True,label = True):
+    def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2, insert = True, label = True):
         """
         Fonction qui prend une colonne de chaîne de caractères et qui renvoie une colonne de 0 ou de 1
         L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où mettre les 0 ou 1.
@@ -202,11 +202,6 @@ class Sheet(File,UtilsForSheet,Other):
             column_read = column_index_from_string(column_read) 
             column_write = column_index_from_string(column_write)
 
-        if insert == False and security == True and self.column_security(column_write) == False:
-            msg = "La colonne n'est pas vide. Si vous voulez vraiment y écrire, mettez security = False en argument."
-            print(msg)
-            return msg
-
         if insert == True:
             self.sheet.insert_cols(column_write)
 
@@ -217,7 +212,7 @@ class Sheet(File,UtilsForSheet,Other):
  
         self.writebook.save(self.path + self.name_file)
 
-    def column_convert_in_minutes(self,column_read,column_write,line_beginning = 2, insert = True, security = True,label = True):
+    def column_convert_in_minutes(self,column_read,column_write,line_beginning = 2, insert = True, label = True):
         """
         Fonction qui prend une colonne de chaines de caractères de la forme "10 jours 5 heures" 
         ou "5 heures 10 min" ou "10 min 5s" ou "5s" et qui renvoie le temps en minutes.
@@ -240,11 +235,6 @@ class Sheet(File,UtilsForSheet,Other):
             column_read = column_index_from_string(column_read) 
             column_write = column_index_from_string(column_write)
 
-        if insert == False and security == True and self.column_security(column_write) == False:
-            msg = "La colonne n'est pas vide. Si vous voulez vraiment y écrire, mettez security = False en argument."
-            print(msg)
-            return msg
-
         if insert == True:
             self.sheet.insert_cols(column_write)
 
@@ -255,7 +245,7 @@ class Sheet(File,UtilsForSheet,Other):
  
         self.writebook.save(self.path + self.name_file)
 
-    def column_set_answer_in_group(self,column_read,column_write,groups_of_responses,line_beginning = 2, insert = True, security = True, label = True):
+    def column_set_answer_in_group(self,column_read,column_write,groups_of_responses,line_beginning = 2, insert = True, label = True):
         """
         Dans le cas où il y a des groupes de réponses, cette fonction qui prend une colonne de chaîne de caractères 
         et qui renvoie une colonne remplie de chaînes contenant pour chaque cellule le groupe associé.
@@ -281,11 +271,6 @@ class Sheet(File,UtilsForSheet,Other):
         if label == True:
             column_read = column_index_from_string(column_read) 
             column_write = column_index_from_string(column_write)
-
-        if insert == False and security == True and self.column_security(column_write) == False:
-            msg = "La colonne n'est pas vide. Si vous voulez vraiment y écrire, mettez security = False en argument."
-            print(msg)
-            return msg
 
         if insert == True:
             self.sheet.insert_cols(column_write)

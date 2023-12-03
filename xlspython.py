@@ -4,9 +4,7 @@ from module_pour_excel import *
 from typing_extensions import Annotated
 from utils import UtilsForcommands as Ufc
 
-"""     
-Ajouter les arguments optionnels de mod pour excel que je n'ai pas mis encore.
-Nettoyer les insert = True security etc qui ne servent plus.
+"""      
 Ajouter une fonction qui prend n colonnes et qui crée deux grandes colonne à partir d'elles : une avec les valeurs et une avec les noms de la colonne correspondante en face. 
 """
 
@@ -93,11 +91,13 @@ def stringinbinary(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
 
         Version complète : python xlspython.py stringinbinary --file name.xlsx --sheet nametab --colread columnletter --colwrite columnletter --answers chaine1 --answers chaine2
     
-    """
+    """ 
     answers = Ufc.askArgumentUntilNone(answers,"Enter one good answer and then press enter. Press directly enter if you have entered all the good answers")
     
     sheetobject = Sheet(file,sheet)
-    sheetobject.column_transform_string_in_binary(colread,colwrite,*answers) 
+ 
+    bool = Ufc.insertOrOverwrite(colwrite)
+    sheetobject.column_transform_string_in_binary(colread,colwrite,*answers, insert = bool) 
 
 # Créer un fichier test pour tester cette fonction.
 @app.command()
@@ -142,7 +142,8 @@ def convertminutes(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
     
     """
     sheetobject = Sheet(file,sheet)
-    sheetobject.column_convert_in_minutes(colread,colwrite,line_beginning=line)
+    bool = Ufc.insertOrOverwrite(colwrite)
+    sheetobject.column_convert_in_minutes(colread,colwrite,line_beginning=line, insert=bool)
 
 @app.command()
 def groupofanswers(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
@@ -165,7 +166,8 @@ def groupofanswers(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
     groups_of_responses = Ufc.createDictListValueByCmd("Enter the name of one group of answers")
 
     sheetobject = Sheet(file,sheet)
-    sheetobject.column_set_answer_in_group(colread,colwrite,groups_of_responses, line_beginning = line)
+    bool = Ufc.insertOrOverwrite(colwrite)
+    sheetobject.column_set_answer_in_group(colread,colwrite,groups_of_responses, line_beginning = line, insert=bool)
 
 @app.command()
 def colorcasescolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
@@ -230,8 +232,7 @@ def addcolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file i
 
         Version complète : python xlspython.py addcolumn --file name.xlsx --sheet nametab --colread columnletter --colwrite columnletter --file2 name.xlsx --sheet2 nametab --colread2 columnletter --colimport col1 --colimport col2
     
-    """
-    print(colimport)
+    """ 
     colimport = Ufc.askArgumentUntilNone(colimport,"Enter one column to import and then press enter. Press directly enter if you have entered all the columns to import.")
     sheetobject = Sheet(file,sheet)
     sheetobject.add_column_in_sheet_differently_sorted(colread,colwrite,[file2,sheet2,colread2,colimport])
@@ -274,8 +275,8 @@ def cutstring(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file '
 
         Version complète : python xlspython.py cutstring --file name.xlsx --sheet nametab --colcut columnletter --colwrite columnletter --separator symbol
     """
-    sheetobject = Sheet(file,sheet)
-    sheetobject.column_cut_string_in_parts(colcut,colwrite,separator)
+    sheetobject = Sheet(file,sheet) 
+    sheetobject.column_cut_string_in_parts(colcut,colwrite,separator,insert = bool)
 
 @app.command()
 def deletelines(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],

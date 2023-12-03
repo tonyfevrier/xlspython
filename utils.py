@@ -311,6 +311,12 @@ class UtilsForcommands():
             dictionary[user_input] = values
         return dictionary
             
+    def insertOrOverwrite(column_write):
+        """
+        Fonction qui propose à l'utilisateur d'insérer ou écraser les données de la colonne dans laquelle il écrit.
+        """
+        bool = typer.prompt(f"By default, we insert a new column {column_write} to write data. If you agree, press enter. If you want to overwrite the column {column_write}, write False" , default = True)
+        return bool
     
 class Other():
     def reverse_dico_for_set_answer_in_group(self,dictionary):
