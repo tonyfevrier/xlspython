@@ -85,8 +85,9 @@ class TestFile(TestCase):
 
         self.verify_files_identical(File("test_gather_columns_in_one - ref.xlsx"), File("test_gather_columns_in_one.xlsx"))
 
-        #del file.writebook[file.sheets_name[-1]]
-        #file.writebook.save(file.path + 'test_gather_columns_in_one.xlsx')
+        del file.writebook['onglet 1']
+        del file.writebook['onglet 2']
+        file.writebook.save(file.path + 'test_gather_columns_in_one.xlsx')
         
 
 class TestSheet(TestCase, Other):

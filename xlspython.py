@@ -74,6 +74,18 @@ def extractcolsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx
     fileobject.extract_column_from_all_sheets(colread)
 
 @app.command()
+def gathercolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
+                 sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
+                 columnlists : Annotated[Optional[List[str]], typer.Option()] = None,
+                 ):
+ 
+    group = Ufc.askArgumentUntilNone(columnlists, "Enter a group of column of the form C,D,E,I")
+    column_lists = [string.split(',') for string in group]
+
+    fileobject = File(file)
+    fileobject.gather_columns_in_one(sheet,*column_lists)
+
+@app.command()
 def stringinbinary(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
                    sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
                    colread : Annotated[str, typer.Option(prompt = 'Enter the column containing the answers')],
