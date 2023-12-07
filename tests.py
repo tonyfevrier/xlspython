@@ -300,7 +300,11 @@ class TestStr(TestCase, Other):
         self.assertEqual(duration2.convert_time_in_minutes(), '85.0')
         self.assertEqual(duration3.convert_time_in_minutes(), '16.58')
 
+    def test_listFromColumnsStrings(self):
+        self.assertListEqual(Str.listFromColumnsStrings("C-E,H,J-L", "D,G","H-K"),[['C','D','E','H','J','K','L'],['D','G'],['H','I','J','K']])
 
+    def test_range_Letter(self):
+        self.assertListEqual(Str.rangeLetter('D-H'), ['D','E','F','G','H'])
         
 
 if __name__== "__main__":

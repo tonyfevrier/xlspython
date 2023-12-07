@@ -176,8 +176,7 @@ class File(UtilsForFile):
             - onglet (str) : nom de l'onglet d'où on importe les colonnes.
             - column_lists (list[list[str]]) : liste de groupes de colonnes. Chaque groupe est une liste de colonnes.
         """
-        
-        #IDEALEMENT IL FAUDRAIT QUE L USER puisse entrer soit des colonnes soit deux chiffres et qu'on prenne automatiquement toutes les colonnes entre elles.
+         
         for list in column_lists:
             tab_number = len(self.writebook.sheetnames)
             self.writebook.create_sheet(f"onglet {tab_number}")

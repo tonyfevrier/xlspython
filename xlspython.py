@@ -4,11 +4,6 @@ from module_pour_excel import *
 from typing_extensions import Annotated
 from utils import UtilsForcommands as Ufc
 
-"""      
-Ajouter une fonction qui prend n colonnes et qui crée deux grandes colonne à partir d'elles : une avec les valeurs (de la première cellule de la colonne) et une avec les noms de la colonne correspondante en face. 
-Cette fonction est en général utilisée plusieurs fois à la suite sur un onglet.  Un onglet par paires de colonnes.
-"""
-
 app = typer.Typer()
 
 
@@ -79,8 +74,9 @@ def gathercolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
                  columnlists : Annotated[Optional[List[str]], typer.Option()] = None,
                  ):
  
-    group = Ufc.askArgumentUntilNone(columnlists, "Enter a group of column of the form C,D,E,I")
-    column_lists = [string.split(',') for string in group]
+    group = Ufc.askArgumentUntilNone(columnlists, "Enter a group of column of the form A-D,E,G,H-J,Z")
+    column_lists = Str.listFromColumnsStrings(*group)
+    #column_lists = [string.split(',') for string in group]
 
     fileobject = File(file)
     fileobject.gather_columns_in_one(sheet,*column_lists)

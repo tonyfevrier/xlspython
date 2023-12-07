@@ -82,11 +82,11 @@ Pour la programmation par classe, la logique voudrait une classe File parent, un
     FAIT : Modifier les fonctions afin d'injecter non pas le numéro de la colonne mais la lettre. Traitement particulier à réserver à addsheetdifferentlysorted, revoir la façon dont je transmets l'autre fichier.
     FAIT : Fonction qui prend une feuille avec une colonne où des partcpts ont pu répondre plusieurs fois et qui met dans une feuille ceux qui ont répondu plusieurs fois avec des colonnes contenant la valeur d'une cellule donnée lors des différentes réponses (exemple : le temps de réponse lors des différentes réponses).
     Ajouter des exemples avec label=False dans les docstrings.
-    Fonction qui prend pleins d'onglets et qui copie les formules d'une colonne (H par exemple) créée dans un onglet (le premier) pour la reproduire sur toutes les colonnes H des autres onglets.
+    FAIT : Fonction qui prend pleins d'onglets et qui copie les formules d'une colonne (H par exemple) créée dans un onglet (le premier) pour la reproduire sur toutes les colonnes H des autres onglets.
     FAIT:Voir comment générer automatiquement une doc à partir de mes docstrings.
-    Vérifier que quand je sauvegarde un fichier avec formules avec dataonly = True, il ne garde que les valeurs. Si oui modifier la doc pour signaler ce point. Voir s'il vaut mieux garder par défaut à True ou le passer à False. Qui est majoritaire?
-    Modifier les fonctions pour qu'on puisse aussi entrer les arguments par la lettre de colonne et pas le numéro peu pratique quand il y a beaucoup de colonnes.
-    line_end vraiment utile dans les fonctions : max_row ne suffit pas?
+    FAIT : Vérifier que quand je sauvegarde un fichier avec formules avec dataonly = True, il ne garde que les valeurs. Si oui modifier la doc pour signaler ce point. Voir s'il vaut mieux garder par défaut à True ou le passer à False. Qui est majoritaire?
+    FAIT : Modifier les fonctions pour qu'on puisse aussi entrer les arguments par la lettre de colonne et pas le numéro peu pratique quand il y a beaucoup de colonnes.
+    FAIT :line_end vraiment utile dans les fonctions : max_row ne suffit pas?
     Voir pour regrouper les trois fonctions column_transform_string_in_binary et columnsetansweringroup, columnconvertinminutes la première étant un cas particulier de la seconde. 
     FAIT: Ecrire une documentation pour un utilisateur lambda.
     Prendre un temps pour réfléchir à quelle interface on pourrait utiliser pour qu'un utilisateur n'ait pas à utiliser python. Faire un freeplane.

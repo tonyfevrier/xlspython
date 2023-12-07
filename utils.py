@@ -1,4 +1,5 @@
 from openpyxl.styles import PatternFill
+from openpyxl.utils import get_column_interval
 import typer
 
 class UtilsForFile():
@@ -276,6 +277,47 @@ class Str():
     
         conversion = str(duration)
         return conversion
+    
+    @classmethod
+    def listFromColumnsStrings(cls,*strings):
+        """
+        Fonction qui prend en entrée une séquence de chaînes de caractères de la forme "C-E,H,J" et qui retourne une liste de listes (ici 
+        [['C','D','E','H','J'],[autres],[autres]]).
+
+        Input : 
+            - strings (list).
+
+        Output:
+            -Liste (list) : Liste des listes de lettres.
+        """
+        Liste = []
+        
+        for string in strings:
+            substrings = string.split(',')
+            listechaine = []
+            for substring in substrings:
+                if '-' in substring:
+                    listechaine += cls.rangeLetter(substring)
+                else:
+                    listechaine.append(substring)
+            Liste.append(listechaine) 
+        
+        return Liste
+    
+    @staticmethod
+    def rangeLetter(string):
+        """
+        Fonction qui prend une chaîne de la forme "D-G" et qui retourne la liste des lettres entre elles.
+            
+        Input: 
+            -string : forme "D-G"
+
+        Output:
+            - list : contient les colonnes allant de la première lettre à la dernière
+        """
+        L = string.split('-')
+        return get_column_interval(L[0],L[-1])
+        
     
 class UtilsForcommands():
     def askArgumentUntilNone(args, message):
