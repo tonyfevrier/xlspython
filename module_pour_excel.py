@@ -185,7 +185,44 @@ class File(UtilsForFile):
                 self.copy_column_tags_and_values_at_bottom(self.writebook[onglet], column_index_from_string(column), target_sheet)
 
         self.writebook.save(self.path + self.name_file) 
+
+    def build_file_from_tab(self, tab):
+        """
+        Fonction qui prend un nom d'onglet dans un fichier et qui crée un fichier associé.
+
+        Input :
+            - tab (str) : the name of the tab from which we want to create the file.
+        """
+
+        sheet_from = self.writebook[tab]
+        newfile = openpyxl.Workbook() 
+        sheet_to = newfile.create_sheet(tab)
+        path = 'multifiles/' 
+ 
+        for j in range(1,sheet_from.max_column + 1):
+            self.copy_paste_column(sheet_from, j, sheet_to, j)
+        newfile.save(path + tab + '.xlsx') 
+        return newfile
+            
+            
+    def one_file_by_tab_sendmail(self, send = False, objet = "", message = ""):
+        """
+        Vous souhaitez fabriquer un fichier par onglet. Chaque fichier aura le nom de l'onglet. 
+        Vous souhaitez éventuellement envoyer chaque fichier à la personne associée.
+        Attention, pour utiliser cette fonction, les onglets doivent être de la forme "prenom nom" sans caractère spéciaux. 
+
+        Inputs : 
+            send(optional boolean) : True si on veut envoyer le mail, False si on veut juste couper en fichiers.
+            objet(optional str) : Objet du message.
+            message (optional str) : Contenu du message.
+        """
         
+        for tab in self.sheets_name:
+            file_to_send = self.build_file_from_tab(tab)
+            prenom = tab.split(" ")[0]
+            nom = tab.split(" ")[1]
+            if send == True:
+                self.envoi_mail(prenom + "." + nom + "@universite-paris-saclay.fr", file_to_send, "tony.fevrier62@gmail.com", "qkxqzhlvsgdssboh", objet, message)
 
 
 class Sheet(File,UtilsForSheet,Other): 

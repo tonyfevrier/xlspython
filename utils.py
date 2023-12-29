@@ -1,6 +1,7 @@
 from openpyxl.styles import PatternFill
 from openpyxl.utils import get_column_interval
 import typer
+import yagmail
 
 class UtilsForFile():
     def copy_paste_line(self,onglet_from,row_from, onglet_to, row_to ):
@@ -54,6 +55,23 @@ class UtilsForFile():
         for line in range(2, import_sheet.max_row + 1):
             target_sheet.cell(line - 2 + maxrow, 1).value = import_sheet.cell(1, column).value
             target_sheet.cell(line - 2 + maxrow, 2).value = import_sheet.cell(line, column).value
+
+    def envoi_mail(self,adresse, file, expeditor, password, object, message): 
+        """
+        Fonction qui envoie un mail avec une pièce jointe.
+
+        Inputs : 
+            - adresse (str) : mail à qui on envoie.
+            - file (str) : fichier à joindre au mail.
+            - expeditor (str) : mail de la personne qui envoie.
+            - password (str) : mot de passe pour permettre d'envoyer un mail d'un serveur distant.
+            - object (str) : l'objet du mail.
+            - message (str) : le contenu du mail. 
+        """
+        yag = yagmail.SMTP(expeditor, password) 
+        piece_jointe = file
+
+        yag.send(to=adresse, subject=object, contents=message, attachments = piece_jointe)
 
 
 class UtilsForSheet():

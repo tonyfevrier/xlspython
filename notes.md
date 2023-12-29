@@ -90,7 +90,9 @@ Pour la programmation par classe, la logique voudrait une classe File parent, un
     Voir pour regrouper les trois fonctions column_transform_string_in_binary et columnsetansweringroup, columnconvertinminutes la première étant un cas particulier de la seconde. 
     FAIT: Ecrire une documentation pour un utilisateur lambda.
     Prendre un temps pour réfléchir à quelle interface on pourrait utiliser pour qu'un utilisateur n'ait pas à utiliser python. Faire un freeplane.
-    
+    Tester le découpage de fichiers et l'envoi de mails.
+    Créer la commande associée à l'envoi de mails.
+
     Créer une classe Path avec attribut nom de dossier
     Voir comment ça peut modifier les classes File et sheet à qui je donnais un argument path.
     Comment dans act on files traduire le fait que fonction peut avoir plusieurs arguments?
