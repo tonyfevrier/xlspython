@@ -69,10 +69,48 @@ def extractcolsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx
     fileobject.extract_column_from_all_sheets(colread)
 
 @app.command()
+def cutsendmail(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
+                sendmail : Annotated[Optional[str], typer.Option(prompt = '(Optional) Do you want to send files by mail? Press y (yes) or enter (no)')] = 'n',
+               ):
+    """
+    Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
+
+    Vous souhaitez fabriquer un fichier par onglet. Chaque fichier aura le nom de l'onglet. Vous souhaitez éventuellement envoyer chaque fichier à la personne associée.
+    Attention, pour utiliser cette fonction, les onglets doivent être de la forme "prenom nom" sans caractère spéciaux. 
+
+    Commande : 
+
+        Version guidée : python xlspython.py cutsendmail
+
+        Version complète : python xlspython.py cutsendmail 
+    """
+    fileobject = File(file)
+
+    if sendmail ==  'n':
+        fileobject.one_file_by_tab_sendmail()
+    else:
+        objet = typer.prompt('Please enter the object of your email',default="")
+        message = typer.prompt('Please enter the message of your email',default="")
+        fileobject.one_file_by_tab_sendmail(send = True, objet = objet, message = message)
+
+
+@app.command()
 def gathercolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
                  sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
                  columnlists : Annotated[Optional[List[str]], typer.Option()] = None,
                  ):
+    """
+    Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
+
+    Vous avez des groupes de colonnes de valeurs avec une étiquette en première cellule. Pour chaque groupe, vous souhaitez former deux colonnes de valeurs : l'une qui contient
+        les valeurs rassemblées en une colonne, l'autre, à sa gauche, qui indique l'étiquette de la colonne dans laquelle elle a été prise.
+    
+    Commande : 
+
+        Version guidée : python xlspython.py gathercolumn
+
+        Version complète : python xlspython.py gathercolumn --file nom --sheet onglet --columnlists A-D,E,G,H-J,Z
+    """
  
     group = Ufc.askArgumentUntilNone(columnlists, "Enter a group of column of the form A-D,E,G,H-J,Z")
     column_lists = Str.listFromColumnsStrings(*group)

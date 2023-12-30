@@ -89,9 +89,11 @@ Pour la programmation par classe, la logique voudrait une classe File parent, un
     FAIT :line_end vraiment utile dans les fonctions : max_row ne suffit pas?
     Voir pour regrouper les trois fonctions column_transform_string_in_binary et columnsetansweringroup, columnconvertinminutes la première étant un cas particulier de la seconde. 
     FAIT: Ecrire une documentation pour un utilisateur lambda.
-    Prendre un temps pour réfléchir à quelle interface on pourrait utiliser pour qu'un utilisateur n'ait pas à utiliser python. Faire un freeplane.
+    FAIT: Prendre un temps pour réfléchir à quelle interface on pourrait utiliser pour qu'un utilisateur n'ait pas à utiliser python. Faire un freeplane.
+    FAIT: Créer un environnement avec yagmail et openpyxl pour code_xls.
     Tester le découpage de fichiers et l'envoi de mails.
-    Créer la commande associée à l'envoi de mails.
+    FAIT: Créer la commande associée à l'envoi de mails.
+    Pour l'écriture du mail, faire ouvrir un libre office dans lequel l'utilisateur tape son mail et le contenu est converti en str.
 
     Créer une classe Path avec attribut nom de dossier
     Voir comment ça peut modifier les classes File et sheet à qui je donnais un argument path.

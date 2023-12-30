@@ -41,6 +41,14 @@ class TestFile(TestCase):
                 for j in range(1,sheet1.max_column+1):
                     self.assertEqual(sheet1.cell(i,j).value,sheet2.cell(i,j).value)
 
+    def verify_sheets_identical(self, sheet1, sheet2):  
+        self.assertEqual(sheet1.sheet.max_row,sheet2.sheet.max_row)
+        self.assertEqual(sheet1.sheet.max_column,sheet2.sheet.max_column)
+
+        for i in range(1,sheet1.sheet.max_row+1):
+            for j in range(1,sheet1.sheet.max_column+1):
+                self.assertEqual(sheet1.sheet.cell(i,j).value,sheet2.sheet.cell(i,j).value) 
+
     def test_create_one_onglet_by_participant(self): 
 
         file = File('test_create_one_onglet_by_participant.xlsx')
@@ -88,7 +96,19 @@ class TestFile(TestCase):
         del file.writebook['onglet 1']
         del file.writebook['onglet 2']
         file.writebook.save(file.path + 'test_gather_columns_in_one.xlsx')
-        
+
+    def test_one_file_by_tab_sendmail(self):
+        file = File("test_onefile_sendmail.xlsx")
+        file.one_file_by_tab_sendmail()
+ 
+        sheet1 = Sheet("tony fevrier.xlsx","Sheet", path = "multifiles/")
+        sheet2 = Sheet("Marine Moyon.xlsx","Sheet", path = "multifiles/")
+
+        sheet1o = Sheet("test_onefile_sendmail.xlsx","tony fevrier")
+        sheet2o = Sheet("test_onefile_sendmail.xlsx","Marine Moyon")
+
+        self.verify_sheets_identical(sheet1, sheet1o)
+        self.verify_sheets_identical(sheet2, sheet2o)                
 
 class TestSheet(TestCase, Other):
     def test_sheet_correctly_opened(self):

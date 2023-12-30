@@ -196,13 +196,14 @@ class File(UtilsForFile):
 
         sheet_from = self.writebook[tab]
         newfile = openpyxl.Workbook() 
-        sheet_to = newfile.create_sheet(tab)
+        sheet_to = newfile.get_sheet_by_name('Sheet') 
         path = 'multifiles/' 
  
         for j in range(1,sheet_from.max_column + 1):
             self.copy_paste_column(sheet_from, j, sheet_to, j)
-        newfile.save(path + tab + '.xlsx') 
-        return newfile
+        namefile = path + tab + '.xlsx'
+        newfile.save(namefile) 
+        return namefile
             
             
     def one_file_by_tab_sendmail(self, send = False, objet = "", message = ""):
@@ -217,11 +218,11 @@ class File(UtilsForFile):
             message (optional str) : Contenu du message.
         """
         
-        for tab in self.sheets_name:
+        for tab in self.sheets_name: 
             file_to_send = self.build_file_from_tab(tab)
-            prenom = tab.split(" ")[0]
-            nom = tab.split(" ")[1]
             if send == True:
+                prenom = tab.split(" ")[0]
+                nom = tab.split(" ")[1]
                 self.envoi_mail(prenom + "." + nom + "@universite-paris-saclay.fr", file_to_send, "tony.fevrier62@gmail.com", "qkxqzhlvsgdssboh", objet, message)
 
 
