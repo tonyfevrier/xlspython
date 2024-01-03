@@ -1,6 +1,6 @@
 #from xlutils.copy import copy 
 
-import openpyxl 
+import openpyxl, json 
 from openpyxl.styles import PatternFill
 from openpyxl.utils import column_index_from_string
 from copy import copy
@@ -206,7 +206,7 @@ class File(UtilsForFile):
         return namefile
             
             
-    def one_file_by_tab_sendmail(self, send = False, objet = "", message = ""):
+    def one_file_by_tab_sendmail(self, send = False, adressjson = "", objet = "", message = ""):
         """
         Vous souhaitez fabriquer un fichier par onglet. Chaque fichier aura le nom de l'onglet. 
         Vous souhaitez éventuellement envoyer chaque fichier à la personne associée.
@@ -214,17 +214,24 @@ class File(UtilsForFile):
 
         Inputs : 
             send(optional boolean) : True si on veut envoyer le mail, False si on veut juste couper en fichiers.
+            adressjson(str) : nom du fichier xlsx qui contient deux colonnes la première avec les noms des onglets, la seconde avec l'adresse mail. Ce fichier doit être mis dans le dossier fichier_xls. 
             objet(optional str) : Objet du message.
             message (optional str) : Contenu du message.
         """
-        
+        if adressjson != None:
+            file = open(self.path + adressjson, 'r')
+            mailinglist = json.load(file)
+            file.close()
+
         for tab in self.sheets_name: 
             file_to_send = self.build_file_from_tab(tab)
             if send == True:
-                prenom = tab.split(" ")[0]
-                nom = tab.split(" ")[1]
-                self.envoi_mail(prenom + "." + nom + "@universite-paris-saclay.fr", file_to_send, "tony.fevrier62@gmail.com", "qkxqzhlvsgdssboh", objet, message)
-
+                if adressjson == None:
+                    prenom = tab.split(" ")[0]
+                    nom = tab.split(" ")[1]
+                    self.envoi_mail(prenom + "." + nom + "@universite-paris-saclay.fr", file_to_send, "tony.fevrier62@gmail.com", "qkxqzhlvsgdssboh", objet, message)
+                else: 
+                    self.envoi_mail(mailinglist[tab], file_to_send, "tony.fevrier62@gmail.com", "qkxqzhlvsgdssboh", objet, message)  
 
 class Sheet(File,UtilsForSheet,Other): 
     def __init__(self, name_file, name_onglet,path = 'fichiers_xls/'): 

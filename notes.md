@@ -94,6 +94,7 @@ Pour la programmation par classe, la logique voudrait une classe File parent, un
     Tester le découpage de fichiers et l'envoi de mails.
     FAIT: Créer la commande associée à l'envoi de mails.
     Pour l'écriture du mail, faire ouvrir un libre office dans lequel l'utilisateur tape son mail et le contenu est converti en str.
+    Ajouter l'option de rentrée un fichier xlsx qui contient pour chaque prenom nom un mail associé.
 
     Créer une classe Path avec attribut nom de dossier
     Voir comment ça peut modifier les classes File et sheet à qui je donnais un argument path.

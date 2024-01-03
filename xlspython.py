@@ -90,8 +90,9 @@ def cutsendmail(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file
         fileobject.one_file_by_tab_sendmail()
     else:
         objet = typer.prompt('Please enter the object of your email',default="")
-        message = typer.prompt('Please enter the message of your email',default="")
-        fileobject.one_file_by_tab_sendmail(send = True, objet = objet, message = message)
+        message = typer.prompt('Please enter the message of your email',default="") 
+        jsonfile = typer.prompt('Please enter the name of the json file containing mail adresses. If you want to send to the mail paris-saclay, just press enter',default="") 
+        fileobject.one_file_by_tab_sendmail(send = True, adressjson = jsonfile, objet = objet, message = message)
 
 
 @app.command()
