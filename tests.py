@@ -259,6 +259,19 @@ class TestSheet(TestCase, Other):
         del file.writebook[file.sheets_name[-1]]
         file.writebook.save(file.path + 'testongletbyparticipant.xlsx')
 
+    def test_give_names_of_maximum(self):
+        sheet = Sheet('test_give_names.xlsx','sheet1')
+        sheet.give_names_of_maximum('D', 'A', 'B', 'C') 
+
+        self.verify_sheets_identical(sheet, Sheet('test_give_names.xlsx','Feuille2'))
+
+        sheet.sheet.delete_cols(4)
+        sheet.writebook.save(sheet.path + 'test_give_names.xlsx') 
+        
+
+        
+
+
 
 class TestStr(TestCase, Other):
     def test_transform_string_in_binary(self):

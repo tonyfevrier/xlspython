@@ -645,6 +645,41 @@ class Sheet(File,UtilsForSheet,Other):
 
         self.writebook.save(self.path + self.name_file) 
 
+    def give_names_of_maximum(self, column_insertion, *columnlist):
+        """
+        Vous avez une liste de colonnes avec des chiffres, chaque colonne a un nom dans sa première cellule. Cette fonction crée une colonne dans laquelle on entre pour chaque 
+        ligne le nom de la colonne ou des colonnes qui contient le max.
+
+        Inputs : 
+            - column_insertion : 
+            - columnlist :
+        """
+
+        number_column_insertion = column_index_from_string(column_insertion)
+        self.sheet.insert_cols(number_column_insertion)
+        self.sheet.cell(1, number_column_insertion).value = "Colonne de(s) maximum(s)"
+
+        #dico qui à une colonne associe le nom de la colonne
+        dico = {}
+        for column in columnlist:
+            dico[column] = self.sheet.cell(1,column_index_from_string(column)).value
+ 
+        for line in range(2, self.sheet.max_row + 1):
+            #pour une ligne donnée, on récupère le nom de la colonne associé aux maximum(s).
+            maximum = -1
+            chaine = ""
+            for column in columnlist:
+                cellvalue = self.sheet.cell(line, column_index_from_string(column)).value
+                if cellvalue > maximum:
+                    maximum = cellvalue
+                    chaine = dico[column]
+                elif cellvalue == maximum:
+                    chaine += "_" + dico[column]
+            self.sheet.cell(line, number_column_insertion).value = chaine
+        
+        self.writebook.save(self.path + self.name_file) 
+        
+
     
 
         

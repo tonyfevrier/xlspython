@@ -411,6 +411,27 @@ def gathermultianswers(file : Annotated[str, typer.Option(prompt = 'Enter the xl
     sheetobject = Sheet(file,sheet)
     sheetobject.gather_multiple_answers(colread,colstore,line_beggining=line)
 
+@app.command()
+def maxnames(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
+                   sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
+                   colstore : Annotated[str, typer.Option(prompt = 'Enter the column letter containing the data to store ')],
+                   columnlist : Annotated[Optional[List[str]], typer.Option()] = None, 
+                   ):
+    """
+    Vous avez une liste de colonnes avec des chiffres, chaque colonne a un nom dans sa première cellule. Cette fonction crée une colonne dans laquelle on entre pour chaque 
+    ligne le nom de la colonne ou des colonnes qui contient le max.
+
+    Commande : 
+
+        Version guidée : python xlspython.py maxnames 
+
+        Version complète : python xlspython.py maxnames --file name.xlsx --sheet nametab --colstore columnletter --columnlist A --columnlist C
+    
+    """
+    columnlist = Ufc.askArgumentUntilNone(columnlist, "Enter the letter of a column you want to read")
+
+    sheetobject = Sheet(file,sheet)
+    sheetobject.give_names_of_maximum(colstore, *columnlist)
 
 
 if __name__ == "__main__":
