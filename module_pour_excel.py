@@ -198,9 +198,9 @@ class File(UtilsForFile):
         newfile = openpyxl.Workbook() 
         sheet_to = newfile.get_sheet_by_name('Sheet') 
         path = 'multifiles/' 
- 
-        for j in range(1,sheet_from.max_column + 1):
-            self.copy_paste_column(sheet_from, j, sheet_to, j)
+  
+        self.deep_copy_of_a_sheet(sheet_from, sheet_to) 
+
         namefile = path + tab + '.xlsx'
         newfile.save(namefile) 
         return namefile
@@ -217,8 +217,8 @@ class File(UtilsForFile):
             adressjson(str) : nom du fichier xlsx qui contient deux colonnes la première avec les noms des onglets, la seconde avec l'adresse mail. Ce fichier doit être mis dans le dossier fichier_xls. 
             objet(optional str) : Objet du message.
             message (optional str) : Contenu du message.
-        """
-        if adressjson != None:
+        """ 
+        if adressjson != "":
             file = open(self.path + adressjson, 'r')
             mailinglist = json.load(file)
             file.close()
@@ -226,7 +226,7 @@ class File(UtilsForFile):
         for tab in self.sheets_name: 
             file_to_send = self.build_file_from_tab(tab)
             if send == True:
-                if adressjson == None:
+                if adressjson == "":
                     prenom = tab.split(" ")[0]
                     nom = tab.split(" ")[1]
                     self.envoi_mail(prenom + "." + nom + "@universite-paris-saclay.fr", file_to_send, "tony.fevrier62@gmail.com", "qkxqzhlvsgdssboh", objet, message)

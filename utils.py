@@ -2,6 +2,7 @@ from openpyxl.styles import PatternFill
 from openpyxl.utils import get_column_interval
 import typer
 import yagmail
+from copy import copy
 
 class UtilsForFile():
     def copy_paste_line(self,onglet_from,row_from, onglet_to, row_to ):
@@ -30,6 +31,27 @@ class UtilsForFile():
 
         for i in range(1, onglet_from.max_row + 1): 
             onglet_to.cell(i,column_to).value = onglet_from.cell(i,column_from).value 
+
+    def deep_copy_of_a_sheet(self, sheet_from, sheet_to):
+        """
+        Fonction qui copie une page sur une autre. La copie est totale : valeur, couleur, cellules fusionnées
+        """
+        for i in range(1,sheet_from.max_row+1):
+                for j in range(1,sheet_from.max_column+1): 
+                    # Récupérer les informations sur la cellule fusionnée  
+                    sheet_to.cell(i,j).value = sheet_from.cell(i,j).value  
+                    sheet_to.cell(i,j).fill = copy(sheet_from.cell(i,j).fill)
+                    sheet_to.cell(i,j).font = copy(sheet_from.cell(i,j).font) 
+                    sheet_to.cell(i,j).border = copy(sheet_from.cell(i,j).border) 
+                    sheet_to.cell(i,j).alignment = copy(sheet_from.cell(i,j).alignment)  
+
+        #On parcourt le dictionnaire des cellules fusionnées et on fusionne celles de sheet to correspondante:
+        for merged_range in sheet_from.merged_cells.ranges:  
+            start_column, start_row, end_column, end_row = merged_range.bounds 
+            # Fusionner les cellules correspondantes dans la feuille de calcul destination
+            sheet_to.merge_cells(start_row=start_row, start_column=start_column, end_row=end_row, end_column=end_column)
+
+    
 
     def add_line_at_bottom(self, onglet_from, row_from, onglet_to):
         """
