@@ -108,7 +108,36 @@ class TestFile(TestCase):
         sheet2o = Sheet("test_onefile_sendmail.xlsx","Marine Moyon")
 
         self.verify_sheets_identical(sheet1, sheet1o)
-        self.verify_sheets_identical(sheet2, sheet2o)                
+        self.verify_sheets_identical(sheet2, sheet2o) 
+
+    def test_merge_cells_on_all_tabs(self): 
+        file1 = File("test_merging.xlsx") 
+        file1.merge_cells_on_all_tabs('C', 'D', 5, 7)
+
+        #voir comment tester le fait qu'une cellule est mergée : comprendre l'objet mergedcells
+        """ for tab in file1.sheets_name:
+            sheet = file1.writebook[tab]
+            mergedcells = sheet.merged_cells
+            print(mergedcells.ranges, type(mergedcells))
+            self.assertEqual('C5' in mergedcells.ranges,True)
+            self.assertIn(sheet['C6'],mergedcells)
+            self.assertIn(sheet['C7'],mergedcells)
+            self.assertIn(sheet['D5'],mergedcells)
+            self.assertIn(sheet['D6'],mergedcells) """
+        
+    def test_apply_cell_formula_on_all_sheets(self):
+        file = File("test_merging.xlsx")
+        file.apply_cells_formula_on_all_sheets('A10','B10','C10')
+
+        for tab in file.sheets_name[1:]:
+            sheet = file.writebook[tab]
+            self.assertEqual(sheet['A10'].value, file.writebook[file.sheets_name[0]]['A10'].value)
+            self.assertEqual(sheet['B10'].value, file.writebook[file.sheets_name[0]]['B10'].value)
+            self.assertEqual(sheet['C10'].value, file.writebook[file.sheets_name[0]]['C10'].value)
+            #self.assertEqual(sheet.cell(1,10).formula, file.writebook[file.sheets_name[0]].cell(1,10).formula)
+            #self.assertEqual(sheet.cell(2,10).formula, file.writebook[file.sheets_name[0]].cell(2,10).formula)
+            #self.assertEqual(sheet.cell(3,10).formula, file.writebook[file.sheets_name[0]].cell(3,10).formula)
+
 
 class TestSheet(TestCase, Other):
     def test_sheet_correctly_opened(self):
@@ -221,7 +250,8 @@ class TestSheet(TestCase, Other):
 
     def test_delete_lines(self):
         sheet = Sheet('test.xlsx','delete_lines') 
-        sheet.delete_lines('D',0)
+        sheet.delete_lines('D', '0')
+        sheet.delete_lines('D','p a')
         self.column_identical('test.xlsx','test.xlsx',9,10, 1, 1)
         self.column_identical('test.xlsx','test.xlsx',9,10, 2, 2)
         self.column_identical('test.xlsx','test.xlsx',9,10, 3, 3)

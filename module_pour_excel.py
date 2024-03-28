@@ -2,9 +2,9 @@
 
 import openpyxl, json 
 from openpyxl.styles import PatternFill
-from openpyxl.utils import column_index_from_string
+from openpyxl.utils import column_index_from_string, coordinate_to_tuple
 from copy import copy
-from datetime import date, datetime
+from datetime import datetime, timezone
 from utils import UtilsForFile, UtilsForSheet, Str, Other
 
 class Path():
@@ -19,7 +19,7 @@ class Path():
 
 
 class File(UtilsForFile): 
-    def __init__(self, name_file, path = 'fichiers_xls/', dataonly = True):
+    def __init__(self, name_file, path = 'fichiers_xls/', dataonly = False): #True):
         """L'utilisateur sera invité à mettre son fichier xslx dans un dossier nommé fichiers_xls
         """
         self.name_file = name_file  
@@ -167,6 +167,37 @@ class File(UtilsForFile):
 
         self.writebook.save(self.path + self.name_file)
 
+    def apply_cells_formula_on_all_sheets(self, *cells):
+        """
+        Fonction qui reproduit les formules d'une cellule ou plusieurs cellules
+          du premier onglet sur toutes les cellules situées à la même position dans les 
+          autres onglets.
+
+        Input : 
+            -cells : string. les positions des cellule où récupérer et coller 
+
+        Exemples d'utilisation : 
+
+            Bien veiller à mettre dataonly = False sinon il ne copiera pas les formules mais
+            les valeurs des cellules. On peut aussi copier les valeurs des cellules : pour cela,
+            enlever dataonly = False.
+
+            file = File('dataset.xlsx', dataonly = False)
+            file.apply_column_formula_on_all_sheets('C5','D6')  
+        """
+
+        #obtenir les indices de la cellule 
+        cell_list = []
+        for cell in cells: 
+            cell_list.append(coordinate_to_tuple(cell)) 
+
+        #on applique les copies dans tous les onglets sauf le premier
+        for name_onglet in self.sheets_name[1:]:  
+            for tuple in cell_list: 
+                self.writebook[name_onglet].cell(tuple[0],tuple[1]).value = self.writebook[self.sheets_name[0]].cell(tuple[0],tuple[1]).value  
+
+        self.writebook.save(self.path + self.name_file)
+
     def gather_columns_in_one(self,onglet, *column_lists):
         """
         Vous avez des groupes de colonnes de valeurs avec une étiquette en première cellule. Pour chaque groupe, vous souhaitez former deux colonnes de valeurs : l'une qui contient
@@ -196,7 +227,7 @@ class File(UtilsForFile):
 
         sheet_from = self.writebook[tab]
         newfile = openpyxl.Workbook() 
-        sheet_to = newfile.get_sheet_by_name('Sheet') 
+        sheet_to = newfile['Sheet']  
         path = 'multifiles/' 
   
         self.deep_copy_of_a_sheet(sheet_from, sheet_to) 
@@ -232,6 +263,27 @@ class File(UtilsForFile):
                     self.envoi_mail(prenom + "." + nom + "@universite-paris-saclay.fr", file_to_send, "tony.fevrier62@gmail.com", "qkxqzhlvsgdssboh", objet, message)
                 else: 
                     self.envoi_mail(mailinglist[tab], file_to_send, "tony.fevrier62@gmail.com", "qkxqzhlvsgdssboh", objet, message)  
+
+    def merge_cells_on_all_tabs(self,start_column, end_column, start_row, end_row):
+        """
+        Fonction qui merge les mêmes cellules sur tous les onglets d'un fichier 
+
+        Inputs :
+            - start_column (string): Letter of the column where to start the merging
+            - end_column (string): Letter of the column where to end the merging
+            - start_row (int): Index of the row where to start the merging
+            - end_row (int): Index of the row where to start the merging
+
+        """
+        
+        start_column = column_index_from_string(start_column)
+        end_column = column_index_from_string(end_column)
+
+        for tab in self.sheets_name:
+            sheet = self.writebook[tab] 
+            sheet.merge_cells(start_row=start_row, start_column=start_column, end_row=end_row, end_column=end_column)
+
+        self.writebook.save(self.path + self.name_file)
 
 class Sheet(File,UtilsForSheet,Other): 
     def __init__(self, name_file, name_onglet,path = 'fichiers_xls/'): 
@@ -529,9 +581,12 @@ class Sheet(File,UtilsForSheet,Other):
         """
         if label == True:
             column = column_index_from_string(column)  
-
-        for i in range(1,self.sheet.max_row + 1):   
-            if str(self.sheet.cell(i,column).value) in chaines:
+            
+        #value = self.getCellNumericalValue(self.path + self.name_file, self.sheet.cell(i,column)) 
+        #if str(value) in chaines: 
+                
+        for i in range(self.sheet.max_row,0,-1):
+            if str(self.sheet.cell(i,column).value) in chaines:  
                 self.sheet.delete_rows(i)
 
         self.writebook.save(self.path + self.name_file)

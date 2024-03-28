@@ -84,7 +84,7 @@ def cutsendmail(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file
 
         Version complète : python xlspython.py cutsendmail 
     """
-    fileobject = File(file)
+    fileobject = File(file, dataonly=True)
 
     if sendmail ==  'n':
         fileobject.one_file_by_tab_sendmail()
@@ -149,7 +149,7 @@ def stringinbinary(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
 
 # Créer un fichier test pour tester cette fonction.
 @app.command()
-def formulaonsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
+def cpcolumnonsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
                     column : Annotated[List[str], typer.Option()] = None
                     ):
     """
@@ -160,15 +160,63 @@ def formulaonsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx 
     
     Commande : 
 
-        Version guidée : python xlspython.py formulaonsheets
+        Version guidée : python xlspython.py cpcolumnonsheets
 
-        Version complète : python xlspython.py formulaonsheets --file name.xlsx --column columnletter
+        Version complète : python xlspython.py cpcolumnonsheets --file name.xlsx --column columnletter
     
     """
     columns = Ufc.askArgumentUntilNone(column,'Enter one column whose you want to reproduce the formula')
 
     fileobject = File(file, dataonly = False)
     fileobject.apply_column_formula_on_all_sheets(*columns) 
+
+@app.command()
+def cpcellonsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
+                    cell : Annotated[List[str], typer.Option()] = None
+                    ):
+    
+    """
+    Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
+
+    Fonction qui reproduit les formules d'une ou plusieurs cellules (cell) du premier onglet sur toutes les cellules situées à la même position dans les 
+          autres onglets.
+    
+    Commande : 
+
+        Version guidée : python xlspython.py cpcellonsheets
+
+        Version complète : python xlspython.py cpcellonsheets --file name.xlsx --cell C5 --cell C17
+    
+    """
+
+    cells = Ufc.askArgumentUntilNone(cell,'Enter one cell whose you want to reproduce the formula')
+
+    fileobject = File(file)
+    fileobject.apply_cells_formula_on_all_sheets(*cells) 
+    
+@app.command()
+def mergecells(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
+                    start_column : Annotated[str, typer.Option(prompt = 'Enter the first column of  cells to merge :')],
+                    end_column : Annotated[str, typer.Option(prompt = 'Enter the last column of cells to merge :')],
+                    start_row : Annotated[str, typer.Option(prompt = 'Enter the first row of  cells to merge :')],
+                    end_row : Annotated[str, typer.Option(prompt = 'Enter the last row of cells to merge :')],
+                    ):
+    
+    """
+    Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
+
+    Fonction qui fusionne les cellules de start_column à end_column et de start_row à end_row.
+    
+    Commande : 
+
+        Version guidée : python xlspython.py mergecells
+
+        Version complète : python xlspython.py mergecells --file name.xlsx --start_column columnletter --end_column columnletter --start_row rowindex --end_column rowindex 
+    
+    """
+    
+    fileobject = File(file)
+    fileobject.merge_cells_on_all_tabs(start_column,end_column,start_row,end_row)
 
 
  

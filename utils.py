@@ -1,8 +1,9 @@
 from openpyxl.styles import PatternFill
 from openpyxl.utils import get_column_interval
-import typer
+import typer 
 import yagmail
-from copy import copy
+from copy import copy 
+from pycel import ExcelCompiler
 
 class UtilsForFile():
     def copy_paste_line(self,onglet_from,row_from, onglet_to, row_to ):
@@ -422,3 +423,19 @@ class Other():
             for reponse in value:
                 reverse_dico[reponse] = key
         return reverse_dico
+
+    def getCellNumericalValue(self,filename,cell):
+        """
+        Fonction qui prend la valeur d'une cellule et qui, si c'est une formule, retourne sa valeur numérique
+        """ 
+
+        # Compiler les formules Excel
+        compiler = ExcelCompiler(filename)
+        compiler.compile()
+
+        formula = cell.value
+ 
+        if isinstance(formula, str) and formula.startswith('='):
+            value = compiler.evaluate(cell) 
+
+        return value
