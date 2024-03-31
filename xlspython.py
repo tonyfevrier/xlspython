@@ -65,7 +65,7 @@ def extractcolsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx
         Version complète : python xlspython.py extractcolsheets --file name.xlsx --colread columnletter
     
     """
-    fileobject = File(file) 
+    fileobject = File(file,dataonly=True) 
     fileobject.extract_column_from_all_sheets(colread)
 
 @app.command()

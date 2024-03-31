@@ -198,10 +198,14 @@ class TestSheet(TestCase, Other):
         groups_of_response = {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']}  
 
         sheet.column_set_answer_in_group('B','C',groups_of_response)
-
+ 
         self.column_identical('test_column_set_answer.xlsx','test_column_set_answer.xlsx',0,1,3,3)
+        self.column_identical('test_column_set_answer.xlsx','test_column_set_answer.xlsx',0,1,4,4)
 
-
+        sheet.sheet.delete_cols(3)
+        sheet.updateCellFormulas(sheet.sheet,False,'column',['C'])
+        sheet.writebook.save(sheet.path + 'test_column_set_answer.xlsx') 
+        
 
     def test_column_security(self):
         sheet = Sheet('test.xlsx','sheet1')
@@ -258,6 +262,12 @@ class TestSheet(TestCase, Other):
         self.column_identical('test.xlsx','test.xlsx',9,10, 4, 4)
         self.column_identical('test.xlsx','test.xlsx',9,10, 5, 5)
         self.column_identical('test.xlsx','test.xlsx',9,10, 6, 6)
+
+    def test_delete_lines_with_formulas(self):
+        sheet = Sheet('listing_par_etape - Copie.xlsx','Feuil1') 
+        sheet.delete_lines('B', 'pas consenti') 
+        self.column_identical('listing_par_etape - Copie.xlsx','listing_par_etape - Copie.xlsx',0, 1, 2, 2)
+        self.column_identical('listing_par_etape - Copie.xlsx','listing_par_etape - Copie.xlsx',0, 1, 10, 10) 
 
     def test_delete_doublons(self):
         file = File('test_doublons.xlsx')
@@ -359,16 +369,38 @@ class TestStr(TestCase, Other):
         duration2 = Str("1 heure 25 min")
         duration3 = Str("16 min 35 s")
         
-        self.assertEqual(duration1.convert_time_in_minutes(), '3000.0')
-        self.assertEqual(duration2.convert_time_in_minutes(), '85.0')
-        self.assertEqual(duration3.convert_time_in_minutes(), '16.58')
+        self.assertEqual(duration1.convert_time_in_minutes(), '3000,0')
+        self.assertEqual(duration2.convert_time_in_minutes(), '85,0')
+        self.assertEqual(duration3.convert_time_in_minutes(), '16,58')
 
     def test_listFromColumnsStrings(self):
         self.assertListEqual(Str.listFromColumnsStrings("C-E,H,J-L", "D,G","H-K"),[['C','D','E','H','J','K','L'],['D','G'],['H','I','J','K']])
 
     def test_range_Letter(self):
         self.assertListEqual(Str.rangeLetter('D-H'), ['D','E','F','G','H'])
-        
+
+    def testUpdateOneFormulaForOneInsertion(self):
+        formula = Str.updateOneFormulaForOneInsertion("SI(J10+K$1+L$3)",True,'row','2')
+        self.assertEqual(formula, "SI(J11+K$1+L$4)")
+
+        formula = Str.updateOneFormulaForOneInsertion("SI(J12+K$1+L$3)",False,'row','11')
+        self.assertEqual(formula, "SI(J11+K$1+L$3)")
+
+        formula = Str.updateOneFormulaForOneInsertion("SI(J12+K$1+L$3)",False,'row','13')
+        self.assertEqual(formula, "SI(J12+K$1+L$3)")
+
+        formula = Str.updateOneFormulaForOneInsertion("SI(J10+K$1+L$3)",True,'column','C')
+        self.assertEqual(formula, "SI(K10+L$1+M$3)")
+
+        formula = Str.updateOneFormulaForOneInsertion("SI(J10+K$1+L$3)",False,'column','C')
+        self.assertEqual(formula, "SI(I10+J$1+K$3)")
+
+    def testUpdateOneFormula(self):
+        formula = Str.updateOneFormula("SI(J10+K$1+L$3)",True,'row',['2','5'])
+        self.assertEqual(formula, "SI(J12+K$1+L$4)")
+  
+        formula = Str.updateOneFormula("SI(J10+K$1+L$3)",False,'column',['C','D','L'])
+        self.assertEqual(formula, "SI(H10+I$1+J$3)")
 
 if __name__== "__main__":
     main()

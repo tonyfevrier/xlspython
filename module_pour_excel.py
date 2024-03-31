@@ -2,10 +2,11 @@
 
 import openpyxl, json 
 from openpyxl.styles import PatternFill
-from openpyxl.utils import column_index_from_string, coordinate_to_tuple
+from openpyxl.utils import column_index_from_string, coordinate_to_tuple, get_column_letter
 from copy import copy
 from datetime import datetime, timezone
 from utils import UtilsForFile, UtilsForSheet, Str, Other
+from pycel import ExcelCompiler
 
 class Path():
     def __init__(self,path = 'fichiers_xls/'):
@@ -26,6 +27,7 @@ class File(UtilsForFile):
         self.path = path
         self.writebook = openpyxl.load_workbook(self.path + self.name_file, data_only = dataonly)
         self.sheets_name = self.writebook.sheetnames
+        self.compiler = ExcelCompiler(self.path + self.name_file)
 
     def sauvegarde(self):
         """
@@ -195,6 +197,10 @@ class File(UtilsForFile):
         for name_onglet in self.sheets_name[1:]:  
             for tuple in cell_list: 
                 self.writebook[name_onglet].cell(tuple[0],tuple[1]).value = self.writebook[self.sheets_name[0]].cell(tuple[0],tuple[1]).value  
+                self.writebook[name_onglet].cell(tuple[0],tuple[1]).fill = copy(self.writebook[self.sheets_name[0]].cell(tuple[0],tuple[1]).fill)  
+                self.writebook[name_onglet].cell(tuple[0],tuple[1]).font = copy(self.writebook[self.sheets_name[0]].cell(tuple[0],tuple[1]).font)  
+                self.writebook[name_onglet].cell(tuple[0],tuple[1]).border = copy(self.writebook[self.sheets_name[0]].cell(tuple[0],tuple[1]).border)  
+                self.writebook[name_onglet].cell(tuple[0],tuple[1]).alignment = copy(self.writebook[self.sheets_name[0]].cell(tuple[0],tuple[1]).alignment)    
 
         self.writebook.save(self.path + self.name_file)
 
@@ -314,9 +320,13 @@ class Sheet(File,UtilsForSheet,Other):
 
             #Bien mettre les réponses de good_answers entre ''. 
         """  
+        
         if label == True:
             column_read = column_index_from_string(column_read) 
+            modifications = [column_write]
             column_write = column_index_from_string(column_write)
+        else:
+            modifications = [get_column_letter(column_write)]
 
         if insert == True:
             self.sheet.insert_cols(column_write)
@@ -326,6 +336,7 @@ class Sheet(File,UtilsForSheet,Other):
             bool = chaine_object.clean_string().transform_string_in_binary(*good_answers) 
             self.sheet.cell(i,column_write).value = bool
  
+        self.updateCellFormulas(self.sheet,True,'column', modifications)         
         self.writebook.save(self.path + self.name_file)
 
     def column_convert_in_minutes(self,column_read,column_write,line_beginning = 2, insert = True, label = True):
@@ -346,19 +357,24 @@ class Sheet(File,UtilsForSheet,Other):
             sheet = Sheet('dataset.xlsx','onglet1')
             sheet.column_convert_in_minutes('A','B',line_beggining = 3) 
 
-        """
+        """ 
         if label == True:
             column_read = column_index_from_string(column_read) 
+            modifications = [column_write]
             column_write = column_index_from_string(column_write)
+        else:
+            modifications = [get_column_letter(column_write)]
 
         if insert == True:
             self.sheet.insert_cols(column_write)
 
         for i in range(line_beginning,self.sheet.max_row + 1):
-            chaine_object = Str(self.sheet.cell(i,column_read).value)  
-            bool = chaine_object.clean_string().convert_time_in_minutes() 
-            self.sheet.cell(i,column_write).value = bool
+            chaine_object = Str(self.sheet.cell(i,column_read).value) 
+            if chaine_object.chaine != "None": 
+                bool = chaine_object.clean_string().convert_time_in_minutes() 
+                self.sheet.cell(i,column_write).value = bool
  
+        self.updateCellFormulas(self.sheet,True,'column', modifications)         
         self.writebook.save(self.path + self.name_file)
 
     def column_set_answer_in_group(self,column_read,column_write,groups_of_responses,line_beginning = 2, insert = True, label = True):
@@ -386,7 +402,10 @@ class Sheet(File,UtilsForSheet,Other):
         """
         if label == True:
             column_read = column_index_from_string(column_read) 
+            modifications = [column_write]
             column_write = column_index_from_string(column_write)
+        else:
+            modifications = [get_column_letter(column_write)]
 
         if insert == True:
             self.sheet.insert_cols(column_write)
@@ -398,6 +417,7 @@ class Sheet(File,UtilsForSheet,Other):
             group = chaine_object.clean_string().set_answer_in_group(reversed_group_of_responses) 
             self.sheet.cell(i,column_write).value = group
             
+        self.updateCellFormulas(self.sheet,True,'column', modifications)         
         self.writebook.save(self.path + self.name_file)
         
     def color_special_cases_in_column(self,column,chainecolor,label = True):
@@ -485,6 +505,8 @@ class Sheet(File,UtilsForSheet,Other):
             other_sheet[2] = column_index_from_string(other_sheet[2])
             columns_to_copy = [column_index_from_string(column) for column in columns_to_copy]
 
+        modifications = [get_column_letter(column_insertion + i ) for i in range(len(columns_to_copy))]
+
         #Passage en revue les identifiants du premier fichier et création d'un dictionnaire dont les clés sont ces identifiants et les valeurs sont une liste de valeurs à récupérer.
         for i in range(1,sheet_to_copy.max_row + 1):
             value = sheet_to_copy.cell(i,other_sheet[2]).value
@@ -501,6 +523,7 @@ class Sheet(File,UtilsForSheet,Other):
                     self.sheet.cell(i,column_insertion + j).value = dico[key][j].value
                     self.sheet.cell(i,column_insertion + j).fill = copy(dico[key][j].fill)
         
+        self.updateCellFormulas(self.sheet,True,'column', modifications)         
         self.writebook.save(self.path + self.name_file)
 
 
@@ -559,11 +582,13 @@ class Sheet(File,UtilsForSheet,Other):
             value = self.sheet.cell(i,column_to_cut).value
             chaine_object = Str(value)
             parts = chaine_object.cut_string_in_parts(separator)
+            modifications = [get_column_letter(column_insertion + i) for i in range(len(parts))]
             if i == 2:
                 self.sheet.insert_cols(column_insertion,len(parts))
             for j in range(len(parts)):
                 self.sheet.cell(i,column_insertion + j).value = parts[j]
 
+        self.updateCellFormulas(self.sheet,True,'column', modifications)         
         self.writebook.save(self.path + self.name_file) 
 
     def delete_lines(self,column,*chaines,label = True):
@@ -581,14 +606,16 @@ class Sheet(File,UtilsForSheet,Other):
         """
         if label == True:
             column = column_index_from_string(column)  
-            
-        #value = self.getCellNumericalValue(self.path + self.name_file, self.sheet.cell(i,column)) 
-        #if str(value) in chaines: 
-                
+        
+        modifications = []
         for i in range(self.sheet.max_row,0,-1):
-            if str(self.sheet.cell(i,column).value) in chaines:  
-                self.sheet.delete_rows(i)
-
+            value = self.getCellNumericalValue(self.compiler, self.name_onglet, self.sheet.cell(i,column)) 
+            if str(value) in chaines: 
+            #if str(self.sheet.cell(i,column).value) in chaines:  ) 
+                self.sheet.delete_rows(i) 
+                modifications.append(str(i))
+ 
+        self.updateCellFormulas(self.sheet,False,'row',modifications)        
         self.writebook.save(self.path + self.name_file)
 
     def delete_doublons(self, column_identifiant, line_beginning = 2, color = False, label = True):
@@ -615,7 +642,7 @@ class Sheet(File,UtilsForSheet,Other):
             column_identifiant = column_index_from_string(column_identifiant) 
 
         participants = {} 
-
+        modifications = []
         #On parcourt dans le sens inverse afin d'éviter que la suppression progressive impacte la position des lignes étudiées ensuite.
         i = self.sheet.max_row 
         while i != line_beginning:  
@@ -624,11 +651,13 @@ class Sheet(File,UtilsForSheet,Other):
                 if color == True:
                     self.color_line('0000a933', participants[identifiant.chaine])
                 self.sheet.delete_rows(i)
+                modifications.append(str(i))
                 participants[identifiant.chaine] -= 1    
             else:
                 participants[identifiant.chaine] = i 
             i -= 1
 
+        self.updateCellFormulas(self.sheet,False,'row',modifications)        
         self.writebook.save(self.path + self.name_file)
     
     def create_one_column_by_QCM_answer(self, column, column_insertion, list_string, *reponses, label = True):
@@ -654,6 +683,8 @@ class Sheet(File,UtilsForSheet,Other):
         if label == True:
             column = column_index_from_string(column) 
             column_insertion = column_index_from_string(column_insertion) 
+        
+        modifications = [get_column_letter(column_insertion + i) for i in range(len(reponses))]
 
         #on crée les colonnes pour chaque réponse
         self.sheet.insert_cols(column_insertion,len(reponses))
@@ -672,6 +703,7 @@ class Sheet(File,UtilsForSheet,Other):
                     else:
                         self.sheet.cell(i,j + column_insertion).value = list_string[1]
 
+        self.updateCellFormulas(self.sheet,True,'column',modifications)        
         self.writebook.save(self.path + self.name_file)
         
     def gather_multiple_answers(self, column_read, column_store, line_beggining = 2, label = True):
@@ -712,6 +744,7 @@ class Sheet(File,UtilsForSheet,Other):
 
         number_column_insertion = column_index_from_string(column_insertion)
         self.sheet.insert_cols(number_column_insertion)
+        modifications = [number_column_insertion]
         self.sheet.cell(1, number_column_insertion).value = "Colonne de(s) maximum(s)"
 
         #dico qui à une colonne associe le nom de la colonne
@@ -732,6 +765,7 @@ class Sheet(File,UtilsForSheet,Other):
                     chaine += "_" + dico[column]
             self.sheet.cell(line, number_column_insertion).value = chaine
         
+        self.updateCellFormulas(self.sheet, True, 'column', modifications)
         self.writebook.save(self.path + self.name_file) 
         
 

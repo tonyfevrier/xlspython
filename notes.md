@@ -96,6 +96,16 @@ Pour la programmation par classe, la logique voudrait une classe File parent, un
     Pour l'écriture du mail, faire ouvrir un libre office dans lequel l'utilisateur tape son mail et le contenu est converti en str.
     Ajouter l'option de rentrée un fichier xlsx qui contient pour chaque prenom nom un mail associé.
     Faire en sorte que les formules des colonnes soient conservées (jouer sur le data only = True)
+    
+pour pycel:
+    - `FAIT : pb : quand on supprime une ligne, la formule ne s'adapte pas (elle devrait changer les cellules comme le fait excel).`
+    - `FAIT : écrire une fonction qui met à jour les formules de l'excel après une suppression ou ajout de ligne colonne : écrire une fonction qui fait plusieurs opé pour une cellule, modifier le nom de celle qui n'en fait qu'une et le test associé puis l'utiliser dans celle qui met à jour la feuille entière.`
+    - `FAIT : tester l'update sur deletelines. Pb : il ne met pas à jour les formules.`
+    - `convert time : mettre une, au lieu des . et changer le texte.`
+    - `voir à quelles autres fonctions l'ajouter (la mise à jour des formules) : reste les deux dernières fonctions de mpe.py`
+    - Bug : quand on insère une colonne il faut toujours le faire après la colonne de lecture dans mes programmes. 
+
+- pb xls A REGLER : ouvrir en data only =true pour créer un nouvel onglet scratche toutes les formules des onglets initiaux.
 
     Créer une classe Path avec attribut nom de dossier
     Voir comment ça peut modifier les classes File et sheet à qui je donnais un argument path.

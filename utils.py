@@ -1,9 +1,11 @@
 from openpyxl.styles import PatternFill
-from openpyxl.utils import get_column_interval
+from openpyxl.utils import get_column_interval, column_index_from_string, get_column_letter
 import typer 
 import yagmail
 from copy import copy 
 from pycel import ExcelCompiler
+import re
+
 
 class UtilsForFile():
     def copy_paste_line(self,onglet_from,row_from, onglet_to, row_to ):
@@ -191,7 +193,23 @@ class UtilsForSheet():
                 for i in range(len(list[1])):
                     storesheet.cell(firstline, i+2).value = list[1][i]
 
+    def updateCellFormulas(self,sheet,insert, rowOrColumn, modifications):
+        """
+        Fonction qui met à jour les formules d'une feuille entière 
 
+        Inputs : 
+            - formula (str) : la chaîne de caractères.
+            - insert (bool) : True si les modifications sont toutes des insertions, False si ce sont toutes des suppressions.
+            - rowOrColumn (str): 'row' ou 'column' suivant que la série d'opérations effectuées porte sur ligne ou colonne.
+            - modifications (list[str]) : liste de str donnant les modifications. Si on a inséré 10 colonnes, ce sera la liste des 10 lettres correspondantes.
+
+        """
+        for row in range(1,sheet.max_row + 1):
+            for column in range(1,sheet.max_column + 1): 
+                formula = sheet.cell(row,column).value 
+                if isinstance(formula, str) and formula.startswith('='):
+                    sheet.cell(row,column).value  = Str.updateOneFormula(formula, insert, rowOrColumn, modifications)
+        
 
 class Str():
     def __init__(self,chaine):
@@ -316,7 +334,7 @@ class Str():
         else:
             duration = round(float(parts[0])/60,2)
     
-        conversion = str(duration)
+        conversion = str(duration).replace('.',',')
         return conversion
     
     @classmethod
@@ -358,6 +376,75 @@ class Str():
         """
         L = string.split('-')
         return get_column_interval(L[0],L[-1])
+    
+    @staticmethod
+    def updateOneFormula(formula, insert, rowOrColumn, modifications):
+        """
+        Fonction qui va mettre à jour la formule d'une cellule suite plusieurs suppressions de colonne/ligne.
+
+        Inputs : 
+            - formula (str) : la chaîne de caractères.
+            - insert (bool) : True si les modifications sont toutes des insertions, False si ce sont toutes des suppressions.
+            - rowOrColumn (str): 'row' ou 'column' suivant que la série d'opérations effectuées porte sur ligne ou colonne.
+            - modifications (list[str]) : liste de str donnant les modifications. Si on a inséré 10 colonnes, ce sera la liste des 10 lettres correspondantes.
+
+        Output : 
+            - formula modified (str).
+        """
+        for elt in modifications:
+            formula = Str.updateOneFormulaForOneInsertion(formula,insert,rowOrColumn,elt)
+            
+        return formula
+
+
+    @staticmethod
+    def updateOneFormulaForOneInsertion(formula, insert, rowOrColumn, modification):
+        """
+        Fonction qui va mettre à jour la formule d'une cellule suite à un ajout ou une suppression de colonne/ligne.
+
+        Inputs : 
+            - formula (str) : la chaîne de caractères.
+            - insert (bool) : True si on a inséré, False si on a supprimé.
+            - rowOrColumn (str): 'row' ou 'column' suivant que la série d'opérations effectuées porte sur ligne ou colonne.
+            - modification (str) :  str donnant la modification, soit la lettre de la colonne, soit le numéro de la ligne
+
+
+        Output : 
+            - formula modified (str).
+        """
+         
+        #Isoler les cellules des formules
+        L1 = re.split(r'(\b[A-Za-z-$]+\d+\b)',formula) 
+        for i in range(len(L1)):
+            elt = L1[i]
+            #si l'élt est une cellule, on la modifie :
+            if re.fullmatch(r'\b[A-Za-z-$]+\d+\b', elt):
+                L2 = re.split(r'(\d+)',elt)[:-1] 
+                #si on a supprimé ou inséré une ligne
+                if rowOrColumn == "row":
+                    if int(L2[1]) > int(modification):
+                        if insert == True: 
+                            L2[1] = str(int(L2[1])+1) 
+                        else:
+                            L2[1] = str(int(L2[1])-1)
+                #même chose sur les colonnes
+                else:
+                    if '$' in L2[0]:
+                        letter = L2[0][:-1]
+                    else:
+                        letter = L2[0] 
+                    if column_index_from_string(letter) > column_index_from_string(modification):
+                        if insert == True:
+                            letter = get_column_letter(column_index_from_string(letter) + 1)
+                        else:
+                            letter = get_column_letter(column_index_from_string(letter) - 1)
+                    if '$' in L2[0]:
+                        L2[0] = letter + '$'
+                    else:
+                        L2[0] = letter
+                L1[i] = ''.join(L2) 
+        return ''.join(L1) 
+                        
         
     
 class UtilsForcommands():
@@ -424,18 +511,16 @@ class Other():
                 reverse_dico[reponse] = key
         return reverse_dico
 
-    def getCellNumericalValue(self,filename,cell):
+    def getCellNumericalValue(self,compiler,tab,cell):
         """
         Fonction qui prend la valeur d'une cellule et qui, si c'est une formule, retourne sa valeur numérique
         """ 
 
-        # Compiler les formules Excel
-        compiler = ExcelCompiler(filename)
-        compiler.compile()
+        # Compiler les formules Excel 
 
-        formula = cell.value
- 
+        formula = cell.value 
         if isinstance(formula, str) and formula.startswith('='):
-            value = compiler.evaluate(cell) 
-
+            value = compiler.evaluate(tab + '!' + cell.coordinate) 
+        else:
+            value = formula
         return value
