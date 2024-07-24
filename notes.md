@@ -103,7 +103,11 @@ pour pycel:
     - `FAIT : tester l'update sur deletelines. Pb : il ne met pas à jour les formules.`
     - `convert time : mettre une, au lieu des . et changer le texte.`
     - `voir à quelles autres fonctions l'ajouter (la mise à jour des formules) : reste les deux dernières fonctions de mpe.py`
-    - Bug : quand on insère une colonne il faut toujours le faire après la colonne de lecture dans mes programmes. 
+    - Bug : quand on insère une colonne il faut toujours le faire après la colonne de lecture dans mes programmes.
+
+pb de resourcewarning:
+    - il semble qu'il faille ouvrir et fermer les fichiers dans chaque fonction pour l'éviter : faire un wrapper et descripteur dans chaque fonction. On dirait qu'une fois l'objet créé, écrire une commande qui laisse le workbook en mémoire mène à un warning : en gros la méthode doit ouvrir, faire les modifs et fermer sinon warning. Je pourrais pour les tests les ouvrir autrement.
+    - Bug : modifier les sheetnames dans les fonctions si nécessaire et les verify des tests pour ne pas ouvrir le même objet plusieurs fois.
 
 - pb xls A REGLER : ouvrir en data only =true pour créer un nouvel onglet scratche toutes les formules des onglets initiaux.
 

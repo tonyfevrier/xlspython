@@ -7,6 +7,7 @@ from copy import copy
 from datetime import datetime, timezone
 from utils import UtilsForFile, UtilsForSheet, Str, Other
 from pycel import ExcelCompiler
+import gc
 
 class Path():
     def __init__(self,path = 'fichiers_xls/'):
@@ -22,12 +23,15 @@ class Path():
 class File(UtilsForFile): 
     def __init__(self, name_file, path = 'fichiers_xls/', dataonly = False): #True):
         """L'utilisateur sera invité à mettre son fichier xslx dans un dossier nommé fichiers_xls
-        """
+        """ 
         self.name_file = name_file  
         self.path = path
+        self.dataonly = dataonly 
+
         self.writebook = openpyxl.load_workbook(self.path + self.name_file, data_only = dataonly)
         self.sheets_name = self.writebook.sheetnames
-        self.compiler = ExcelCompiler(self.path + self.name_file)
+        self.compiler = ExcelCompiler(self.path + self.name_file)  
+       
 
     def sauvegarde(self):
         """
@@ -79,8 +83,7 @@ class File(UtilsForFile):
     
             file = File('dataset.xlsx')
             file.create_one_onglet_by_participant('onglet1', 'A') 
-        """
-    
+        """ 
         if label == True:
             column_read = column_index_from_string(column_read)  
 
@@ -94,8 +97,9 @@ class File(UtilsForFile):
                 self.copy_paste_line(sheet, 1,  self.writebook[onglet], 1)
                 onglets.append(onglet) 
             self.add_line_at_bottom(sheet, i, self.writebook[onglet])
-        
-        self.writebook.save(self.path + self.name_file) 
+         
+        self.writebook.save(self.path + self.name_file)
+        self.sheets_name = self.writebook.sheetnames 
 
     def extract_column_from_all_sheets(self,column,label = True):
         """
@@ -129,6 +133,7 @@ class File(UtilsForFile):
             new_sheet.cell(1,new_sheet.max_column).value = name_onglet 
             
         self.writebook.save(self.path + self.name_file) 
+        self.sheets_name = self.writebook.sheetnames 
 
     def apply_column_formula_on_all_sheets(self, *column_list, label = True):
         """

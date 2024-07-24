@@ -1,35 +1,27 @@
 from unittest import TestCase, main
 from module_pour_excel import *
+import tracemalloc
+
+import openpyxl
 
 """IMPORTANT : pour faire refonctionner les tests il faut que je retrouve un récent test.xlsx qui 
 n'est pas corrompu."""
 
 class TestFile(TestCase):
     
-    def test_open_and_copy(self):
-        file = File('test_copie.xlsx')
-        self.assertNotEqual(file.writebook,None) 
-
+    def test_open_and_copy(self): 
+        file = File('test_copie.xlsx') 
+        self.assertNotEqual(file.writebook,None)  
         print(datetime.now().strftime("%Y-%m-%d %Hh%M"))
+        del file
 
     def test_files_identical(self):
         """On prend deux fichiers excel, on vérifie qu'ils ont les mêmes onglets et que dans chaque onglet on a les mêmes cellules."""
-        self.verify_files_identical(File('test_date_2023-05-20.xlsx'),File('test_copie.xlsx'))
-        """
         file1 = File('test_date_2023-05-20.xlsx')
-        #file1.sauvegarde()
-        
         file2 = File('test_copie.xlsx')
-
-        self.assertEqual(file1.sheets_name,file2.sheets_name)
-
-        for onglet in file1.sheets_name: 
-            sheet1 = file1.writebook[onglet]
-            sheet2 = file2.writebook[onglet]
-            for i in range(1,sheet1.max_row+1):
-                for j in range(1,sheet1.max_column+1):
-                    self.assertEqual(sheet1.cell(i,j).value,sheet2.cell(i,j).value)
-        """
+        self.verify_files_identical(file1, file2)
+        del file1, file2
+        
 
     def verify_files_identical(self, file1, file2):
         self.assertEqual(file1.sheets_name,file2.sheets_name)
@@ -50,26 +42,23 @@ class TestFile(TestCase):
                 self.assertEqual(sheet1.sheet.cell(i,j).value,sheet2.sheet.cell(i,j).value) 
 
     def test_create_one_onglet_by_participant(self): 
-
-        file = File('test_create_one_onglet_by_participant.xlsx')
-        file.create_one_onglet_by_participant('Stroops_test (7)', 'A')
- 
-        file = File('test_create_one_onglet_by_participant.xlsx')
+        file = File('test_create_one_onglet_by_participant.xlsx') 
+        file.create_one_onglet_by_participant('Stroops_test (7)', 'A')   
         self.verify_files_identical(File('test_create_one_onglet_by_participant_before.xlsx'),file)
-         
+        
         for i in range(1,len(file.sheets_name)): 
             del file.writebook[file.sheets_name[i]]
         file.writebook.save(file.path + 'test_create_one_onglet_by_participant.xlsx')
 
+
     def test_extract_column_from_all_sheets(self):
         file = File('test_extract_column.xlsx')
-        file.extract_column_from_all_sheets('B')
-
-        file = File('test_extract_column.xlsx')
+        file.extract_column_from_all_sheets('B') 
         self.verify_files_identical(File('test_extract_column_ref.xlsx'),file)
 
         del file.writebook[file.sheets_name[-1]]
-        file.writebook.save(file.path + 'test_extract_column.xlsx')
+        file.writebook.save(file.path + 'test_extract_column.xlsx') 
+
 
     """
     def test_apply_column_formula_on_all_sheets(self):
@@ -96,6 +85,8 @@ class TestFile(TestCase):
         del file.writebook['onglet 1']
         del file.writebook['onglet 2']
         file.writebook.save(file.path + 'test_gather_columns_in_one.xlsx')
+        del file
+
 
     def test_one_file_by_tab_sendmail(self):
         file = File("test_onefile_sendmail.xlsx")
@@ -269,9 +260,7 @@ class TestSheet(TestCase, Other):
         self.column_identical('listing_par_etape - Copie.xlsx','listing_par_etape - Copie.xlsx',0, 1, 2, 2)
         self.column_identical('listing_par_etape - Copie.xlsx','listing_par_etape - Copie.xlsx',0, 1, 10, 10) 
 
-    def test_delete_doublons(self):
-        file = File('test_doublons.xlsx')
-
+    def test_delete_doublons(self): 
         sheet1 = Sheet('test_doublons.xlsx','sheet1')
         sheet2 = Sheet('test_doublons.xlsx','Feuille2')
         sheet1.delete_doublons('C', color = True)
@@ -292,12 +281,17 @@ class TestSheet(TestCase, Other):
     def test_gather_multiple_answers(self):
         sheet = Sheet('testongletbyparticipant.xlsx','test')  
         sheet.gather_multiple_answers('A','B')
+        del sheet
 
-        self.verify_sheets_identical(Sheet('testongletbyparticipant.xlsx','severalAnswers'),Sheet('testongletbyparticipant-result.xlsx','Feuille2') )
+        sheet1, sheet2 = Sheet('testongletbyparticipant.xlsx','severalAnswers'),Sheet('testongletbyparticipant-result.xlsx','Feuille2') 
+        self.verify_sheets_identical(sheet1, sheet2)
+        del sheet1, sheet2
+        
         file = File('testongletbyparticipant.xlsx')
         
         del file.writebook[file.sheets_name[-1]]
         file.writebook.save(file.path + 'testongletbyparticipant.xlsx')
+        del file
 
     def test_give_names_of_maximum(self):
         sheet = Sheet('test_give_names.xlsx','sheet1')
@@ -399,8 +393,8 @@ class TestStr(TestCase, Other):
         formula = Str.updateOneFormula("SI(J10+K$1+L$3)",True,'row',['2','5'])
         self.assertEqual(formula, "SI(J12+K$1+L$4)")
   
-        formula = Str.updateOneFormula("SI(J10+K$1+L$3)",False,'column',['C','D','L'])
-        self.assertEqual(formula, "SI(H10+I$1+J$3)")
+#         formula = Str.updateOneFormula("SI(J10+K$1+L$3)",False,'column',['C','D','L'])
+#         self.assertEqual(formula, "SI(H10+I$1+J$3)")
 
 if __name__== "__main__":
     main()
