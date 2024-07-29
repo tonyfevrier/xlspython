@@ -1,10 +1,11 @@
 #from xlutils.copy import copy 
 
-import openpyxl, json 
+import openpyxl
+import json 
 from openpyxl.styles import PatternFill
 from openpyxl.utils import column_index_from_string, coordinate_to_tuple, get_column_letter
 from copy import copy
-from datetime import datetime, timezone
+from datetime import datetime
 from utils import UtilsForFile, UtilsForSheet, Str, Other
 from pycel import ExcelCompiler
 import gc
@@ -84,7 +85,7 @@ class File(UtilsForFile):
             file = File('dataset.xlsx')
             file.create_one_onglet_by_participant('onglet1', 'A') 
         """ 
-        if label == True:
+        if label:
             column_read = column_index_from_string(column_read)  
 
         onglets = []
@@ -121,7 +122,7 @@ class File(UtilsForFile):
             file = File('dataset.xlsx',dataonly = False)
             file.extract_column_from_all_sheets('B') 
         """ 
-        if label == True:
+        if label:
             column = column_index_from_string(column)
          
         new_sheet = self.writebook.create_sheet(f"gather_{column}")
@@ -162,7 +163,7 @@ class File(UtilsForFile):
                 file = File('dataset.xlsx', dataonly = False)
                 file.apply_column_formula_on_all_sheets(*[i for i in range(colmin,colmax + 1)]) 
         """
-        if label == True:
+        if label:
             column_int_list = []
             for column in column_list: 
                 column_int_list.append(column_index_from_string(column))  
@@ -267,7 +268,7 @@ class File(UtilsForFile):
 
         for tab in self.sheets_name: 
             file_to_send = self.build_file_from_tab(tab)
-            if send == True:
+            if send:
                 if adressjson == "":
                     prenom = tab.split(" ")[0]
                     nom = tab.split(" ")[1]
@@ -326,14 +327,14 @@ class Sheet(File,UtilsForSheet,Other):
             #Bien mettre les réponses de good_answers entre ''. 
         """  
         
-        if label == True:
+        if label:
             column_read = column_index_from_string(column_read) 
             modifications = [column_write]
             column_write = column_index_from_string(column_write)
         else:
             modifications = [get_column_letter(column_write)]
 
-        if insert == True:
+        if insert:
             self.sheet.insert_cols(column_write)
 
         for i in range(line_beginning, self.sheet.max_row + 1):
@@ -363,14 +364,14 @@ class Sheet(File,UtilsForSheet,Other):
             sheet.column_convert_in_minutes('A','B',line_beggining = 3) 
 
         """ 
-        if label == True:
+        if label:
             column_read = column_index_from_string(column_read) 
             modifications = [column_write]
             column_write = column_index_from_string(column_write)
         else:
             modifications = [get_column_letter(column_write)]
 
-        if insert == True:
+        if insert:
             self.sheet.insert_cols(column_write)
 
         for i in range(line_beginning,self.sheet.max_row + 1):
@@ -405,14 +406,14 @@ class Sheet(File,UtilsForSheet,Other):
             sheet.column_set_answer_in_group('A', 'B', {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']} ,line_beggining = 3) 
 
         """
-        if label == True:
+        if label:
             column_read = column_index_from_string(column_read) 
             modifications = [column_write]
             column_write = column_index_from_string(column_write)
         else:
             modifications = [get_column_letter(column_write)]
 
-        if insert == True:
+        if insert:
             self.sheet.insert_cols(column_write)
 
         reversed_group_of_responses = self.reverse_dico_for_set_answer_in_group(groups_of_responses)
@@ -441,13 +442,13 @@ class Sheet(File,UtilsForSheet,Other):
             sheet.color_special_cases_in_column('L', {'vrai': '#FF0000','faux': '#00FF00'}) 
 
         """
-        if label == True:
+        if label:
             column = column_index_from_string(column)
 
         for i in range(1,self.sheet.max_row + 1):
             cellule = self.sheet.cell(i,column) 
 
-            if type(cellule.value) == str:
+            if cellule.value is str:
                 key = Str(cellule.value).clean_string().chaine
             else: 
                 key = cellule.value
@@ -504,7 +505,7 @@ class Sheet(File,UtilsForSheet,Other):
         columns_to_copy = other_sheet[3]
         dico = {}
 
-        if label == True:
+        if label:
             column_identifiant = column_index_from_string(column_identifiant)
             column_insertion = column_index_from_string(column_insertion)
             other_sheet[2] = column_index_from_string(other_sheet[2])
@@ -579,7 +580,7 @@ class Sheet(File,UtilsForSheet,Other):
         
         """
 
-        if label == True:
+        if label:
             column_to_cut = column_index_from_string(column_to_cut) 
             column_insertion = column_index_from_string(column_insertion)
         
@@ -609,7 +610,7 @@ class Sheet(File,UtilsForSheet,Other):
             sheet = Sheet('dataset.xlsx','onglet1')
             sheet.delete_lines(3, 'chaine1', 'chaine2', 'chaine3', 'chaine4') 
         """
-        if label == True:
+        if label:
             column = column_index_from_string(column)  
         
         modifications = []
@@ -643,7 +644,7 @@ class Sheet(File,UtilsForSheet,Other):
             sheet = Sheet('dataset.xlsx','onglet1')
             sheet.delete_doublons('C', color = True)
         """
-        if label == True:
+        if label:
             column_identifiant = column_index_from_string(column_identifiant) 
 
         participants = {} 
@@ -653,7 +654,7 @@ class Sheet(File,UtilsForSheet,Other):
         while i != line_beginning:  
             identifiant = Str(self.sheet.cell(i,column_identifiant).value).clean_string() 
             if identifiant.chaine in participants.keys():
-                if color == True:
+                if color:
                     self.color_line('0000a933', participants[identifiant.chaine])
                 self.sheet.delete_rows(i)
                 modifications.append(str(i))
@@ -685,7 +686,7 @@ class Sheet(File,UtilsForSheet,Other):
 
         """
  
-        if label == True:
+        if label:
             column = column_index_from_string(column) 
             column_insertion = column_index_from_string(column_insertion) 
         
@@ -723,7 +724,7 @@ class Sheet(File,UtilsForSheet,Other):
             - line_beggining (int) : ligne où débute la recherche.
             - label (bool) : False si on veut entrer le numéro de la colonne et pas la lettre.
         """ 
-        if label == True:
+        if label:
             column_read = column_index_from_string(column_read) 
             column_store = column_index_from_string(column_store) 
 

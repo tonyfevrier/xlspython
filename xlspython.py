@@ -1,6 +1,6 @@
 import typer
 from typing import Optional, List, Tuple
-from module_pour_excel import *
+from module_pour_excel import File, Sheet, Str
 from typing_extensions import Annotated
 from utils import UtilsForcommands as Ufc
 
@@ -50,8 +50,7 @@ def multipletabs(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
 
 @app.command()
 def extractcolsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
-                     colread : Annotated[str, typer.Option(prompt = 'Enter the column letter ')]
-                    ):
+                     colread : Annotated[str, typer.Option(prompt = 'Enter the column letter ')]):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
 
@@ -70,8 +69,7 @@ def extractcolsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx
 
 @app.command()
 def cutsendmail(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
-                sendmail : Annotated[Optional[str], typer.Option(prompt = '(Optional) Do you want to send files by mail? Press y (yes) or enter (no)')] = 'n',
-               ):
+                sendmail : Annotated[Optional[str], typer.Option(prompt = '(Optional) Do you want to send files by mail? Press y (yes) or enter (no)')] = 'n'):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
 
@@ -98,8 +96,7 @@ def cutsendmail(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file
 @app.command()
 def gathercolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
                  sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
-                 columnlists : Annotated[Optional[List[str]], typer.Option()] = None,
-                 ):
+                 columnlists : Annotated[Optional[List[str]], typer.Option()] = None):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
 
@@ -114,8 +111,7 @@ def gathercolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
     """
  
     group = Ufc.askArgumentUntilNone(columnlists, "Enter a group of column of the form A-D,E,G,H-J,Z")
-    column_lists = Str.listFromColumnsStrings(*group)
-    #column_lists = [string.split(',') for string in group]
+    column_lists = Str.listFromColumnsStrings(*group) 
 
     fileobject = File(file)
     fileobject.gather_columns_in_one(sheet,*column_lists)
@@ -125,8 +121,7 @@ def stringinbinary(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
                    sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
                    colread : Annotated[str, typer.Option(prompt = 'Enter the column containing the answers')],
                    colwrite : Annotated[str, typer.Option(prompt = 'Enter the column where you want to write')], 
-                   answers : Annotated[Optional[List[str]], typer.Option()] = None, 
-                   ):
+                   answers : Annotated[Optional[List[str]], typer.Option()] = None):
     """
     Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
 
@@ -150,8 +145,7 @@ def stringinbinary(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
 # Créer un fichier test pour tester cette fonction.
 @app.command()
 def cpcolumnonsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
-                    column : Annotated[List[str], typer.Option()] = None
-                    ):
+                     column : Annotated[List[str], typer.Option()] = None):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
 
@@ -172,8 +166,7 @@ def cpcolumnonsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx
 
 @app.command()
 def cpcellonsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
-                    cell : Annotated[List[str], typer.Option()] = None
-                    ):
+                   cell : Annotated[List[str], typer.Option()] = None):
     
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -196,11 +189,10 @@ def cpcellonsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
     
 @app.command()
 def mergecells(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
-                    start_column : Annotated[str, typer.Option(prompt = 'Enter the first column of  cells to merge :')],
-                    end_column : Annotated[str, typer.Option(prompt = 'Enter the last column of cells to merge :')],
-                    start_row : Annotated[str, typer.Option(prompt = 'Enter the first row of  cells to merge :')],
-                    end_row : Annotated[str, typer.Option(prompt = 'Enter the last row of cells to merge :')],
-                    ):
+               start_column : Annotated[str, typer.Option(prompt = 'Enter the first column of  cells to merge :')],
+               end_column : Annotated[str, typer.Option(prompt = 'Enter the last column of cells to merge :')],
+               start_row : Annotated[str, typer.Option(prompt = 'Enter the first row of  cells to merge :')],
+               end_row : Annotated[str, typer.Option(prompt = 'Enter the last row of cells to merge :')]):
     
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -246,8 +238,7 @@ def groupofanswers(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
                    sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
                    colread : Annotated[str, typer.Option(prompt = 'Enter the column containing the answers')],
                    colwrite : Annotated[str, typer.Option(prompt = 'Enter the column where you want to write')],  
-                   line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'
-                   ):
+                   line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
     """
     Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. Vous avez une colonne (colread) contenant des réponses. Chacune de ses réponses appartient à un groupe.
     Vous souhaitez afficher dans une colonne (colwrite) le groupe d'appartenance de la réponse.
@@ -267,9 +258,8 @@ def groupofanswers(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
 
 @app.command()
 def colorcasescolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
-                   sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
-                   column : Annotated[str, typer.Option(prompt = 'Enter the column')], 
-                   ):
+                     sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
+                     column : Annotated[str, typer.Option(prompt = 'Enter the column')]):
     """
     Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Vous souhaitez parcourir une colonne (column) et colorer certaines chaînes de caractères dans cette colonne. Ces chaînes et les couleurs associées vous seront demandées
@@ -289,8 +279,7 @@ def colorcasescolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx
 
 @app.command()
 def colorcasestab(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
-                   sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')], 
-                   ):
+                  sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')]):
     """
     Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Vous souhaitez parcourir un onglet (sheet) et colorer certaines chaînes de caractères. Ces chaînes et les couleurs associées vous seront demandées
@@ -335,9 +324,9 @@ def addcolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file i
 
 @app.command()
 def colorlines(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
-                   sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
-                   color : Annotated[str, typer.Option(prompt = 'Enter the color in a hexadecimal format')],
-                   strings : Annotated[Optional[List[str]], typer.Option()] = None):                    
+               sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
+               color : Annotated[str, typer.Option(prompt = 'Enter the color in a hexadecimal format')],
+               strings : Annotated[Optional[List[str]], typer.Option()] = None):                    
 
     """
     Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -356,11 +345,10 @@ def colorlines(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file 
 
 @app.command()
 def cutstring(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
-                   sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
-                   colcut : Annotated[str, typer.Option(prompt = 'Enter the column containing strings to cut')],
-                   colwrite : Annotated[str, typer.Option(prompt = 'Enter the column where you want to write')], 
-                   separator : Annotated[Optional[str], typer.Option(prompt = '(Optional) Enter the separator or press enter')] = ',' 
-                   ):
+              sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
+              colcut : Annotated[str, typer.Option(prompt = 'Enter the column containing strings to cut')],
+              colwrite : Annotated[str, typer.Option(prompt = 'Enter the column where you want to write')], 
+              separator : Annotated[Optional[str], typer.Option(prompt = '(Optional) Enter the separator or press enter')] = ','):
     """
     Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. Une colonne (colcut) contient des chaînes de caractères séparées par un symbole (separator). Vous souhaitez les couper en morceaux 
     et créer des colonnes (à partir de colwrite) pour chacun de ces morceaux.
@@ -376,9 +364,9 @@ def cutstring(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file '
 
 @app.command()
 def deletelines(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
-                   sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
-                   colread : Annotated[str, typer.Option(prompt = 'Enter the column letter containing identifiers ')],
-                   strings : Annotated[Optional[List[str]], typer.Option()] = None):                    
+                sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
+                colread : Annotated[str, typer.Option(prompt = 'Enter the column letter containing identifiers ')],
+                strings : Annotated[Optional[List[str]], typer.Option()] = None):                    
     """
     Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. Vous souhaitez parcourir une colonne (colread) et si une chaîne (strings) apparaît dans cette colonne, supprimer la ligne associée.
 
@@ -396,9 +384,9 @@ def deletelines(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file
 
 @app.command()
 def deletetwins(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
-                   sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
-                   colread : Annotated[str, typer.Option(prompt = 'Enter the column letter containing identifiers ')],
-                 line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
+                sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
+                colread : Annotated[str, typer.Option(prompt = 'Enter the column letter containing identifiers ')],
+                line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
     """
     Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. Certains participants à un questionnaire répondent plusieurs fois. Vous souhaitez parcourir une colonne (colread)
      qui les identifie et ne garder que leur dernière réponse à ce questionnaire.
@@ -418,8 +406,7 @@ def columnbyqcmanswer(file : Annotated[str, typer.Option(prompt = 'Enter the xls
                    colread : Annotated[str, typer.Option(prompt = 'Enter the column containing the answers')],
                    colwrite : Annotated[str, typer.Option(prompt = 'Enter the column from which you want to write')], 
                    answers : Annotated[Optional[List[str]], typer.Option()] = None,
-                   list : Annotated[Tuple[str, str], typer.Option(prompt = 'Enter what you want to write in the cells or press enter')] = ('oui', 'non'),
-                   ):
+                   list : Annotated[Tuple[str, str], typer.Option(prompt = 'Enter what you want to write in the cells or press enter')] = ('oui', 'non')):
 
     """
     Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. Une colonne (colread) contient toutes les réponses d'un participant à une question de QCM. Vous souhaitez créer autant de colonnes que
@@ -439,11 +426,10 @@ def columnbyqcmanswer(file : Annotated[str, typer.Option(prompt = 'Enter the xls
 
 @app.command()
 def gathermultianswers(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
-                   sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
-                   colread : Annotated[str, typer.Option(prompt = 'Enter the column letter containing identifiers ')],
-                   colstore : Annotated[str, typer.Option(prompt = 'Enter the column letter containing the data to store ')],
-                   line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'
-                   ):
+                       sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
+                       colread : Annotated[str, typer.Option(prompt = 'Enter the column letter containing identifiers ')],
+                       colstore : Annotated[str, typer.Option(prompt = 'Enter the column letter containing the data to store ')],
+                       line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
     """
     Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. Certains participants à un questionnaire répondent plusieurs fois. Vous souhaitez parcourir une colonne (colread)
      qui les identifie et créer, dans un autre onglet, une ligne par participant ayant répondu plusieurs fois. Cette ligne contient les différentes
@@ -461,10 +447,9 @@ def gathermultianswers(file : Annotated[str, typer.Option(prompt = 'Enter the xl
 
 @app.command()
 def maxnames(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
-                   sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
-                   colstore : Annotated[str, typer.Option(prompt = 'Enter the column letter containing the data to store ')],
-                   columnlist : Annotated[Optional[List[str]], typer.Option()] = None, 
-                   ):
+             sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
+             colstore : Annotated[str, typer.Option(prompt = 'Enter the column letter containing the data to store ')],
+             columnlist : Annotated[Optional[List[str]], typer.Option()] = None):
     """
     Vous avez une liste de colonnes avec des chiffres, chaque colonne a un nom dans sa première cellule. Cette fonction crée une colonne dans laquelle on entre pour chaque 
     ligne le nom de la colonne ou des colonnes qui contient le max.

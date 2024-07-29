@@ -2,8 +2,7 @@ from openpyxl.styles import PatternFill
 from openpyxl.utils import get_column_interval, column_index_from_string, get_column_letter
 import typer 
 import yagmail
-from copy import copy 
-from pycel import ExcelCompiler
+from copy import copy  
 import re
 
 
@@ -108,7 +107,7 @@ class UtilsForSheet():
         """
         bool = True
         for i in range(1,self.sheet.max_row+1): 
-            if self.sheet.cell(i,column).value != None:
+            if self.sheet.cell(i,column).value is not None:
                 bool = False
                 break
         return bool 
@@ -423,7 +422,7 @@ class Str():
                 #si on a supprimé ou inséré une ligne
                 if rowOrColumn == "row":
                     if int(L2[1]) > int(modification):
-                        if insert == True: 
+                        if insert: 
                             L2[1] = str(int(L2[1])+1) 
                         else:
                             L2[1] = str(int(L2[1])-1)
@@ -434,7 +433,7 @@ class Str():
                     else:
                         letter = L2[0] 
                     if column_index_from_string(letter) > column_index_from_string(modification):
-                        if insert == True:
+                        if insert:
                             letter = get_column_letter(column_index_from_string(letter) + 1)
                         else:
                             letter = get_column_letter(column_index_from_string(letter) - 1)
