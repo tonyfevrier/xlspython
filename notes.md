@@ -41,7 +41,6 @@ Pour la programmation par classe, la logique voudrait une classe File parent, un
 
 
 # Déroulé et prochaines étapes :
-
     FAIT Imaginer la strcuture par classe 
     FAIT Fabriquer un excel jouet puis un micro test pour la fonction column transform string. 
     FAIT Tester l'ouverture de l'attribut sheet (bonne page) de la classe sheet. 
@@ -109,7 +108,19 @@ pb de resourcewarning:
     - `il semble qu'il faille ouvrir et fermer les fichiers dans chaque fonction pour l'éviter : faire un wrapper et descripteur dans chaque fonction. On dirait qu'une fois l'objet créé, écrire une commande qui laisse le workbook en mémoire mène à un warning : en gros la méthode doit ouvrir, faire les modifs et fermer sinon warning. Je pourrais pour les tests les ouvrir autrement.`
     - `Bug : modifier les sheetnames dans les fonctions si nécessaire et les verify des tests pour ne pas ouvrir le même objet plusieurs fois.`
 
+- Sécurité : 
+    Ajouter une sauvegarde automatique et l'indiquer pour toutes les fonctions qui modifient directement sur le fichier (en décorateur)
+
+- Pb : parfois un onglet doit être ouvert en dataonly = True mais les autres onglets doivent garder les formules mais si on le met en False, on ne peut pas faire l'opération voulue sur l'onglet. 
+    - Solution, il faudrait une fonction de File qui prend un fichier lance l'opération Sheet et constitue un nouveau fichier avec la feuille modifiée à laquelle on appose les autres onglets du fichier avant modification utilisant data_only= True. La fonction devrait repérer tout les onglets auquel on ne touche pas et les restaurer comme initialement.
+    - Ainsi toutes les méthodes de Sheet pourraient être appelées par cette méthode de File, ce qui pourrait changer la structure des commandes : à réfléchir.
+
+
 - pb xls A REGLER : ouvrir en data only =true pour créer un nouvel onglet scratche toutes les formules des onglets initiaux.
+    Une solution : qu'on demande à l'utilisateur de dire s'il veut l'ouvrir avec dataonly =TRUE
+    S'il l'ouvre avec, alors on impose une sauvegarde au début du fichier (utiliser un décorateur) et on prévient l'utilisateur que le fichier préservé sera nommé et daté.
+    Sinon il peut modifier dans le fichier.
+    Voir si le code ne peut pas être allégé avec des décorateurs (notamment columnbystring)
 
     Créer une classe Path avec attribut nom de dossier
     Voir comment ça peut modifier les classes File et sheet à qui je donnais un argument path.

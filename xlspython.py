@@ -1,17 +1,32 @@
 import typer
 from typing import Optional, List, Tuple
-from module_pour_excel import File, Sheet, Str
+from module_pour_excel import Path, File, Sheet, Str
 from typing_extensions import Annotated
 from utils import UtilsForcommands as Ufc
 
 app = typer.Typer()
 
 
+# Path commands
+
+@app.command()
+def gatherfiles(directory : Annotated[str, typer.Option(prompt = 'Enter the name of the directory containing all directories')],
+                file : Annotated[str, typer.Option(prompt = 'Enter the name of the file')],
+                sheet : Annotated[str, typer.Option(prompt = 'Enter the name of the sheet to copy')]):
+    
+    """
+    A REMPLIR
+    """
+    pathobject = Path(directory + '/')
+    pathobject.gather_files_in_different_directories(file, sheet)
+
+
+# File commands
+
 @app.command()
 def filesave(file : Annotated[str, typer.Option(prompt = 'Enter the file you want to save ')]):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. 
-    
     Fonction qui crée une sauvegarde du fichier entré (file) et qui l'appelle name_file_time où time est le moment d'enregistrement.
 
     Commande : 
@@ -33,7 +48,6 @@ def multipletabs(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
                  line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
-
     Vous avez un fichier xlsx dont une colonne (colread) contient des participants qui ont pu répondre plusieurs fois à un questionnaire. 
     Vous souhaitez créer un onglet par participant avec toutes les lignes qui correspondent.
 
@@ -53,7 +67,6 @@ def extractcolsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx
                      colread : Annotated[str, typer.Option(prompt = 'Enter the column letter ')]):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
-
     Fonction qui récupère une même colonne (colread) dans chaque onglet pour former une nouvelle feuille contenant toutes les colonnes.
     La première cellule de chaque colonne correspond alors au nom de l'onglet.
 
@@ -64,7 +77,7 @@ def extractcolsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx
         Version complète : python xlspython.py extractcolsheets --file name.xlsx --colread columnletter
     
     """
-    fileobject = File(file,dataonly=True) 
+    fileobject = File(file) 
     fileobject.extract_column_from_all_sheets(colread)
 
 @app.command()
@@ -72,7 +85,6 @@ def cutsendmail(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file
                 sendmail : Annotated[Optional[str], typer.Option(prompt = '(Optional) Do you want to send files by mail? Press y (yes) or enter (no)')] = 'n'):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
-
     Vous souhaitez fabriquer un fichier par onglet. Chaque fichier aura le nom de l'onglet. Vous souhaitez éventuellement envoyer chaque fichier à la personne associée.
     Attention, pour utiliser cette fonction, les onglets doivent être de la forme "prenom nom" sans caractère spéciaux. 
 
@@ -99,7 +111,6 @@ def gathercolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
                  columnlists : Annotated[Optional[List[str]], typer.Option()] = None):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
-
     Vous avez des groupes de colonnes de valeurs avec une étiquette en première cellule. Pour chaque groupe, vous souhaitez former deux colonnes de valeurs : l'une qui contient
         les valeurs rassemblées en une colonne, l'autre, à sa gauche, qui indique l'étiquette de la colonne dans laquelle elle a été prise.
     
@@ -116,6 +127,9 @@ def gathercolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
     fileobject = File(file)
     fileobject.gather_columns_in_one(sheet,*column_lists)
 
+
+# Sheet commands
+
 @app.command()
 def stringinbinary(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
                    sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
@@ -124,7 +138,6 @@ def stringinbinary(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
                    answers : Annotated[Optional[List[str]], typer.Option()] = None):
     """
     Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
-
     Cette fonction lit les cellules d'une colonne (colread) et crée une nouvelle colonne (colwrite) contenant 1 si la valeur de la cellule est dans les bonnes réponses (answers)
     0 sinon.
 
@@ -148,7 +161,6 @@ def cpcolumnonsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx
                      column : Annotated[List[str], typer.Option()] = None):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
-
     Fonction qui reproduit les formules d'une ou plusieurs colonnes (column) du premier onglet sur toutes les colonnes situées à la même position dans les 
           autres onglets.
     
@@ -170,7 +182,6 @@ def cpcellonsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
     
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
-
     Fonction qui reproduit les formules d'une ou plusieurs cellules (cell) du premier onglet sur toutes les cellules situées à la même position dans les 
           autres onglets.
     
@@ -196,7 +207,6 @@ def mergecells(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file 
     
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
-
     Fonction qui fusionne les cellules de start_column à end_column et de start_row à end_row.
     
     Commande : 
@@ -363,7 +373,27 @@ def cutstring(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file '
     sheetobject.column_cut_string_in_parts(colcut,colwrite,separator,insert = bool)
 
 @app.command()
-def deletelines(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
+def deletecols(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
+               sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
+               columns : Annotated[Optional[List[str]], typer.Option()] = None):
+
+    """
+    Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. Prend une séquence de colonnes et les supprime.
+
+    Commande : 
+
+        Version guidée : python xlspython.py deletecols  
+
+        Version complète : python xlspython.py deletecols --file name.xlsx --sheet nametab --columns A --columns D 
+    
+    """
+    columns = Ufc.askArgumentUntilNone(columns,"Enter one column to delete. Press directly enter if you have finished.")
+
+    sheetobject = Sheet(file,sheet)
+    sheetobject.delete_columns(*columns)
+
+@app.command()
+def deletelinesstr(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
                 sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
                 colread : Annotated[str, typer.Option(prompt = 'Enter the column letter containing identifiers ')],
                 strings : Annotated[Optional[List[str]], typer.Option()] = None):                    
@@ -380,7 +410,7 @@ def deletelines(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file
     strings = Ufc.askArgumentUntilNone(strings,"Enter one string leading to the delation of the line and then press enter. Press directly enter if you have entered all the strings.")
 
     sheetobject = Sheet(file,sheet)
-    sheetobject.delete_lines(colread,*strings)
+    sheetobject.delete_lines_containing_str(colread,*strings)
 
 @app.command()
 def deletetwins(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],

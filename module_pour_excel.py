@@ -7,10 +7,10 @@ from openpyxl.utils import column_index_from_string, coordinate_to_tuple, get_co
 from copy import copy
 from datetime import datetime
 from utils import UtilsForFile, UtilsForSheet, Str, Other
-from pycel import ExcelCompiler
-import gc
+from pycel import ExcelCompiler 
+import os
 
-class Path():
+class Path(UtilsForFile):
     def __init__(self,path = 'fichiers_xls/'):
         self.path = path
         
@@ -20,10 +20,43 @@ class Path():
         """
         pass 
 
+    def gather_files_in_different_directories(self, name_file, name_sheet):
+        """
+        Vous avez plusieurs dossiers contenant un fichier ayant le même nom. Vous souhaitez créer un seul fichier regroupant 
+        toutes les lignes de ces fichiers.
+        """
+        # Récupérer tous les dossiers d'un dossier
+        directories = [f for f in os.listdir(self.path) if os.path.isdir(os.path.join(self.path, f))]
+
+        # Créer un nouveau fichier
+        new_file = openpyxl.Workbook() 
+        new_sheet = new_file.worksheets[0] 
+
+        # Récupérer le fichier dans chacun des dossiers
+        for directory in directories:
+            sheet_to_copy = Sheet(name_file, name_sheet, self.path + directory + '/')
+
+            # Copier une fois la première ligne
+            if directory == directories[0]:
+                self.copy_paste_line(sheet_to_copy.sheet, 1, new_sheet, 1)
+
+            # Copier son contenu à la suite du fichier
+            for line in range(2, sheet_to_copy.sheet.max_row + 1): 
+                self.add_line_at_bottom(sheet_to_copy.sheet, line, new_sheet)
+
+        new_file.save(self.path  + "gathered_" + name_file)
+        
+
+    def gather_files(self):
+        """
+        Vous souhaitez créer un seul fichier regroupant toutes les lignes des fichiers compris dans un dossier donné.
+        """
+        pass
+
 
 class File(UtilsForFile): 
     def __init__(self, name_file, path = 'fichiers_xls/', dataonly = False): #True):
-        """L'utilisateur sera invité à mettre son fichier xslx dans un dossier nommé fichiers_xls
+        """L'utilisateur sera invité à mettre son fichier xlxx dans un dossier nommé fichiers_xls
         """ 
         self.name_file = name_file  
         self.path = path
@@ -299,7 +332,7 @@ class File(UtilsForFile):
 
 class Sheet(File,UtilsForSheet,Other): 
     def __init__(self, name_file, name_onglet,path = 'fichiers_xls/'): 
-        super().__init__(name_file,path)
+        super().__init__(name_file, path)
         self.name_onglet = name_onglet  
         self.sheet = self.writebook[self.name_onglet]
         del self.sheets_name
@@ -597,7 +630,23 @@ class Sheet(File,UtilsForSheet,Other):
         self.updateCellFormulas(self.sheet,True,'column', modifications)         
         self.writebook.save(self.path + self.name_file) 
 
-    def delete_lines(self,column,*chaines,label = True):
+    def delete_columns(self, *columns, label = True):
+        """
+        Prend une séquence de colonnes et les supprime.
+        """ 
+        # Réordonner par les lettres les plus grandes pour supprimer de la droite vers la gauche dans l'excel 
+        list_columns = list(columns)
+        list_columns.sort(reverse = True) 
+
+        for column in list_columns:
+            if label:
+                self.sheet.delete_cols(column_index_from_string(column))
+            else:
+                self.sheet.delete_cols(column)
+
+        self.writebook.save(self.path + self.name_file) 
+
+    def delete_lines_containing_str(self,column,*chaines,label = True):
         """
         Fonction qui parcourt une colonne et qui supprime la ligne si celle-ci contient une chaîne particulière.
 

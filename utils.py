@@ -7,7 +7,7 @@ import re
 
 
 class UtilsForFile():
-    def copy_paste_line(self,onglet_from,row_from, onglet_to, row_to ):
+    def copy_paste_line(self,onglet_from,row_from, onglet_to, row_to):
         """
         Fonction qui prend une ligne de la feuille et qui la copie dans un autre onglet.
 
@@ -26,7 +26,28 @@ class UtilsForFile():
         for j in range(1, onglet_from.max_column + 1): 
             onglet_to.cell(row_to,j).value = onglet_from.cell(row_from, j).value 
 
-    def copy_paste_column(self ,onglet_from ,column_from , onglet_to, column_to ):
+    def copy_paste_line_between_files(file_from, onglet_from,row_from, file_to, onglet_to, row_to):
+        """
+        Fonction qui prend une ligne d'une feuille d'un fichier et qui la copie dans un autre onglet d'un autre fichier.
+
+        Inputs : 
+            - file_from : fichier de départ
+            - onglet_from : onglet d'où on copie
+            - row_from : ligne de l'onglet d'origine.
+            - file_to : fichier d'arrivée
+            - onglet_to : onglet où coller.
+            - row_to : la ligne où il faut coller dans l'onglet à modifier.
+
+        Exemple d'utilisation : 
+      
+            file = File('dataset.xlsx')
+            file.copy_paste_line('onglet1', 1, 'onglet2', 1)
+        """
+
+        for j in range(1, onglet_from.max_column + 1): 
+            onglet_to.cell(row_to,j).value = onglet_from.cell(row_from, j).value 
+
+    def copy_paste_column(self, onglet_from ,column_from , onglet_to, column_to ):
         """
         Fonction qui prend une colonne de la feuille et qui la copie dans un autre onglet.
         """
@@ -52,8 +73,6 @@ class UtilsForFile():
             start_column, start_row, end_column, end_row = merged_range.bounds 
             # Fusionner les cellules correspondantes dans la feuille de calcul destination
             sheet_to.merge_cells(start_row=start_row, start_column=start_column, end_row=end_row, end_column=end_column)
-
-    
 
     def add_line_at_bottom(self, onglet_from, row_from, onglet_to):
         """
@@ -148,7 +167,6 @@ class UtilsForSheet():
         for i in range(first_line,last_line):
             key = self.sheet.cell(i,column_keys).value 
             
-            print(key,self.sheet.max_row+1)
             if key != "":
                 dico[key] = self.sheet.cell(i,column_values).value
         return dico
