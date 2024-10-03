@@ -251,7 +251,7 @@ def groupofanswers(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
                    line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
     """
     Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. Vous avez une colonne (colread) contenant des réponses. Chacune de ses réponses appartient à un groupe.
-    Vous souhaitez afficher dans une colonne (colwrite) le groupe d'appartenance de la réponse.
+    Vous souhaitez afficher dans une colonne (colwrite) le groupe d'appartenance de la réponse. On vous demandera d'entrer des noms de groupes et dans la foulée, les réponses qui appartiennent au groupe.
 
     Commande : 
 
@@ -495,6 +495,20 @@ def maxnames(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')
 
     sheetobject = Sheet(file,sheet)
     sheetobject.give_names_of_maximum(colstore, *columnlist)
+
+@app.command()
+def colcongruent(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
+                sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
+                firstcol : Annotated[str, typer.Option(prompt = 'Enter the column letter containing the word (example: prime, probe)')],
+                secondcol : Annotated[str, typer.Option(prompt = 'Enter the column letter containing congruence data')],
+                colwrite : Annotated[str, typer.Option(prompt = 'Enter the column letter in which you want to write')],
+                words : Annotated[Optional[List[str]], typer.Option()] = None):
+    
+    words = Ufc.askArgumentUntilNone(words, "Enter the words (like prime, probe), for which you want to write something in the new column")
+
+    sheetobject = Sheet(file,sheet)
+    sheetobject.column_for_prime_probe_congruence(firstcol, secondcol, colwrite, *words) 
+    
 
 
 if __name__ == "__main__":

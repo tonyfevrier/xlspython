@@ -1,14 +1,16 @@
 #from xlutils.copy import copy 
 
 import openpyxl
+import os
 import json 
+import re
 from openpyxl.styles import PatternFill
 from openpyxl.utils import column_index_from_string, coordinate_to_tuple, get_column_letter
 from copy import copy
 from datetime import datetime
 from utils import UtilsForFile, UtilsForSheet, Str, Other
 from pycel import ExcelCompiler 
-import os
+
 
 class Path(UtilsForFile):
     def __init__(self,path = 'fichiers_xls/'):
@@ -823,6 +825,31 @@ class Sheet(File,UtilsForSheet,Other):
         self.updateCellFormulas(self.sheet, True, 'column', modifications)
         self.writebook.save(self.path + self.name_file) 
         
+    def column_for_prime_probe_congruence(self, first_column, second_column, column_insertion, *words,  line_beginning=2, insert=True, label=True):
+        """
+        Vous avez deux colonnes l'une contient des chaines de caractères particulières. L'autre contient des chaines de la forme MOTnb_.jpg où MOT peut 
+        être congruent, neutre, incongruent et nb est un nombre. Vous souhaitez insérer une colonne contenant soit rien soit la chaine de la première colonne
+        suivi de MOT si la chaîne de la première colonne fait partie de words
+        """
+        # Transformer les lettres de colonnes en index et insérer la colonne d'écriture
+        if label:
+            first_column = column_index_from_string(first_column) 
+            second_column = column_index_from_string(second_column) 
+            column_insertion = column_index_from_string(column_insertion) 
+
+        if insert:
+            self.sheet.insert_cols(column_insertion)
+
+        # Remplissage de la nouvelle colonne
+        for i in range(line_beginning,self.sheet.max_row + 1):
+
+            # Adjonction de la chaine de first_column à MOT
+            if self.sheet.cell(i, first_column).value in words:
+                mot = re.sub(r'([A-Z-a-z]+)\d+_.jpg', r'\1', self.sheet.cell(i, second_column).value)
+                self.sheet.cell(i,column_insertion).value = self.sheet.cell(i, first_column).value + "_" + mot
+        
+        self.writebook.save(self.path + self.name_file)
+
 
     
 

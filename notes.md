@@ -110,10 +110,17 @@ pb de resourcewarning:
 
 - Sécurité : 
     Ajouter une sauvegarde automatique et l'indiquer pour toutes les fonctions qui modifient directement sur le fichier (en décorateur)
+    Pour sauvegarder après une méthode de Sheet, il faudra réfléchir à donner en attributs à File ses objets Sheet ou un attribut File à Sheet.
 
-- Pb : parfois un onglet doit être ouvert en dataonly = True mais les autres onglets doivent garder les formules mais si on le met en False, on ne peut pas faire l'opération voulue sur l'onglet. 
+- REGARDER CETTE SECTION ET OPTER PR LA MEILLEURE SOLUTION. Pb : parfois un onglet doit être ouvert en dataonly = True mais les autres onglets doivent garder les formules mais si on le met en False, on ne peut pas faire l'opération voulue sur l'onglet. 
     - Solution, il faudrait une fonction de File qui prend un fichier lance l'opération Sheet et constitue un nouveau fichier avec la feuille modifiée à laquelle on appose les autres onglets du fichier avant modification utilisant data_only= True. La fonction devrait repérer tout les onglets auquel on ne touche pas et les restaurer comme initialement.
     - Ainsi toutes les méthodes de Sheet pourraient être appelées par cette méthode de File, ce qui pourrait changer la structure des commandes : à réfléchir.
+    - Autre solution : ouvrir la feuille en dataonly true, faire la modif, ouvrir en dataonly false y copier les modif faites en true et enregistrer.
+    - voir si on a un moyen sans imposer dataonly de récupérer localement soit la formule, soit la valeur : xlswings? pandas?
+
+- les objets Sheet File, sont ils indispensables? 
+
+- si j'adoptais MVC pour le projet, est-ce que ce que j'ai programmé le respecterait?
 
 
 - pb xls A REGLER : ouvrir en data only =true pour créer un nouvel onglet scratche toutes les formules des onglets initiaux.
