@@ -13,8 +13,8 @@ from pycel import ExcelCompiler
 
 
 class Path(UtilsForFile):
-    def __init__(self,path = 'fichiers_xls/'):
-        self.path = path
+    def __init__(self,pathname = 'fichiers_xls/'):
+        self.pathname = pathname
         
     # def same_action_on_homononymous_files(self, method, *names):
     #     """
@@ -39,10 +39,10 @@ class Path(UtilsForFile):
         d'un même nom et qui ne conserve que les colonnes entrées par l'utilisateur.
         """
         # Récupérer tous les dossiers d'un dossier
-        directories = [f for f in os.listdir(self.path) if os.path.isdir(os.path.join(self.path, f))]
+        directories = [f for f in os.listdir(self.pathname) if os.path.isdir(os.path.join(self.pathname, f))]
 
         for directory in directories:
-            sheet = Sheet(filename, sheetname, self.path + directory)
+            sheet = Sheet(filename, sheetname, self.pathname + directory + '/')
             sheet.delete_other_columns(columns)
 
     def gather_files_in_different_directories(self, name_file, name_sheet, values_only=False):
@@ -56,7 +56,7 @@ class Path(UtilsForFile):
             - values_only(bool): to decide whether or not copying only the values and not formulas
         """
         # Récupérer tous les dossiers d'un dossier
-        directories = [f for f in os.listdir(self.path) if os.path.isdir(os.path.join(self.path, f))]
+        directories = [f for f in os.listdir(self.pathname) if os.path.isdir(os.path.join(self.pathname, f))]
 
         # Créer un nouveau fichier
         new_file = openpyxl.Workbook() 
@@ -65,7 +65,7 @@ class Path(UtilsForFile):
         # Récupérer le fichier dans chacun des dossiers
         for directory in directories:
             print(directory, len(directories))
-            sheet_to_copy = Sheet(name_file, name_sheet, self.path + directory + '/')
+            sheet_to_copy = Sheet(name_file, name_sheet, self.pathname + directory + '/')
 
             # Copier une fois la première ligne
             if directory == directories[0]:
@@ -78,7 +78,7 @@ class Path(UtilsForFile):
                 self.add_line_at_bottom(sheet_to_copy.sheet, line, new_sheet, values_only=values_only)
 
             # save at the end of each directory not to use too much memory
-            new_file.save(self.path  + "gathered_" + name_file)
+            new_file.save(self.pathname  + "gathered_" + name_file)
         
 
     def gather_files(self):

@@ -1,11 +1,21 @@
 from unittest import TestCase, main
-from module_pour_excel import *
-import tracemalloc
-
+from module_pour_excel import * 
 import openpyxl
+import os
+ 
 
-"""IMPORTANT : pour faire refonctionner les tests il faut que je retrouve un récent test.xlsx qui 
-n'est pas corrompu."""
+class TestPath(TestCase):
+
+    """ def test_delete_other_columns(self):
+        Pb de ce test : ne fonctionne qu'une fois car une fois les colonnes supprimées il en supprimera d'autres et le test sera faux.
+        path = Path('fichiers_xls/gathertests/')
+        path.delete_other_columns('A-F,H-J', 'test_keep_only_columns.xlsx', 'sheet1')
+        directories = [f for f in os.listdir(path.pathname) if os.path.isdir(os.path.join(path.pathname, f))]
+
+        for directory in directories:
+            verify_sheets_identical(Sheet('test_keep_only_columns.xlsx', 'sheet1', path.pathname + '/').sheet,
+                                    Sheet('test_keep_only_columns.xlsx', 'Feuille2', path.pathname + '/').sheet) """
+            
 
 class TestFile(TestCase):
     
@@ -19,32 +29,13 @@ class TestFile(TestCase):
         """On prend deux fichiers excel, on vérifie qu'ils ont les mêmes onglets et que dans chaque onglet on a les mêmes cellules."""
         file1 = File('test_date_2023-05-20.xlsx')
         file2 = File('test_copie.xlsx')
-        self.verify_files_identical(file1, file2)
+        verify_files_identical(file1, file2)
         del file1, file2
-        
-
-    def verify_files_identical(self, file1, file2):
-        self.assertEqual(file1.sheets_name,file2.sheets_name)
-
-        for onglet in file1.sheets_name: 
-            sheet1 = file1.writebook[onglet]
-            sheet2 = file2.writebook[onglet]
-            for i in range(1,sheet1.max_row+1):
-                for j in range(1,sheet1.max_column+1):
-                    self.assertEqual(sheet1.cell(i,j).value,sheet2.cell(i,j).value)
-
-    def verify_sheets_identical(self, sheet1, sheet2):  
-        self.assertEqual(sheet1.sheet.max_row,sheet2.sheet.max_row)
-        self.assertEqual(sheet1.sheet.max_column,sheet2.sheet.max_column)
-
-        for i in range(1,sheet1.sheet.max_row+1):
-            for j in range(1,sheet1.sheet.max_column+1):
-                self.assertEqual(sheet1.sheet.cell(i,j).value,sheet2.sheet.cell(i,j).value) 
 
     def test_create_one_onglet_by_participant(self): 
         file = File('test_create_one_onglet_by_participant.xlsx') 
         file.create_one_onglet_by_participant('Stroops_test (7)', 'A')   
-        self.verify_files_identical(File('test_create_one_onglet_by_participant_before.xlsx'),file)
+        verify_files_identical(File('test_create_one_onglet_by_participant_before.xlsx'),file)
         
         for i in range(1,len(file.sheets_name)): 
             del file.writebook[file.sheets_name[i]]
@@ -54,7 +45,7 @@ class TestFile(TestCase):
     def test_extract_column_from_all_sheets(self):
         file = File('test_extract_column.xlsx')
         file.extract_column_from_all_sheets('B') 
-        self.verify_files_identical(File('test_extract_column_ref.xlsx'),file)
+        verify_files_identical(File('test_extract_column_ref.xlsx'),file)
 
         del file.writebook[file.sheets_name[-1]]
         file.writebook.save(file.path + 'test_extract_column.xlsx') 
@@ -80,7 +71,7 @@ class TestFile(TestCase):
         file = File("test_gather_columns_in_one.xlsx")
         file.gather_columns_in_one("test", ['C','D','E'], ['G','H','I'])
 
-        self.verify_files_identical(File("test_gather_columns_in_one - ref.xlsx"), File("test_gather_columns_in_one.xlsx"))
+        verify_files_identical(File("test_gather_columns_in_one - ref.xlsx"), File("test_gather_columns_in_one.xlsx"))
 
         del file.writebook['onglet 1']
         del file.writebook['onglet 2']
@@ -98,8 +89,8 @@ class TestFile(TestCase):
         sheet1o = Sheet("test_onefile_sendmail.xlsx","tony fevrier")
         sheet2o = Sheet("test_onefile_sendmail.xlsx","Marine Moyon")
 
-        self.verify_sheets_identical(sheet1, sheet1o)
-        self.verify_sheets_identical(sheet2, sheet2o) 
+        verify_sheets_identical(sheet1, sheet1o)
+        verify_sheets_identical(sheet2, sheet2o) 
 
     def test_merge_cells_on_all_tabs(self): 
         file1 = File("test_merging.xlsx") 
@@ -153,14 +144,6 @@ class TestSheet(TestCase, Other):
         
         for i in range(2,sheet1.max_row+1 ): 
             self.assertEqual(sheet1.cell(i,column1).value,sheet2.cell(i,column2).value)
-
-    def verify_sheets_identical(self, sheet1, sheet2):  
-        self.assertEqual(sheet1.sheet.max_row,sheet2.sheet.max_row)
-        self.assertEqual(sheet1.sheet.max_column,sheet2.sheet.max_column)
-
-        for i in range(1,sheet1.sheet.max_row+1):
-            for j in range(1,sheet1.sheet.max_column+1):
-                self.assertEqual(sheet1.sheet.cell(i,j).value,sheet2.sheet.cell(i,j).value) 
 
     def test_column_transform_string_in_binary(self):
         sheet = Sheet('test.xlsx','sheet1')  
@@ -264,7 +247,7 @@ class TestSheet(TestCase, Other):
         sheet1 = Sheet('test_doublons.xlsx','sheet1')
         sheet2 = Sheet('test_doublons.xlsx','Feuille2')
         sheet1.delete_doublons('C', color = True)
-        self.verify_sheets_identical(sheet1,sheet2)
+        verify_sheets_identical(sheet1,sheet2)
 
     def test_create_one_column_by_QCM_answer(self):
         sheet = Sheet('test_create_one_column.xlsx','sheet1')  
@@ -284,7 +267,7 @@ class TestSheet(TestCase, Other):
         del sheet
 
         sheet1, sheet2 = Sheet('testongletbyparticipant.xlsx','severalAnswers'),Sheet('testongletbyparticipant-result.xlsx','Feuille2') 
-        self.verify_sheets_identical(sheet1, sheet2)
+        verify_sheets_identical(sheet1, sheet2)
         del sheet1, sheet2
         
         file = File('testongletbyparticipant.xlsx')
@@ -297,16 +280,17 @@ class TestSheet(TestCase, Other):
         sheet = Sheet('test_give_names.xlsx','sheet1')
         sheet.give_names_of_maximum('D', 'A', 'B', 'C') 
 
-        self.verify_sheets_identical(sheet, Sheet('test_give_names.xlsx','Feuille2'))
+        verify_sheets_identical(sheet, Sheet('test_give_names.xlsx','Feuille2'))
 
         sheet.sheet.delete_cols(4)
         sheet.writebook.save(sheet.path + 'test_give_names.xlsx') 
         
-    def test_delete_other_columns(self):
+    """ def test_delete_other_columns(self):
+        # Fonctionnel une fois
         sheet = Sheet('test_keep_only_columns.xlsx','sheet1')
         sheet.delete_other_columns('B-H,L,M,AI-AJ')
 
-        self.verify_sheets_identical(sheet, Sheet('test_keep_only_columns.xlsx','Feuille2'))
+        verify_sheets_identical(sheet, Sheet('test_keep_only_columns.xlsx','Feuille2')) """
 
 
 
@@ -399,9 +383,27 @@ class TestStr(TestCase, Other):
     def testUpdateOneFormula(self):
         formula = Str.updateOneFormula("SI(J10+K$1+L$3)",True,'row',['2','5'])
         self.assertEqual(formula, "SI(J12+K$1+L$4)")
-  
-#         formula = Str.updateOneFormula("SI(J10+K$1+L$3)",False,'column',['C','D','L'])
-#         self.assertEqual(formula, "SI(H10+I$1+J$3)")
+ 
+        
+def verify_files_identical(file1, file2):
+    testcase = TestCase()
+    testcase.assertEqual(file1.sheets_name,file2.sheets_name)
+
+    for onglet in file1.sheets_name: 
+        sheet1 = file1.writebook[onglet]
+        sheet2 = file2.writebook[onglet]
+        for i in range(1,sheet1.max_row+1):
+            for j in range(1,sheet1.max_column+1):
+                testcase.assertEqual(sheet1.cell(i,j).value,sheet2.cell(i,j).value)
+
+def verify_sheets_identical(sheet1, sheet2):  
+    testcase = TestCase()
+    testcase.assertEqual(sheet1.sheet.max_row,sheet2.sheet.max_row)
+    testcase.assertEqual(sheet1.sheet.max_column,sheet2.sheet.max_column)
+
+    for i in range(1,sheet1.sheet.max_row+1):
+        for j in range(1,sheet1.sheet.max_column+1):
+            testcase.assertEqual(sheet1.sheet.cell(i,j).value,sheet2.sheet.cell(i,j).value)
 
 if __name__== "__main__":
     main()
