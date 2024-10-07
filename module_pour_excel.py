@@ -637,29 +637,28 @@ class Sheet(File,UtilsForSheet,Other):
         self.updateCellFormulas(self.sheet,True,'column', modifications)         
         self.writebook.save(self.path + self.name_file) 
 
-    def delete_columns(self, *columns, label = True):
+    def delete_columns(self, columns):
         """
-        Prend une séquence de colonnes qu'on souhaite supprimer.
-        """ 
-        # Réordonner par les lettres les plus grandes pour supprimer de la droite vers la gauche dans l'excel 
-        list_columns = list(columns)
-        list_columns.sort(reverse = True) 
+        Prend une séquence de colonnes sous forme de lettres qu'on souhaite supprimer.
 
-        for column in list_columns:
-            if label:
-                self.sheet.delete_cols(column_index_from_string(column))
-            else:
-                self.sheet.delete_cols(column)
+        Input : 
+            - columns (str): list of column of the form 'C-J,K,L-N,Z' 
+        """ 
+        # Réordonner par les lettres les plus grandes pour supprimer de la droite vers la gauche dans l'excel  
+        columns_to_delete = Str.columns_from_strings(columns)
+        columns_to_delete.sort(reverse = True) 
+
+        for column in columns_to_delete: 
+            self.sheet.delete_cols(column_index_from_string(column)) 
 
         self.writebook.save(self.path + self.name_file) 
 
     def delete_other_columns(self, columns):
         """
-        Prend une séquence de colonne à conserver et supprime les autres
+        Prend une séquence de colonnes sous forme de lettres à conserver et supprime les autres
 
-        Inputs : 
+        Input : 
             - columns (str): list of column of the form 'C-J,K,L-N,Z'
-            - label
         """
         columns_to_keep = Str.columns_from_strings(columns)
 
