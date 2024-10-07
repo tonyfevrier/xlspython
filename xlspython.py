@@ -12,13 +12,22 @@ app = typer.Typer()
 @app.command()
 def gatherfiles(directory : Annotated[str, typer.Option(prompt = 'Enter the name of the directory containing all directories')],
                 file : Annotated[str, typer.Option(prompt = 'Enter the name of the file')],
-                sheet : Annotated[str, typer.Option(prompt = 'Enter the name of the sheet to copy')]):
+                sheet : Annotated[str, typer.Option(prompt = 'Enter the name of the sheet to copy')],
+                values : Annotated[bool, typer.Option(prompt = 'Do you want to copy only values (y) or to keep forumla (n)')],):
     
     """
-    A REMPLIR
-    """
+    Fonction agissant sur un dossier. Fonction qui prend plusieurs fichiers de structures identiques et 
+    qui crée un fichier contenant l'ensemble des lignes de ces fichiers.
+
+    Commande : 
+
+        Version guidée : python xlspython.py gatherfiles
+
+        Version complète : python xlspython.py gatherfiles --directory name --file name.xlsx --sheet name
+    
+    """ 
     pathobject = Path(directory + '/')
-    pathobject.gather_files_in_different_directories(file, sheet)
+    pathobject.gather_files_in_different_directories(file, sheet, values_only=values)
 
 
 # File commands
@@ -378,7 +387,8 @@ def deletecols(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file 
                columns : Annotated[Optional[List[str]], typer.Option()] = None):
 
     """
-    Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. Prend une séquence de colonnes et les supprime.
+    Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
+    Prend une séquence de colonnes et les supprime.
 
     Commande : 
 
@@ -503,6 +513,17 @@ def colcongruent(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
                 secondcol : Annotated[str, typer.Option(prompt = 'Enter the column letter containing congruence data')],
                 colwrite : Annotated[str, typer.Option(prompt = 'Enter the column letter in which you want to write')],
                 words : Annotated[Optional[List[str]], typer.Option()] = None):
+    
+    """
+    Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. 
+    On a deux colonnes, une contenant des mots, l'autre contenant une chaine de la forme motnb_o.jpg (congruent1_o.jpg), on veut créer
+    une colonne qui contient le mot de la première colonne + mot (congruent) si le mot de la première colonne fait partie d'une liste de mots prédéfinie.
+
+    Commande : 
+
+        Version guidée : python xlspython.py colcongruent
+ 
+    """
     
     words = Ufc.askArgumentUntilNone(words, "Enter the words (like prime, probe), for which you want to write something in the new column")
 

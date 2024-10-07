@@ -22,7 +22,7 @@ class Path(UtilsForFile):
         """
         pass 
 
-    def gather_files_in_different_directories(self, name_file, name_sheet):
+    def gather_files_in_different_directories(self, name_file, name_sheet, values_only=False):
         """
         Vous avez plusieurs dossiers contenant un fichier ayant le même nom. Vous souhaitez créer un seul fichier regroupant 
         toutes les lignes de ces fichiers.
@@ -36,17 +36,21 @@ class Path(UtilsForFile):
 
         # Récupérer le fichier dans chacun des dossiers
         for directory in directories:
+            print(directory, len(directories))
             sheet_to_copy = Sheet(name_file, name_sheet, self.path + directory + '/')
 
             # Copier une fois la première ligne
             if directory == directories[0]:
-                self.copy_paste_line(sheet_to_copy.sheet, 1, new_sheet, 1)
+                self.copy_paste_line(sheet_to_copy.sheet, 1, new_sheet, 1, values_only=values_only)
 
             # Copier son contenu à la suite du fichier
             for line in range(2, sheet_to_copy.sheet.max_row + 1): 
-                self.add_line_at_bottom(sheet_to_copy.sheet, line, new_sheet)
+                if line % 200 == 0:
+                    print(line, sheet_to_copy.sheet.max_row + 1)
+                self.add_line_at_bottom(sheet_to_copy.sheet, line, new_sheet, values_only=values_only)
 
-        new_file.save(self.path  + "gathered_" + name_file)
+            # save at the end of each directory not to use too much memory
+            new_file.save(self.path  + "gathered_" + name_file)
         
 
     def gather_files(self):
@@ -634,7 +638,7 @@ class Sheet(File,UtilsForSheet,Other):
 
     def delete_columns(self, *columns, label = True):
         """
-        Prend une séquence de colonnes et les supprime.
+        Prend une séquence de colonnes qu'on souhaite supprimer.
         """ 
         # Réordonner par les lettres les plus grandes pour supprimer de la droite vers la gauche dans l'excel 
         list_columns = list(columns)
@@ -647,6 +651,23 @@ class Sheet(File,UtilsForSheet,Other):
                 self.sheet.delete_cols(column)
 
         self.writebook.save(self.path + self.name_file) 
+
+    def delete_other_columns(self, columns):
+        """
+        Prend une séquence de colonne à conserver et supprime les autres
+
+        Inputs : 
+            - columns (str): list of column of the form 'C-J,K,L-N,Z'
+            - label
+        """
+        columns_to_keep = Str.columns_from_strings(columns)
+
+        for column in range(self.sheet.max_column + 1, -1, 0):
+            if get_column_letter(column) not in columns_to_keep:
+                self.sheet.delete_cols(column)
+       
+        self.writebook.save(self.path + self.name_file) 
+        
 
     def delete_lines_containing_str(self,column,*chaines,label = True):
         """
@@ -845,7 +866,7 @@ class Sheet(File,UtilsForSheet,Other):
 
             # Adjonction de la chaine de first_column à MOT
             if self.sheet.cell(i, first_column).value in words:
-                mot = re.sub(r'([A-Z-a-z]+)\d+_.jpg', r'\1', self.sheet.cell(i, second_column).value)
+                mot = re.sub(r'([A-Z-a-z]+)\d+_[A-Z-a-z].jpg', r'\1', self.sheet.cell(i, second_column).value)
                 self.sheet.cell(i,column_insertion).value = self.sheet.cell(i, first_column).value + "_" + mot
         
         self.writebook.save(self.path + self.name_file)

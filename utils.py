@@ -7,7 +7,7 @@ import re
 
 
 class UtilsForFile():
-    def copy_paste_line(self,onglet_from,row_from, onglet_to, row_to):
+    def copy_paste_line(self,onglet_from,row_from, onglet_to, row_to, values_only=False):
         """
         Fonction qui prend une ligne de la feuille et qui la copie dans un autre onglet.
 
@@ -23,29 +23,27 @@ class UtilsForFile():
             file.copy_paste_line('onglet1', 1, 'onglet2', 1)
         """
 
-        for j in range(1, onglet_from.max_column + 1): 
-            onglet_to.cell(row_to,j).value = onglet_from.cell(row_from, j).value 
+        column_index = 1 
 
-    def copy_paste_line_between_files(file_from, onglet_from,row_from, file_to, onglet_to, row_to):
-        """
-        Fonction qui prend une ligne d'une feuille d'un fichier et qui la copie dans un autre onglet d'un autre fichier.
+        # Cas où on ne copie que les valeurs, cell est un str
+        if values_only:
+            for column in onglet_from.iter_cols(min_row=row_from, max_row=row_from, min_col=0, max_col=onglet_from.max_column, values_only=values_only):
+                for cell in column: 
+                    if cell:
+                        onglet_to.cell(row_to, column_index).value = cell
+                    column_index += 1
+                    
+        # Cas où on copie les formules, cell est un objet
+        else:
+            for column in onglet_from.iter_cols(min_row=row_from, max_row=row_from, min_col=0, max_col=onglet_from.max_column, values_only=values_only):
+                for cell in column: 
+                    if cell.value:
+                        onglet_to.cell(row_to, cell.column).value = cell.value
 
-        Inputs : 
-            - file_from : fichier de départ
-            - onglet_from : onglet d'où on copie
-            - row_from : ligne de l'onglet d'origine.
-            - file_to : fichier d'arrivée
-            - onglet_to : onglet où coller.
-            - row_to : la ligne où il faut coller dans l'onglet à modifier.
 
-        Exemple d'utilisation : 
-      
-            file = File('dataset.xlsx')
-            file.copy_paste_line('onglet1', 1, 'onglet2', 1)
-        """
-
-        for j in range(1, onglet_from.max_column + 1): 
-            onglet_to.cell(row_to,j).value = onglet_from.cell(row_from, j).value 
+        #for j in range(1, onglet_from.max_column + 1): 
+        #    onglet_to.cell(row_to,j).value = onglet_from.cell(row_from, j).value 
+ 
 
     def copy_paste_column(self, onglet_from ,column_from , onglet_to, column_to ):
         """
@@ -74,7 +72,7 @@ class UtilsForFile():
             # Fusionner les cellules correspondantes dans la feuille de calcul destination
             sheet_to.merge_cells(start_row=start_row, start_column=start_column, end_row=end_row, end_column=end_column)
 
-    def add_line_at_bottom(self, onglet_from, row_from, onglet_to):
+    def add_line_at_bottom(self, onglet_from, row_from, onglet_to, values_only=False):
         """
         Fonction qui copie une ligne spécifique de la feuille à la fin d'un autre onglet.
 
@@ -87,7 +85,7 @@ class UtilsForFile():
             file = File('dataset.xlsx')
             file.copy_paste_line('onglet1', 1, 'onglet2')
         """ 
-        self.copy_paste_line(onglet_from, row_from, onglet_to, onglet_to.max_row + 1)  
+        self.copy_paste_line(onglet_from, row_from, onglet_to, onglet_to.max_row + 1, values_only=values_only)  
 
     def copy_column_tags_and_values_at_bottom(self,import_sheet, column, target_sheet):
         """
@@ -369,16 +367,37 @@ class Str():
         Liste = []
         
         for string in strings:
-            substrings = string.split(',')
-            listechaine = []
-            for substring in substrings:
-                if '-' in substring:
-                    listechaine += cls.rangeLetter(substring)
-                else:
-                    listechaine.append(substring)
-            Liste.append(listechaine) 
+            # substrings = string.split(',')
+            # listechaine = []
+            # for substring in substrings:
+            #     if '-' in substring:
+            #         listechaine += cls.rangeLetter(substring)
+            #     else:
+            #         listechaine.append(substring) 
+            Liste.append(cls.columns_from_strings(string)) 
         
         return Liste
+    
+    @classmethod
+    def columns_from_strings(cls, string):
+        """
+        Fonction qui prend en entrée une chaîne de caractères de la forme "C-E,H,J" et qui retourne une liste de colonnes 
+        ['C','D','E','H','J'].
+
+        Input : 
+            - string (str).
+
+        Output:
+            -Liste (list) : Liste de lettres.
+        """
+        substrings = string.split(',')
+        column_list = []
+        for substring in substrings:
+            if '-' in substring:
+                column_list += cls.rangeLetter(substring)
+            else:
+                column_list.append(substring)
+        return column_list
     
     @staticmethod
     def rangeLetter(string):

@@ -108,19 +108,49 @@ pb de resourcewarning:
     - `il semble qu'il faille ouvrir et fermer les fichiers dans chaque fonction pour l'éviter : faire un wrapper et descripteur dans chaque fonction. On dirait qu'une fois l'objet créé, écrire une commande qui laisse le workbook en mémoire mène à un warning : en gros la méthode doit ouvrir, faire les modifs et fermer sinon warning. Je pourrais pour les tests les ouvrir autrement.`
     - `Bug : modifier les sheetnames dans les fonctions si nécessaire et les verify des tests pour ne pas ouvrir le même objet plusieurs fois.`
 
+- `faire les docu des nouvelles méthodes`
+
+- delete columns doit plutôt demander les colonnes à garder
+    testet columns for strings, listcolumns for strings et delete columns, keeponly...
+
+Performance :
+- écrire une fonction qui prend une série de fichiers analogues dans des fichiers de même noms inclus dans des dossiers et qui supprime les mêmes colonnes dans tous ses fichiers. (Path)
+- écrire une fonction qui prend une série de fichiers analogues qui parcourt une colonne d'identifiants, qui crée un fichier avec un onglet par identifiant contenant toutes les lignes associées à cet identifiant dans tous les fichiers (Path)
+
+- Tester si gather files conserve les formules si values only = False
+- Faire les modifs nécessaires dans les fonctions utilisant copy paste ou add line to bottom avec le paramètre values_only.
+- Voir si ws.values ne permettrait pas d'éviter d'utiliser le dataonly.
+- ou encore ça Both Worksheet.iter_rows() and Worksheet.iter_cols() can take the values_only parameter to return just the cell’s value:
+
 - Sécurité : 
     Ajouter une sauvegarde automatique et l'indiquer pour toutes les fonctions qui modifient directement sur le fichier (en décorateur)
     Pour sauvegarder après une méthode de Sheet, il faudra réfléchir à donner en attributs à File ses objets Sheet ou un attribut File à Sheet.
 
 - REGARDER CETTE SECTION ET OPTER PR LA MEILLEURE SOLUTION. Pb : parfois un onglet doit être ouvert en dataonly = True mais les autres onglets doivent garder les formules mais si on le met en False, on ne peut pas faire l'opération voulue sur l'onglet. 
-    - Solution, il faudrait une fonction de File qui prend un fichier lance l'opération Sheet et constitue un nouveau fichier avec la feuille modifiée à laquelle on appose les autres onglets du fichier avant modification utilisant data_only= True. La fonction devrait repérer tout les onglets auquel on ne touche pas et les restaurer comme initialement.
+    - Solution, il faudrait une fonction de File qui prend un fichier lance l'opération Sheet et constitue un nouveau fichier avec la feuille modifiée à laquelle on appose les autres onglets du fichier avant modification utilisant data_only= True. La fonction devrait repérer tout les onglets auquel on ne touche pas et les restaurer comme initialement. Il faudrait aussi pouvoir le faire pour un onglet qui contient des formules
     - Ainsi toutes les méthodes de Sheet pourraient être appelées par cette méthode de File, ce qui pourrait changer la structure des commandes : à réfléchir.
     - Autre solution : ouvrir la feuille en dataonly true, faire la modif, ouvrir en dataonly false y copier les modif faites en true et enregistrer.
-    - voir si on a un moyen sans imposer dataonly de récupérer localement soit la formule, soit la valeur : xlswings? pandas?
+    - `voir si on a un moyen sans imposer dataonly de récupérer localement soit la formule, soit la valeur : xlswings? pandas?`
+    - identifier les fonctions qui fonctionnent pareil pour dataonly false ou true : trouver les fonctions qui nécessitent de récupérer les valeurs calculées. A mon avis ce sont slt celles qui nécessiteront de vérifier si une chaine d'une cellule = à ou contient.
+    - Cas : Si la fonction ne nécessite pas de travailler sur les valeurs, calculées, on ouvre en dataonly=False
+            Si la fonction nécessite de travailler sur les valeurs, demander à l'utilisateur s'il souhaite ouvrir son fichier uniquement sur les valeurs, on le prévient alors que toute formule disparaîtra s'il dit oui.
+            S'il refuse, il faudrait ouvrir la feuille en dataonly true, lancer la fonction, extraire les choses qui ont été modifiées
+                , ouvrir le fichier ou la feuille en dataonly = False, insérer les modifications dans le fichier et sauvegarder cette fonction.
+                Dans les autres cas, on évite ça car ça prendrait du temps. 
 
-- les objets Sheet File, sont ils indispensables? 
+- Performance : voir comment gagner du temps sur les gros fichiers : Sheet semble être long à générer par exemple.
+    réfléchir à openmp pour gagner du temps en parallèle
+    voir pour essayer d'utiliser au max ws.values ou iter_rows iter_cols
+    `fonctions copyline qui existent dans openpyxl?`
+    modifier mes copies en allant chercher ws.iterrows pour éviter trop d'accès cellules et voir la différence de temps.
+
+
+- existe til une fonction ou une combinairsonn de fonctions qui prend plusieurs lignes d'un onglet correspondant à un ptcpt. Cet onglet contient moyenne et SD. et on veut créer dans un onglet une ligne par participant qui contient toutes ses moyennes SD etc
+
+- Faire un indicateur d'avancement dans l'exécution des colonnes
 
 - si j'adoptais MVC pour le projet, est-ce que ce que j'ai programmé le respecterait?
+    voir ma feuille volante
 
 
 - pb xls A REGLER : ouvrir en data only =true pour créer un nouvel onglet scratche toutes les formules des onglets initiaux.
