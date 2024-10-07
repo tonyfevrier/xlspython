@@ -112,8 +112,9 @@ pour pycel:
 
 - `testet columns for strings, listcolumns for strings et delete columns, keeponly...`
 - `delete columns doit plutôt demander les colonnes à garder`
-- modifier deletecolumns
+- modifier deletecolumns  
 - écrire une fonction path qui supprime les mêmes colonnes sur tous les fichiers
+- écrire la commande pour delete_other_columns directement pour plusieurs dossiers
     
 
 Performance :

@@ -384,7 +384,7 @@ def cutstring(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file '
 @app.command()
 def deletecols(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
                sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
-               columns : Annotated[Optional[List[str]], typer.Option()] = None):
+               columns : Annotated[str, typer.Option(prompt = 'Enter a group of column to delete of the form A-D,E,G,H-J,Z')]):
 
     """
     Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -396,11 +396,9 @@ def deletecols(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file 
 
         Version complète : python xlspython.py deletecols --file name.xlsx --sheet nametab --columns A --columns D 
     
-    """
-    columns = Ufc.askArgumentUntilNone(columns,"Enter one column to delete. Press directly enter if you have finished.")
-
+    """ 
     sheetobject = Sheet(file,sheet)
-    sheetobject.delete_columns(*columns)
+    sheetobject.delete_columns(columns)
 
 @app.command()
 def deletelinesstr(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
