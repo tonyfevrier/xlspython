@@ -117,8 +117,12 @@ pour pycel:
 
 Performance :
 - `écrire une fonction qui prend une série de fichiers analogues dans des fichiers de même noms inclus dans des dossiers et qui supprime les mêmes colonnes dans tous ses fichiers. (Path)`
-- écrire la commande pour delete_other_columns directement pour plusieurs dossiers
+- `écrire la commande pour delete_other_columns directement pour plusieurs dossiers`
 - écrire une fonction qui prend une série de fichiers analogues qui parcourt une colonne d'identifiants, qui crée un fichier avec un onglet par identifiant contenant toutes les lignes associées à cet identifiant dans tous les fichiers (Path)
+    `Modifier create_one_onglet_by_participant pour envoyer les data dans un nouveau fichier et pas dans le même`
+    Passer le nom du fichier où écrire à la fonction : si existe alors on continue d'écrire dessus sinon on crée le fichier. (On veut pouvoir réutiliser cette fonction plusieurs fois)
+    m'en servir poru la fonction faite dans path
+    factoriser mes fonctions deleteother et createoneonglet de path en faisant une fonction qui agit sur tous les fichiers.
 
 - Tester si gather files conserve les formules si values only = False
 - Faire les modifs nécessaires dans les fonctions utilisant copy paste ou add line to bottom avec le paramètre values_only.

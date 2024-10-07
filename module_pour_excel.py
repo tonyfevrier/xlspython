@@ -157,18 +157,21 @@ class File(UtilsForFile):
 
         onglets = []
         sheet = self.writebook[onglet_from] 
+
+        # Creation of the file aiming to contain the data
+        new_file = openpyxl.Workbook()
  
         for i in range(first_line, sheet.max_row + 1):
             onglet = str(sheet.cell(i,column_read).value)
             if onglet not in onglets:
-                self.writebook.create_sheet(onglet)
-                self.copy_paste_line(sheet, 1,  self.writebook[onglet], 1)
+                new_file.create_sheet(onglet)
+                self.copy_paste_line(sheet, 1,  new_file[onglet], 1)
                 onglets.append(onglet) 
-            self.add_line_at_bottom(sheet, i, self.writebook[onglet]) 
+            self.add_line_at_bottom(sheet, i, new_file[onglet]) 
         
-         
-        self.writebook.save(self.path + self.name_file)
-        self.sheets_name = self.writebook.sheetnames 
+        del new_file[new_file.sheetnames[0]]
+        new_file.save(self.path + 'divided_' + self.name_file)
+        #self.sheets_name = self.writebook.sheetnames 
 
     def extract_column_from_all_sheets(self,column,label = True):
         """
