@@ -245,8 +245,8 @@ class TestSheet(TestCase, Other):
 
     def test_delete_lines(self):
         sheet = Sheet('test.xlsx','delete_lines') 
-        sheet.delete_lines('D', '0')
-        sheet.delete_lines('D','p a')
+        sheet.delete_lines_containing_str('D', '0')
+        sheet.delete_lines_containing_str('D','p a')
         self.column_identical('test.xlsx','test.xlsx',9,10, 1, 1)
         self.column_identical('test.xlsx','test.xlsx',9,10, 2, 2)
         self.column_identical('test.xlsx','test.xlsx',9,10, 3, 3)
@@ -256,7 +256,7 @@ class TestSheet(TestCase, Other):
 
     def test_delete_lines_with_formulas(self):
         sheet = Sheet('listing_par_etape - Copie.xlsx','Feuil1') 
-        sheet.delete_lines('B', 'pas consenti') 
+        sheet.delete_lines_containing_str('B', 'pas consenti') 
         self.column_identical('listing_par_etape - Copie.xlsx','listing_par_etape - Copie.xlsx',0, 1, 2, 2)
         self.column_identical('listing_par_etape - Copie.xlsx','listing_par_etape - Copie.xlsx',0, 1, 10, 10) 
 
@@ -302,8 +302,12 @@ class TestSheet(TestCase, Other):
         sheet.sheet.delete_cols(4)
         sheet.writebook.save(sheet.path + 'test_give_names.xlsx') 
         
+    def test_delete_other_columns(self):
+        sheet = Sheet('test_keep_only_columns.xlsx','sheet1')
+        sheet.delete_other_columns('B-H,L,M,AI-AJ')
 
-        
+        self.verify_sheets_identical(sheet, Sheet('test_keep_only_columns.xlsx','Feuille2'))
+
 
 
 
@@ -366,6 +370,9 @@ class TestStr(TestCase, Other):
         self.assertEqual(duration1.convert_time_in_minutes(), '3000,0')
         self.assertEqual(duration2.convert_time_in_minutes(), '85,0')
         self.assertEqual(duration3.convert_time_in_minutes(), '16,58')
+
+    def test_columns_from_string(self):
+        self.assertListEqual(Str.columns_from_strings("C-E,H,J-L"), ['C','D','E','H','J','K','L'])
 
     def test_listFromColumnsStrings(self):
         self.assertListEqual(Str.listFromColumnsStrings("C-E,H,J-L", "D,G","H-K"),[['C','D','E','H','J','K','L'],['D','G'],['H','I','J','K']])

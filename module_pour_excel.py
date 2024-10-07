@@ -129,14 +129,15 @@ class File(UtilsForFile):
 
         onglets = []
         sheet = self.writebook[onglet_from] 
-
+ 
         for i in range(first_line, sheet.max_row + 1):
             onglet = str(sheet.cell(i,column_read).value)
             if onglet not in onglets:
                 self.writebook.create_sheet(onglet)
                 self.copy_paste_line(sheet, 1,  self.writebook[onglet], 1)
                 onglets.append(onglet) 
-            self.add_line_at_bottom(sheet, i, self.writebook[onglet])
+            self.add_line_at_bottom(sheet, i, self.writebook[onglet]) 
+        
          
         self.writebook.save(self.path + self.name_file)
         self.sheets_name = self.writebook.sheetnames 
@@ -662,7 +663,7 @@ class Sheet(File,UtilsForSheet,Other):
         """
         columns_to_keep = Str.columns_from_strings(columns)
 
-        for column in range(self.sheet.max_column + 1, -1, 0):
+        for column in range(self.sheet.max_column + 1, 0, -1):
             if get_column_letter(column) not in columns_to_keep:
                 self.sheet.delete_cols(column)
        

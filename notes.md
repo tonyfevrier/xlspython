@@ -110,8 +110,9 @@ pb de resourcewarning:
 
 - `faire les docu des nouvelles méthodes`
 
+- testet columns for strings, listcolumns for strings et delete columns, keeponly...
 - delete columns doit plutôt demander les colonnes à garder
-    testet columns for strings, listcolumns for strings et delete columns, keeponly...
+    
 
 Performance :
 - écrire une fonction qui prend une série de fichiers analogues dans des fichiers de même noms inclus dans des dossiers et qui supprime les mêmes colonnes dans tous ses fichiers. (Path)

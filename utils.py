@@ -37,7 +37,7 @@ class UtilsForFile():
         else:
             for column in onglet_from.iter_cols(min_row=row_from, max_row=row_from, min_col=0, max_col=onglet_from.max_column, values_only=values_only):
                 for cell in column: 
-                    if cell.value:
+                    if cell.value != "":
                         onglet_to.cell(row_to, cell.column).value = cell.value
 
 
@@ -388,7 +388,7 @@ class Str():
             - string (str).
 
         Output:
-            -Liste (list) : Liste de lettres.
+            - Liste (list) : Liste de lettres.
         """
         substrings = string.split(',')
         column_list = []
