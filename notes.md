@@ -116,7 +116,7 @@ pour pycel:
     
 
 Performance :
-- écrire une fonction qui prend une série de fichiers analogues dans des fichiers de même noms inclus dans des dossiers et qui supprime les mêmes colonnes dans tous ses fichiers. (Path)
+- `écrire une fonction qui prend une série de fichiers analogues dans des fichiers de même noms inclus dans des dossiers et qui supprime les mêmes colonnes dans tous ses fichiers. (Path)`
 - écrire la commande pour delete_other_columns directement pour plusieurs dossiers
 - écrire une fonction qui prend une série de fichiers analogues qui parcourt une colonne d'identifiants, qui crée un fichier avec un onglet par identifiant contenant toutes les lignes associées à cet identifiant dans tous les fichiers (Path)
 

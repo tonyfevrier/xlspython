@@ -29,6 +29,22 @@ def gatherfiles(directory : Annotated[str, typer.Option(prompt = 'Enter the name
     pathobject = Path(directory + '/')
     pathobject.gather_files_in_different_directories(file, sheet, values_only=values)
 
+@app.command()
+def multidelcols(directory : Annotated[str, typer.Option(prompt = 'Enter the name of the directory containing all directories')],
+                 file : Annotated[str, typer.Option(prompt = 'Enter the name of the file. This name must be present in each directory')],
+                 sheet : Annotated[str, typer.Option(prompt = 'Enter the name of the sheet')],
+                 columns : Annotated[str, typer.Option(prompt = "Enter the group of column you want to KEEP. Respect the form A-D,E,G,H-J,Z")]):
+    """
+    Fonction agissant sur un dossier. Fonction qui prend plusieurs fichiers de structures identiques et qui ne garde qu'un ensemble
+    de colonnes prédéfinies. 
+
+    Commande : 
+
+        Version guidée : python xlspython.py multidelcols 
+    """  
+    pathobject = Path(directory + '/')
+    pathobject.delete_other_columns(columns, file, sheet)
+
 
 # File commands
 
@@ -47,7 +63,6 @@ def filesave(file : Annotated[str, typer.Option(prompt = 'Enter the file you wan
     """
     fileobject = File(file)
     fileobject.sauvegarde()
-
 
 
 @app.command()
