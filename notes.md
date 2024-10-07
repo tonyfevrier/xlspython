@@ -112,13 +112,12 @@ pour pycel:
 
 - `testet columns for strings, listcolumns for strings et delete columns, keeponly...`
 - `delete columns doit plutôt demander les colonnes à garder`
-- modifier deletecolumns  
-- écrire une fonction path qui supprime les mêmes colonnes sur tous les fichiers
-- écrire la commande pour delete_other_columns directement pour plusieurs dossiers
+- `modifier deletecolumns` 
     
 
 Performance :
 - écrire une fonction qui prend une série de fichiers analogues dans des fichiers de même noms inclus dans des dossiers et qui supprime les mêmes colonnes dans tous ses fichiers. (Path)
+- écrire la commande pour delete_other_columns directement pour plusieurs dossiers
 - écrire une fonction qui prend une série de fichiers analogues qui parcourt une colonne d'identifiants, qui crée un fichier avec un onglet par identifiant contenant toutes les lignes associées à cet identifiant dans tous les fichiers (Path)
 
 - Tester si gather files conserve les formules si values only = False

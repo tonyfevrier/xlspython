@@ -16,16 +16,44 @@ class Path(UtilsForFile):
     def __init__(self,path = 'fichiers_xls/'):
         self.path = path
         
-    def act_on_files(self,fonction):
+    # def same_action_on_homononymous_files(self, method, *names):
+    #     """
+    #     A REFLECHIR ET BIEN ECRIRE
+    #     Vous avez plusieurs dossiers contenant un fichier ayant le même nom.
+    #     Fonction qui prend tous les fichiers d'un même nom et qui lui applique une même méthode. 
+    #     Si l'action ne porte que sur une feuille, on donnera un nom identique à la feuille concernée 
+    #     dans chaque fichier.
+    #     """
+    #     # Récupérer tous les dossiers d'un dossier
+    #     directories = [f for f in os.listdir(self.path) if os.path.isdir(os.path.join(self.path, f))]
+
+    #     for directory in directories:
+    #         if len(names) == 2:
+    #             Sheet(names[0], names[1], self.path + directory).method()
+    #         else:
+    #             File(names[0], self.path + directory)
+           
+    def delete_other_columns(self, columns, filename, sheetname):
         """
-        Fonction qui prend tous les fichiers d'un dossier et qui applique une même action à ces fichiers.
+        Vous avez plusieurs dossiers contenant un fichier ayant le même nom. Fonction qui prend tous les fichiers 
+        d'un même nom et qui ne conserve que les colonnes entrées par l'utilisateur.
         """
-        pass 
+        # Récupérer tous les dossiers d'un dossier
+        directories = [f for f in os.listdir(self.path) if os.path.isdir(os.path.join(self.path, f))]
+
+        for directory in directories:
+            sheet = Sheet(filename, sheetname, self.path + directory)
+            sheet.delete_other_columns(columns)
 
     def gather_files_in_different_directories(self, name_file, name_sheet, values_only=False):
         """
         Vous avez plusieurs dossiers contenant un fichier ayant le même nom. Vous souhaitez créer un seul fichier regroupant 
         toutes les lignes de ces fichiers.
+
+        Inputs:
+            - name_file(str)
+            - name_sheet(str)
+            - values_only(bool): to decide whether or not copying only the values and not formulas
         """
         # Récupérer tous les dossiers d'un dossier
         directories = [f for f in os.listdir(self.path) if os.path.isdir(os.path.join(self.path, f))]
