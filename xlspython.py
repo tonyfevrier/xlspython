@@ -66,7 +66,8 @@ def filesave(file : Annotated[str, typer.Option(prompt = 'Enter the file you wan
 
 
 @app.command()
-def multipletabs(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
+def multipletabs(newfilepath : Annotated[str, typer.Option(prompt = 'If you want to divide a single file in tabs, tap "one", otherwise your files must be included in folders themselves included in a bigger folder whose name must be written now.')],
+                 file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file you want to cut')],
                  sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name ')],
                  colread : Annotated[str, typer.Option(prompt = 'Enter the column letter containing strings ')],
                  line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
@@ -82,8 +83,15 @@ def multipletabs(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
         Version complète : python xlspython.py multipletabs --file name.xlsx --sheet nametab --colread columnletter --line linenumber
     
     """
-    fileobject = File(file) 
-    fileobject.create_one_onglet_by_participant(sheet,colread,first_line=line)
+    # Application to same name files contained in folders
+    if newfilepath != 'one':
+        pathobject = Path(newfilepath + '/')
+        pathobject.create_one_onglet_by_participant(file, sheet, colread, f'divided_{file}', first_line=line, label=True)
+
+    # Application to a single file
+    else:
+        fileobject = File(file) 
+        fileobject.create_one_onglet_by_participant(sheet, colread, f'divided_{file}', 'fichiers_xls/', first_line=line, label=True)
     
 
 @app.command()

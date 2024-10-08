@@ -62,7 +62,7 @@ class Path(UtilsForFile):
 
         for directory in self.directories:
             file = File(file_from, self.pathname + directory + '/')
-            file.create_one_onglet_by_participant(onglet_from, column_read, newfile_name, self.pathname)
+            file.create_one_onglet_by_participant(onglet_from, column_read, newfile_name, self.pathname, first_line=first_line, label=True)
 
     def gather_files_in_different_directories(self, name_file, name_sheet, values_only=False):
         """
