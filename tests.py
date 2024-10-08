@@ -34,13 +34,12 @@ class TestFile(TestCase):
 
     def test_create_one_onglet_by_participant(self): 
         file = File('test_create_one_onglet_by_participant.xlsx') 
-        file.create_one_onglet_by_participant('Stroops_test (7)', 'A')   
+        file.create_one_onglet_by_participant('Stroops_test (7)', 'A', "divided_test_create_one_onglet_by_participant.xlsx")  
+        file2 = File('divided_test_create_one_onglet_by_participant.xlsx')
         verify_files_identical(File('test_create_one_onglet_by_participant_before.xlsx'),
-                               File('divided_test_create_one_onglet_by_participant.xlsx'))
+                               file2)
         
-        #for i in range(1,len(file.sheets_name)): 
-        #    del file.writebook[file.sheets_name[i]]
-        #file.writebook.save(file.path + 'test_create_one_onglet_by_participant.xlsx')
+        os.remove("fichiers_xls/divided_test_create_one_onglet_by_participant.xlsx")
 
 
     def test_extract_column_from_all_sheets(self):

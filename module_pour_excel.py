@@ -133,7 +133,7 @@ class File(UtilsForFile):
         return file_copy
             
 
-    def create_one_onglet_by_participant(self, onglet_from, column_read, first_line=2, label=True):
+    def create_one_onglet_by_participant(self, onglet_from, column_read, newfile_name, first_line=2, label=True):
         """
         Fonction qui prend un onglet dont une colonne contient des chaînes de caractères comme par exemple un nom.
         Chaque chaîne de caractères peut apparaître plusieurs fois dans cette colonne (exe : quand un participant répond plusieurs fois)
@@ -143,6 +143,7 @@ class File(UtilsForFile):
         Input : 
             onglet_from : onglet de référence.
             column_read : l'étiquette de la colonne qui contient les chaînes de caractères.
+            newfile_name (str): name of the newfile
             first_line : ligne où commencer à parcourir.
             last_line : ligne de fin de parcours
             label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
@@ -158,9 +159,13 @@ class File(UtilsForFile):
         onglets = []
         sheet = self.writebook[onglet_from] 
 
-        # Creation of the file aiming to contain the data
-        new_file = openpyxl.Workbook()
- 
+        # Creation of the file aiming to contain the data if it does not already exists
+        if newfile_name not in os.listdir(self.path):
+            new_file = openpyxl.Workbook()
+        else:
+            new_file = openpyxl.load_workbook(self.path + newfile_name)
+            
+        # Create one tab by identifiant containing all its lines
         for i in range(first_line, sheet.max_row + 1):
             onglet = str(sheet.cell(i,column_read).value)
             if onglet not in onglets:
@@ -169,9 +174,11 @@ class File(UtilsForFile):
                 onglets.append(onglet) 
             self.add_line_at_bottom(sheet, i, new_file[onglet]) 
         
-        del new_file[new_file.sheetnames[0]]
-        new_file.save(self.path + 'divided_' + self.name_file)
-        #self.sheets_name = self.writebook.sheetnames 
+        # Deletion of the first tab if the newfile was created
+        if newfile_name not in os.listdir(self.path):
+            del new_file[new_file.sheetnames[0]]
+        new_file.save(self.path + newfile_name)
+        
 
     def extract_column_from_all_sheets(self,column,label = True):
         """
