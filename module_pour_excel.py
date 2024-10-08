@@ -15,6 +15,7 @@ from pycel import ExcelCompiler
 class Path(UtilsForFile):
     def __init__(self,pathname = 'fichiers_xls/'):
         self.pathname = pathname
+        self.directories = [f for f in os.listdir(self.pathname) if os.path.isdir(os.path.join(self.pathname, f))]
         
     # def same_action_on_homononymous_files(self, method, *names):
     #     """
@@ -37,13 +38,31 @@ class Path(UtilsForFile):
         """
         Vous avez plusieurs dossiers contenant un fichier ayant le même nom. Fonction qui prend tous les fichiers 
         d'un même nom et qui ne conserve que les colonnes entrées par l'utilisateur.
-        """
-        # Récupérer tous les dossiers d'un dossier
-        directories = [f for f in os.listdir(self.pathname) if os.path.isdir(os.path.join(self.pathname, f))]
+        """ 
 
-        for directory in directories:
+        for directory in self.directories:
             sheet = Sheet(filename, sheetname, self.pathname + directory + '/')
             sheet.delete_other_columns(columns)
+
+    def create_one_onglet_by_participant(self, file_from, onglet_from, column_read, newfile_name, first_line=2, label=True):
+        """
+        Un dossier contient des sous-dossiers contenant eux-mêmes un fichier de même nom et de même structure. Chaque fichier contient 
+        un onglet dont une colonne contient des chaînes de caractères comme par exemple un nom. Chaque chaîne de caractères peut
+        apparaître plusieurs fois dans cette colonne (exe : quand un participant répond plusieurs fois).La fonction retourne un fichier 
+        contenant un onglet par chaîne de caractères. Chaque onglet contient toutes les lignes correspondant à cette chaîne de caractères.  
+
+        Input : 
+            - file_from (str): nom du fichier de référence
+            - onglet_from (str): onglet de référence.
+            - column_read (str): l'étiquette de la colonne qui contient les chaînes de caractères.
+            - newfile_name (str): name of the newfile
+            - first_line (int=2): ligne où commencer à parcourir. 
+            - label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
+        """ 
+
+        for directory in self.directories:
+            file = File(file_from, self.path + directory + '/')
+            file.create_one_onglet_by_participant(onglet_from, column_read, newfile_name)
 
     def gather_files_in_different_directories(self, name_file, name_sheet, values_only=False):
         """
@@ -164,7 +183,7 @@ class File(UtilsForFile):
             new_file = openpyxl.Workbook()
         else:
             new_file = openpyxl.load_workbook(self.path + newfile_name)
-            
+
         # Create one tab by identifiant containing all its lines
         for i in range(first_line, sheet.max_row + 1):
             onglet = str(sheet.cell(i,column_read).value)
