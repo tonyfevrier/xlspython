@@ -62,7 +62,7 @@ class Path(UtilsForFile):
 
         for directory in self.directories:
             file = File(file_from, self.pathname + directory + '/')
-            file.create_one_onglet_by_participant(onglet_from, column_read, newfile_name, self.pathname, first_line=first_line, label=True)
+            file.create_one_onglet_by_participant(onglet_from, column_read, newfile_name, self.pathname, first_line=int(first_line), label=True)
 
     def gather_files_in_different_directories(self, name_file, name_sheet, values_only=False):
         """
@@ -398,6 +398,17 @@ class File(UtilsForFile):
             sheet.merge_cells(start_row=start_row, start_column=start_column, end_row=end_row, end_column=end_column)
 
         self.writebook.save(self.path + self.name_file)
+
+    def check_linenumber_of_tabs(self, line_number):
+        """
+        Fonction qui prend un fichier et qui contrôle si tous les onglets ont un nombre de lignes égal à l'argument
+        """
+        wrong_tabs = []
+        for tab in self.sheets_name:
+            if self.writebook[tab].max_row != line_number:
+                wrong_tabs.append(tab)
+        return wrong_tabs
+
 
 class Sheet(File,UtilsForSheet,Other): 
     def __init__(self, name_file, name_onglet,path = 'fichiers_xls/'): 
@@ -874,8 +885,8 @@ class Sheet(File,UtilsForSheet,Other):
 
     def give_names_of_maximum(self, column_insertion, *columnlist):
         """
-        Vous avez une liste de colonnes avec des chiffres, chaque colonne a un nom dans sa première cellule. Cette fonction crée une colonne dans laquelle on entre pour chaque 
-        ligne le nom de la colonne ou des colonnes qui contient le max.
+        Vous avez une liste de colonnes avec des chiffres, chaque colonne a un nom dans sa première cellule. 
+        Cette fonction crée une colonne dans laquelle on entre pour chaque ligne le nom de la colonne ou des colonnes qui contient le max.
 
         Inputs : 
             - column_insertion : 

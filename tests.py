@@ -19,8 +19,7 @@ class TestPath(TestCase):
     def test_create_one_onglet_by_participant(self):
         path = Path('fichiers_xls/gathertests/')
         path.create_one_onglet_by_participant('test_cmd_ongletbyparticipant.xlsx',
-                                               'test', 'A', 'divided_test_cmd_ongletbyparticipant.xlsx',
-                                                 path.pathname)
+                                               'test', 'A', 'divided_test_cmd_ongletbyparticipant.xlsx')
         file = File('divided_test_cmd_ongletbyparticipant_before.xlsx', path.pathname)
         file2 = File('divided_test_cmd_ongletbyparticipant.xlsx', path.pathname)
         
@@ -127,9 +126,11 @@ class TestFile(TestCase):
             self.assertEqual(sheet['A10'].value, file.writebook[file.sheets_name[0]]['A10'].value)
             self.assertEqual(sheet['B10'].value, file.writebook[file.sheets_name[0]]['B10'].value)
             self.assertEqual(sheet['C10'].value, file.writebook[file.sheets_name[0]]['C10'].value)
-            #self.assertEqual(sheet.cell(1,10).formula, file.writebook[file.sheets_name[0]].cell(1,10).formula)
-            #self.assertEqual(sheet.cell(2,10).formula, file.writebook[file.sheets_name[0]].cell(2,10).formula)
-            #self.assertEqual(sheet.cell(3,10).formula, file.writebook[file.sheets_name[0]].cell(3,10).formula)
+    
+    def test_check_linenumber_of_tabs(self):
+        file = File('test.xlsx')
+        tabs = file.check_linenumber_of_tabs(14)
+        self.assertListEqual(tabs, ['cutinparts', 'cutinpartsbis', 'delete_lines', 'delete_lines_bis'])
 
 
 class TestSheet(TestCase, Other):
