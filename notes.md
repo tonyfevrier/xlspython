@@ -126,7 +126,7 @@ Performance :
     factoriser mes fonctions deleteother et createoneonglet de path en faisant une fonction qui agit sur tous les fichiers
     il faudra modifier ma fonction pour qu'elle n'exige plus le même nom mais le même début de nom
 
-- écrire une fonction qui contrôle si tous les onglets d'un fichier a bien un nombre de lignes préchoisi.
+- `écrire une fonction qui contrôle si tous les onglets d'un fichier a bien un nombre de lignes préchoisi.`
 - créer la fonction qui prend les moyennes SD de chaque onglets et qui crée l'onglet les récapitulant avec une ligne par participant
 - possibilité de faire une macro?
 

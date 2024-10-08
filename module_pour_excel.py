@@ -17,22 +17,37 @@ class Path(UtilsForFile):
         self.pathname = pathname
         self.directories = [f for f in os.listdir(self.pathname) if os.path.isdir(os.path.join(self.pathname, f))]
         
-    # def same_action_on_homononymous_files(self, method, *names):
-    #     """
-    #     A REFLECHIR ET BIEN ECRIRE
-    #     Vous avez plusieurs dossiers contenant un fichier ayant le même nom.
-    #     Fonction qui prend tous les fichiers d'un même nom et qui lui applique une même méthode. 
-    #     Si l'action ne porte que sur une feuille, on donnera un nom identique à la feuille concernée 
-    #     dans chaque fichier.
-    #     """
-    #     # Récupérer tous les dossiers d'un dossier
-    #     directories = [f for f in os.listdir(self.path) if os.path.isdir(os.path.join(self.path, f))]
+    def apply_method_on_homononymous_files(self, filename, method_name, *args, **kwargs):
+        """ 
+        Vous avez plusieurs dossiers contenant un fichier ayant le même nom.
+        Fonction qui prend tous les fichiers d'un même nom et qui lui applique une même méthode.  
 
-    #     for directory in directories:
-    #         if len(names) == 2:
-    #             Sheet(names[0], names[1], self.path + directory).method()
-    #         else:
-    #             File(names[0], self.path + directory)
+        Inputs:
+            - filename (str)
+            - method_name (str): the name of the method to execute 
+            - *args, **kwargs : arguments of the method associated with method_name
+        """
+        # Récupérer tous les dossiers d'un dossier  
+        for directory in self.directories:
+            file = File(filename, self.pathname + directory + '/')
+            method = getattr(file, method_name)
+            method(*args, **kwargs) 
+
+    def apply_method_on_homononymous_sheets(self, filename, sheetname, method_name, *args, **kwargs):
+        """ 
+        Vous avez plusieurs dossiers contenant un fichier ayant le même nom.
+        Fonction qui prend tous les fichiers d'un même nom et qui lui applique une même méthode.  
+
+        Inputs:
+            - filename (str)
+            - method_name (str): the name of the method to execute 
+            - *args, **kwargs : arguments of the method associated with method_name
+        """
+        # Récupérer tous les dossiers d'un dossier  
+        for directory in self.directories:
+            sheet = Sheet(filename, sheetname, self.pathname + directory + '/')
+            method = getattr(sheet, method_name)
+            method(*args, **kwargs) 
            
     def delete_other_columns(self, columns, filename, sheetname):
         """
