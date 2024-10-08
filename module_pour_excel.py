@@ -61,8 +61,8 @@ class Path(UtilsForFile):
         """ 
 
         for directory in self.directories:
-            file = File(file_from, self.path + directory + '/')
-            file.create_one_onglet_by_participant(onglet_from, column_read, newfile_name)
+            file = File(file_from, self.pathname + directory + '/')
+            file.create_one_onglet_by_participant(onglet_from, column_read, newfile_name, self.pathname)
 
     def gather_files_in_different_directories(self, name_file, name_sheet, values_only=False):
         """
@@ -152,7 +152,7 @@ class File(UtilsForFile):
         return file_copy
             
 
-    def create_one_onglet_by_participant(self, onglet_from, column_read, newfile_name, first_line=2, label=True):
+    def create_one_onglet_by_participant(self, onglet_from, column_read, newfile_name, newfile_path, first_line=2, label=True):
         """
         Fonction qui prend un onglet dont une colonne contient des chaînes de caractères comme par exemple un nom.
         Chaque chaîne de caractères peut apparaître plusieurs fois dans cette colonne (exe : quand un participant répond plusieurs fois)
@@ -163,6 +163,7 @@ class File(UtilsForFile):
             onglet_from : onglet de référence.
             column_read : l'étiquette de la colonne qui contient les chaînes de caractères.
             newfile_name (str): name of the newfile
+            newfile_path (str): where to write/find the newfile
             first_line : ligne où commencer à parcourir.
             last_line : ligne de fin de parcours
             label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
@@ -175,28 +176,32 @@ class File(UtilsForFile):
         if label:
             column_read = column_index_from_string(column_read)  
 
-        onglets = []
         sheet = self.writebook[onglet_from] 
 
         # Creation of the file aiming to contain the data if it does not already exists
-        if newfile_name not in os.listdir(self.path):
+        if newfile_name not in os.listdir(newfile_path):
             new_file = openpyxl.Workbook()
         else:
-            new_file = openpyxl.load_workbook(self.path + newfile_name)
+            new_file = openpyxl.load_workbook(newfile_path + newfile_name)
+
+        onglets = new_file.sheetnames
 
         # Create one tab by identifiant containing all its lines
         for i in range(first_line, sheet.max_row + 1):
             onglet = str(sheet.cell(i,column_read).value)
+
+            # Prepare a new tab
             if onglet not in onglets:
                 new_file.create_sheet(onglet)
                 self.copy_paste_line(sheet, 1,  new_file[onglet], 1)
                 onglets.append(onglet) 
+
             self.add_line_at_bottom(sheet, i, new_file[onglet]) 
         
         # Deletion of the first tab if the newfile was created
-        if newfile_name not in os.listdir(self.path):
+        if newfile_name not in os.listdir(newfile_path):
             del new_file[new_file.sheetnames[0]]
-        new_file.save(self.path + newfile_name)
+        new_file.save(newfile_path + newfile_name)
         
 
     def extract_column_from_all_sheets(self,column,label = True):

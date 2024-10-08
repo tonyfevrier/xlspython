@@ -15,7 +15,18 @@ class TestPath(TestCase):
         for directory in directories:
             verify_sheets_identical(Sheet('test_keep_only_columns.xlsx', 'sheet1', path.pathname + '/').sheet,
                                     Sheet('test_keep_only_columns.xlsx', 'Feuille2', path.pathname + '/').sheet) """
-            
+    
+    def test_create_one_onglet_by_participant(self):
+        path = Path('fichiers_xls/gathertests/')
+        path.create_one_onglet_by_participant('test_cmd_ongletbyparticipant.xlsx',
+                                               'test', 'A', 'divided_test_cmd_ongletbyparticipant.xlsx',
+                                                 path.pathname)
+        file = File('divided_test_cmd_ongletbyparticipant_before.xlsx', path.pathname)
+        file2 = File('divided_test_cmd_ongletbyparticipant.xlsx', path.pathname)
+        
+        verify_files_identical(file, file2)
+        os.remove(path.pathname + 'divided_test_cmd_ongletbyparticipant.xlsx') 
+        
 
 class TestFile(TestCase):
     
@@ -34,7 +45,7 @@ class TestFile(TestCase):
 
     def test_create_one_onglet_by_participant(self): 
         file = File('test_create_one_onglet_by_participant.xlsx') 
-        file.create_one_onglet_by_participant('Stroops_test (7)', 'A', "divided_test_create_one_onglet_by_participant.xlsx")  
+        file.create_one_onglet_by_participant('Stroops_test (7)', 'A', "divided_test_create_one_onglet_by_participant.xlsx", 'fichiers_xls/')  
         file2 = File('divided_test_create_one_onglet_by_participant.xlsx')
         verify_files_identical(File('test_create_one_onglet_by_participant_before.xlsx'),
                                file2)

@@ -122,7 +122,8 @@ Performance :
     `Modifier create_one_onglet_by_participant pour envoyer les data dans un nouveau fichier et pas dans le même`
     `Passer le nom du fichier où écrire à la fonction : si existe alors on continue d'écrire dessus sinon on crée le fichier. (On veut pouvoir réutiliser cette fonction plusieurs fois)`
     m'en servir pour la fonction faite dans path
-    factoriser mes fonctions deleteother et createoneonglet de path en faisant une fonction qui agit sur tous les fichiers.
+    modifier commande create one tab et écrire create one tab pour Path (ou alors n'en écrire qu'une pour les deux fonctions.)
+    factoriser mes fonctions deleteother et createoneonglet de path en faisant une fonction qui agit sur tous les fichiers
 
 - Tester si gather files conserve les formules si values only = False
 - Faire les modifs nécessaires dans les fonctions utilisant copy paste ou add line to bottom avec le paramètre values_only.
