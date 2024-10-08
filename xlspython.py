@@ -66,33 +66,42 @@ def filesave(file : Annotated[str, typer.Option(prompt = 'Enter the file you wan
 
 
 @app.command()
-def multipletabs(newfilepath : Annotated[str, typer.Option(prompt = 'If you want to divide a single file in tabs, tap "one", otherwise your files must be included in folders themselves included in a bigger folder whose name must be written now.')],
-                 file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file you want to cut')],
+def multipletabs(file : Annotated[str, typer.Option(prompt = 'Enter the name of the xlsx file(s) you want to cut')],
                  sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name ')],
                  colread : Annotated[str, typer.Option(prompt = 'Enter the column letter containing strings ')],
+                 newfilepath : Annotated[Optional[str], typer.Option(prompt = 'If you want to divide a single file in tabs, press enter, otherwise your files must be included in folders themselves included in a bigger folder whose name must be written now.')] = '',
                  line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
-    Vous avez un fichier xlsx dont une colonne (colread) contient des participants qui ont pu répondre plusieurs fois à un questionnaire. 
-    Vous souhaitez créer un onglet par participant avec toutes les lignes qui correspondent.
+    Vous avez un ou plusieurs fichiers xlsx dont une colonne (colread) contient des participants qui ont pu répondre plusieurs fois à un questionnaire. 
+    Vous souhaitez créer un onglet par participant avec toutes les lignes qui correspondent. 
 
     Commande : 
 
         Version guidée : python xlspython.py multipletabs
 
-        Version complète : python xlspython.py multipletabs --file name.xlsx --sheet nametab --colread columnletter --line linenumber
+        Version complète : python xlspython.py multipletabs --file name.xlsx --sheet nametab --colread columnletter --newfilepath name --line linenumber
     
     """
     # Application to same name files contained in folders
-    if newfilepath != 'one':
+    if newfilepath:
         pathobject = Path(newfilepath + '/')
         pathobject.create_one_onglet_by_participant(file, sheet, colread, f'divided_{file}', first_line=line, label=True)
+        path = pathobject.pathname
 
     # Application to a single file
     else:
         fileobject = File(file) 
         fileobject.create_one_onglet_by_participant(sheet, colread, f'divided_{file}', 'fichiers_xls/', first_line=line, label=True)
+        path = fileobject.path
     
+    # Eventually verify if each tab has the same number of lines
+    check = typer.prompt('Do you want to check if all tabs have the same number of lines? If yes, write the number of lines else press enter', default="")
+    if check:
+        wrong_tabs = File(f'divided_{file}', path).check_linenumber_of_tabs(int(check))
+        if wrong_tabs:
+            print('The following tabs have a different number of lines :' + ",".join(wrong_tabs))
+
 
 @app.command()
 def extractcolsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
