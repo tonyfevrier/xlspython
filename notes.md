@@ -134,7 +134,7 @@ Performance :
     - Afin de moins l'oublier, l'ajouter en descripteur (qui contient update et save) 
 - `Fonction qui prend un xls avec une feuille par participant et qui crée un onglet qui rassemble une ligne par ptcpt contenant des cellules de chaque onglet de notre choix`
 
-- Nettoyage : enlever le booléen label et obliger les gens à mettre les lettres (enlèvera des cas et de toute façon c'est naturel en pratique).
+- `Nettoyage : enlever le booléen label et obliger les gens à mettre les lettres (enlèvera des cas et de toute façon c'est naturel en pratique).`
 - Faut-il aussi nettoyer le booléen insertion pour forcer cette insertion par défaut.
 - Factorisation : il y a peut être moyen de faire une grosse fonction commune pour le travail de colonnes qui contient la structure jusque la boucle à l'intérieur de laquelle on appelle plusieurs petites fonctions qui font des choses différentes. Mais la structure de ces fonctions est identiques hormis à l'intérieur de la boucle (column en index, boucle puis update save). Pourrait se faire via un descripteur? 
 

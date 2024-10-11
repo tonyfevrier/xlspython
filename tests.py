@@ -163,16 +163,7 @@ class TestSheet(TestCase, Other):
         for i in range(2,sheet1.max_row+1 ): 
             self.assertEqual(sheet1.cell(i,column1).value,sheet2.cell(i,column2).value)
 
-    def test_column_transform_string_in_binary(self):
-        sheet = Sheet('test.xlsx','sheet1')  
- 
-        sheet.column_transform_string_in_binary('L','M','partie 1 : Vrai',insert=False)
-        self.column_identical('test.xlsx','test_generated.xlsx',0,0, 13, 13) 
-        sheet.column_transform_string_in_binary('N','O','partie 2 : Vrai',insert=False)
-        self.column_identical('test.xlsx','test_generated.xlsx',0,0, 15, 15) 
-        sheet.column_transform_string_in_binary('P','Q','partie 3 : Vrai',insert=False)
-        self.column_identical('test.xlsx','test_generated.xlsx',0,0, 17, 17) 
-
+    def test_column_transform_string_in_binary(self): 
         sheet2 = Sheet('test.xlsx', 'Feuille2')
          
         sheet2.column_transform_string_in_binary('F','G','partie 12 : Faux',1)

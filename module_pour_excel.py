@@ -426,7 +426,7 @@ class Sheet(File,UtilsForSheet,Other):
         self.sheet = self.writebook[self.name_onglet]
         del self.sheets_name
 
-    def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2, insert = True):
+    def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2):
         """
         Fonction qui prend une colonne de chaîne de caractères et qui renvoie une colonne de 0 ou de 1
         L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où mettre les 0 ou 1.
@@ -435,8 +435,7 @@ class Sheet(File,UtilsForSheet,Other):
                 column_read : l'étiquette de la colonne de lecture des réponses.
                 colum_write : l'étiquette de la colonne d'écriture des 0 et 1. Par défaut, une colonne est insérée à cette position.
                 good_answers : une séquence d'un nombre quelconque de bonnes réponses qui valent 1pt. Chaque mot ne doit pas contenir d'espace ni au début ni à la fin.
-                line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction.
-                insert : (paramètre optionnel) le mettre à False si on ne veut pas insérer une colonne. 
+                line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction. 
 
         Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
 
@@ -451,8 +450,7 @@ class Sheet(File,UtilsForSheet,Other):
         modifications = [column_write]
         column_write = column_index_from_string(column_write)
 
-        if insert:
-            self.sheet.insert_cols(column_write)
+        self.sheet.insert_cols(column_write)
 
         for i in range(line_beginning, self.sheet.max_row + 1):
             chaine_object = Str(self.sheet.cell(i,column_read).value)  
@@ -462,15 +460,14 @@ class Sheet(File,UtilsForSheet,Other):
         self.updateCellFormulas(self.sheet,True,'column', modifications)         
         self.writebook.save(self.path + self.name_file)
 
-    def column_convert_in_minutes(self,column_read,column_write,line_beginning = 2, insert = True):
+    def column_convert_in_minutes(self,column_read,column_write,line_beginning = 2):
         """
         Fonction qui prend une colonne de chaines de caractères de la forme "10 jours 5 heures" 
         ou "5 heures 10 min" ou "10 min 5s" ou "5s" et qui renvoie le temps en minutes.
         L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne à remplir.
         Input : column_read : l'étiquette de la colonne de lecture des réponses.
                 colum_write : l'étiquette de la colonne d'écriture. 
-                line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction.
-                insert : (paramètre optionnel) le mettre à False si on ne veut pas insérer une colonne. 
+                line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction. 
 
         Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
         
@@ -484,8 +481,7 @@ class Sheet(File,UtilsForSheet,Other):
         modifications = [column_write]
         column_write = column_index_from_string(column_write) 
 
-        if insert:
-            self.sheet.insert_cols(column_write)
+        self.sheet.insert_cols(column_write)
 
         for i in range(line_beginning,self.sheet.max_row + 1):
             chaine_object = Str(self.sheet.cell(i,column_read).value) 
@@ -496,7 +492,7 @@ class Sheet(File,UtilsForSheet,Other):
         self.updateCellFormulas(self.sheet,True,'column', modifications)         
         self.writebook.save(self.path + self.name_file)
 
-    def column_set_answer_in_group(self,column_read,column_write,groups_of_responses,line_beginning = 2, insert = True):
+    def column_set_answer_in_group(self,column_read,column_write,groups_of_responses,line_beginning = 2):
         """
         Dans le cas où il y a des groupes de réponses, cette fonction qui prend une colonne de chaîne de caractères 
         et qui renvoie une colonne remplie de chaînes contenant pour chaque cellule le groupe associé.
@@ -507,8 +503,7 @@ class Sheet(File,UtilsForSheet,Other):
                 colum_write : l'étiquette de la colonne d'écriture. 
                 groups_of_response : dictionnary which keys are response groups and which values are a list of responses 
         associated to this group.
-                line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction.
-                insert : (paramètre optionnel) le mettre à False si on ne veut pas insérer une colonne. 
+                line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction. 
 
         Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
         
@@ -522,8 +517,7 @@ class Sheet(File,UtilsForSheet,Other):
         modifications = [column_write]
         column_write = column_index_from_string(column_write) 
 
-        if insert:
-            self.sheet.insert_cols(column_write)
+        self.sheet.insert_cols(column_write)
 
         reversed_group_of_responses = self.reverse_dico_for_set_answer_in_group(groups_of_responses)
 
@@ -906,7 +900,7 @@ class Sheet(File,UtilsForSheet,Other):
         self.updateCellFormulas(self.sheet, True, 'column', modifications)
         self.writebook.save(self.path + self.name_file) 
         
-    def column_for_prime_probe_congruence(self, first_column, second_column, column_insertion, *words,  line_beginning=2, insert=True):
+    def column_for_prime_probe_congruence(self, first_column, second_column, column_insertion, *words,  line_beginning=2):
         """
         Vous avez deux colonnes l'une contient des chaines de caractères particulières. L'autre contient des chaines de la forme MOTnb_.jpg où MOT peut 
         être congruent, neutre, incongruent et nb est un nombre. Vous souhaitez insérer une colonne contenant soit rien soit la chaine de la première colonne
@@ -918,8 +912,7 @@ class Sheet(File,UtilsForSheet,Other):
         modifications = [column_insertion]
         column_insertion = column_index_from_string(column_insertion) 
 
-        if insert:
-            self.sheet.insert_cols(column_insertion)
+        self.sheet.insert_cols(column_insertion)
 
         # Remplissage de la nouvelle colonne
         for i in range(line_beginning,self.sheet.max_row + 1):

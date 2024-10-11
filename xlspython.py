@@ -211,9 +211,7 @@ def stringinbinary(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
     answers = Ufc.askArgumentUntilNone(answers,"Enter one good answer and then press enter. Press directly enter if you have entered all the good answers")
     
     sheetobject = Sheet(file,sheet)
- 
-    bool = Ufc.insertOrOverwrite(colwrite)
-    sheetobject.column_transform_string_in_binary(colread,colwrite,*answers, insert = bool) 
+    sheetobject.column_transform_string_in_binary(colread,colwrite,*answers) 
 
 # Créer un fichier test pour tester cette fonction.
 @app.command()
@@ -299,9 +297,8 @@ def convertminutes(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
         Version complète : python xlspython.py convertminutes --file name.xlsx --sheet nametab --colread columnletter --colwrite columnletter --line linenumber
     
     """
-    sheetobject = Sheet(file,sheet)
-    bool = Ufc.insertOrOverwrite(colwrite)
-    sheetobject.column_convert_in_minutes(colread,colwrite,line_beginning=line, insert=bool)
+    sheetobject = Sheet(file,sheet) 
+    sheetobject.column_convert_in_minutes(colread,colwrite,line_beginning=line)
 
 @app.command()
 def groupofanswers(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
@@ -322,9 +319,8 @@ def groupofanswers(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
     #Creation of the groups of answers dictionary 
     groups_of_responses = Ufc.createDictListValueByCmd("Enter the name of one group of answers", "")
 
-    sheetobject = Sheet(file,sheet)
-    bool = Ufc.insertOrOverwrite(colwrite)
-    sheetobject.column_set_answer_in_group(colread,colwrite,groups_of_responses, line_beginning = line, insert=bool)
+    sheetobject = Sheet(file,sheet) 
+    sheetobject.column_set_answer_in_group(colread,colwrite,groups_of_responses, line_beginning = line)
 
 @app.command()
 def colorcasescolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
@@ -430,7 +426,7 @@ def cutstring(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file '
         Version complète : python xlspython.py cutstring --file name.xlsx --sheet nametab --colcut columnletter --colwrite columnletter --separator symbol
     """
     sheetobject = Sheet(file,sheet) 
-    sheetobject.column_cut_string_in_parts(colcut,colwrite,separator,insert = bool)
+    sheetobject.column_cut_string_in_parts(colcut,colwrite,separator)
 
 @app.command()
 def deletecols(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
