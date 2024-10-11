@@ -253,6 +253,37 @@ class File(UtilsForFile):
         self.writebook.save(self.path + self.name_file) 
         self.sheets_name = self.writebook.sheetnames 
 
+    def extract_cells_from_all_sheets(self, *cells):
+        """
+        Vous avez un fichier avec des onglets de structure identique avec un onglet par participant. Vous souhaitez
+        récupérer des cellules identiques dans tous les onglets et créer un onglet avec une ligne par participant,
+        qui contient les valeurs de ces cellules. Fonction analogue à gather_multiple_answers mais ne portant pas sur une
+        seule feuille.
+        """ 
+
+        # Recover cells coordinates
+        cell_list = []
+        for cell in cells: 
+            cell_list.append(coordinate_to_tuple(cell)) 
+        
+        # Create a new tab
+        gathered_sheet = self.writebook.create_sheet('gathered_data')
+
+        # Fill one line by tab
+        for name_onglet in self.sheets_name[:-1]: 
+            current_line = gathered_sheet.max_row + 1
+
+            gathered_sheet.cell(current_line, 1).value = name_onglet
+            current_column = 2
+
+            # Fill selected values one by one
+            for tuple in cell_list: 
+                gathered_sheet.cell(current_line, current_column).value = gathered_sheet(tuple[0],tuple[1]).value 
+                current_column += 1
+
+        self.writebook.save(self.path + self.name_file)
+        
+
     def apply_column_formula_on_all_sheets(self, *column_list, label = True):
         """
         Fonction qui reproduit les formules d'une colonne ou plusieurs colonnes
