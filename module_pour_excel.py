@@ -739,6 +739,7 @@ class Sheet(File,UtilsForSheet,Other):
         for column in columns_to_delete: 
             self.sheet.delete_cols(column_index_from_string(column)) 
 
+        self.updateCellFormulas(self.sheet, False, 'column', columns_to_delete)
         self.writebook.save(self.path + self.name_file) 
 
     def delete_other_columns(self, columns):
@@ -749,11 +750,15 @@ class Sheet(File,UtilsForSheet,Other):
             - columns (str): list of column of the form 'C-J,K,L-N,Z'
         """
         columns_to_keep = Str.columns_from_strings(columns)
+        modifications = []
 
         for column in range(self.sheet.max_column + 1, 0, -1):
-            if get_column_letter(column) not in columns_to_keep:
+            column_letter = get_column_letter(column)
+            if column_letter not in columns_to_keep:
+                modifications.append(column_letter)
                 self.sheet.delete_cols(column)
        
+        self.updateCellFormulas(self.sheet, False, 'column', modifications)
         self.writebook.save(self.path + self.name_file) 
         
 
@@ -910,7 +915,7 @@ class Sheet(File,UtilsForSheet,Other):
 
         number_column_insertion = column_index_from_string(column_insertion)
         self.sheet.insert_cols(number_column_insertion)
-        modifications = [number_column_insertion]
+        modifications = [column_insertion]
         self.sheet.cell(1, number_column_insertion).value = "Colonne de(s) maximum(s)"
 
         #dico qui à une colonne associe le nom de la colonne
@@ -944,6 +949,7 @@ class Sheet(File,UtilsForSheet,Other):
         if label:
             first_column = column_index_from_string(first_column) 
             second_column = column_index_from_string(second_column) 
+            modifications = [column_insertion]
             column_insertion = column_index_from_string(column_insertion) 
 
         if insert:
@@ -957,7 +963,64 @@ class Sheet(File,UtilsForSheet,Other):
                 mot = re.sub(r'([A-Z-a-z]+)\d+_[A-Z-a-z].jpg', r'\1', self.sheet.cell(i, second_column).value)
                 self.sheet.cell(i,column_insertion).value = self.sheet.cell(i, first_column).value + "_" + mot
         
+        self.updateCellFormulas(self.sheet, True, 'column', modifications)         
         self.writebook.save(self.path + self.name_file)
+
+    def column_get_part_of_str(self, column_read, column_insertion, separator, line_beginning=2):
+        """
+        Vous avez une colonne qui contient une chaîne dont vous voulez prendre le début jusqu'à un certain séparateur.
+        Ce mot est inséré dans une nouvelle colonne.
+        
+        Inputs:
+            - column_read (str): lettre de la colonne de lecture.
+            - column_insertion (str): lettre de la colonne où l'insertion doit avoir lieu.
+            - separator (str): le symbole délimitant le début du mot
+            - line_beggining (int) : ligne où débute la recherche.
+        """
+        # Get indexes of columns and insert one
+        modifications = [column_insertion]
+        column_read = column_index_from_string(column_read)
+        column_insertion = column_index_from_string(column_insertion)
+        self.sheet.insert_cols(column_insertion)
+
+        # Fill cells of the new columns
+        for i in range(line_beginning,self.sheet.max_row + 1):
+            self.sheet.cell(i, column_insertion).value = re.sub(fr'([A-Za-z]+){separator}.*', r'\1', self.sheet.cell(i, column_read).value)
+        
+        # Update formulas and save
+        self.updateCellFormulas(self.sheet, True, 'column', modifications)         
+        self.writebook.save(self.path + self.name_file)
+
+
+    def map_two_columns_to_a_third_column(self, columns_read, column_insertion, mapping, line_beginning=2):
+        """
+        Vous avez deux colonnes de lecture, suivant ce qui est écrit sur une ligne, vous voulez ou non insérer quelque chose 
+        dans une nouvelle colonne.
+
+        Inputs:
+            - columns_read (list[str]): liste de deux lettres contenant les colonnes de lecture.
+            - column_insertion (str): lettre de la colonne où l'insertion doit avoir lieu.
+            - mapping (dict): dictionnaire dont les clés sont les chaînes à écrire. Les valeurs sont dans l'ordre les 
+            str qui si elles sont présentes, entraînent l'écriture de ces chaînes.
+            - line_beggining (int) : ligne où débute la recherche.
+        """
+        modifications = [column_insertion]
+        columns_read_index = [column_index_from_string(column) for column in columns_read]
+        column_insertion = column_index_from_string(column_insertion)
+
+        for i in range(line_beginning, self.sheet.max_row + 1):
+            # Fill the new column if columns read contain some expected values
+            for key, value in mapping.items():
+                value1 = self.sheet.cell(i, columns_read_index[0])
+                value2 = self.sheet.cell(i, columns_read_index[1])
+                if [value1, value2] == value:
+                    self.sheet.cell(i, column_insertion).value = key
+                    break
+            
+        # Update formulas and save
+        self.updateCellFormulas(self.sheet,True,'column', modifications)         
+        self.writebook.save(self.path + self.name_file)
+
 
 
     

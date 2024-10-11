@@ -123,8 +123,20 @@ Performance :
     `Passer le nom du fichier où écrire à la fonction : si existe alors on continue d'écrire dessus sinon on crée le fichier. (On veut pouvoir réutiliser cette fonction plusieurs fois)`
     `m'en servir pour la fonction faite dans path`
     `modifier commande create one tab et écrire create one tab pour Path (ou alors n'en écrire qu'une pour les deux fonctions.)`
-    factoriser mes fonctions deleteother et createoneonglet de path en faisant une fonction qui agit sur tous les fichiers
+    `factoriser mes fonctions deleteother et createoneonglet de path en faisant une fonction qui agit sur tous les fichiers`
+        appliquer ces fonctions sur mes commandes pour voir si ça fonctionne et si oui supprimer deleteothercolumns et createoneonglet... de Path.
     il faudra modifier ma fonction pour qu'elle n'exige plus le même nom mais le même début de nom
+- fonction qui prend la colonne congruentmuche et qui rend congruent
+- fonctino qui regarde deux cellules et qui affiche qqch dans la troisième si a et b alors c, si a1 et b1 alors c1
+- enlever les xlsx dans les commandes pour ne mettre que le nom du fichier
+- voir si pour deletecolumns on peut optimiser en évitant de boucler sur toutes les colonnes        
+- Attention, pour toutes les fonctions où on travaille sur des formules, il faut utiliser la fonction self.updateCellFormulas(self.sheet,True,'column', modifications) si jamais on a inséré ou supprimé des formules, mettre à jour les fonctions de sheet et éventuellement de File et Path si nécessaire. 
+    - Il faudra n'appeler cette fonction que si on travaille sur des formules afin d'éviter un coup supplémentaire.
+    - Afin de moins l'oublier, l'ajouter en descripteur (qui contient update et save) 
+
+- Nettoyage : enlever le booléen label et obliger les gens à mettre les lettres (enlèvera des cas et de toute façon c'est naturel en pratique).
+- Faut-il aussi nettoyer le booléen insertion pour forcer cette insertion par défaut.
+- Factorisation : il y a peut être moyen de faire une grosse fonction commune pour le travail de colonnes qui contient la structure jusque la boucle à l'intérieur de laquelle on appelle plusieurs petites fonctions qui font des choses différentes. Mais la structure de ces fonctions est identiques hormis à l'intérieur de la boucle (column en index, boucle puis update save). Pourrait se faire via un descripteur? 
 
 - `écrire une fonction qui contrôle si tous les onglets d'un fichier a bien un nombre de lignes préchoisi.`
 - créer la fonction qui prend les moyennes SD de chaque onglets et qui crée l'onglet les récapitulant avec une ligne par participant
@@ -160,7 +172,7 @@ Performance :
 
 - existe til une fonction ou une combinairsonn de fonctions qui prend plusieurs lignes d'un onglet correspondant à un ptcpt. Cet onglet contient moyenne et SD. et on veut créer dans un onglet une ligne par participant qui contient toutes ses moyennes SD etc
 
-- Faire un indicateur d'avancement dans l'exécution des colonnes
+- Faire un indicateur d'avancement dans l'exécution des colonnes, peut-on écrire un estimateur de temps restant d'exécution de programme
 
 - si j'adoptais MVC pour le projet, est-ce que ce que j'ai programmé le respecterait?
     voir ma feuille volante

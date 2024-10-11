@@ -213,7 +213,7 @@ class UtilsForSheet():
         Fonction qui met à jour les formules d'une feuille entière 
 
         Inputs : 
-            - formula (str) : la chaîne de caractères.
+            - sheet (obj): la feuille sur laquelle on agit.
             - insert (bool) : True si les modifications sont toutes des insertions, False si ce sont toutes des suppressions.
             - rowOrColumn (str): 'row' ou 'column' suivant que la série d'opérations effectuées porte sur ligne ou colonne.
             - modifications (list[str]) : liste de str donnant les modifications. Si on a inséré 10 colonnes, ce sera la liste des 10 lettres correspondantes.
