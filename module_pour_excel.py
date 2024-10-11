@@ -130,7 +130,7 @@ class File(UtilsForFile):
         return file_copy
             
 
-    def create_one_onglet_by_participant(self, onglet_from, column_read, newfile_name, newfile_path, first_line=2, label=True):
+    def create_one_onglet_by_participant(self, onglet_from, column_read, newfile_name, newfile_path, first_line=2):
         """
         Fonction qui prend un onglet dont une colonne contient des chaînes de caractères comme par exemple un nom.
         Chaque chaîne de caractères peut apparaître plusieurs fois dans cette colonne (exe : quand un participant répond plusieurs fois)
@@ -143,21 +143,18 @@ class File(UtilsForFile):
             newfile_name (str): name of the newfile
             newfile_path (str): where to write/find the newfile
             first_line : ligne où commencer à parcourir.
-            last_line : ligne de fin de parcours
-            label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
+            last_line : ligne de fin de parcours 
  
         Exemple d'utilisation : 
     
             file = File('dataset.xlsx')
             file.create_one_onglet_by_participant('onglet1', 'A') 
         """ 
-        if label:
-            column_read = column_index_from_string(column_read)  
+        column_read = column_index_from_string(column_read)  
 
         sheet = self.writebook[onglet_from] 
 
-        # Creation of the file aiming to contain the data if it does not already exists
-        print(newfile_name, newfile_name not in os.listdir(newfile_path))
+        # Creation of the file aiming to contain the data if it does not already exists 
         if newfile_name not in os.listdir(newfile_path):
             new_file = openpyxl.Workbook()
         else:
@@ -183,15 +180,14 @@ class File(UtilsForFile):
         new_file.save(newfile_path + newfile_name)
         
 
-    def extract_column_from_all_sheets(self,column,label = True):
+    def extract_column_from_all_sheets(self, column):
         """
         Fonction qui récupère une colonne dans chaque onglet pour former une nouvelle feuille
         contenant toutes les colonnes. La première cellule de chaque colonne correspond alors 
         au nom de l'onglet. Attention, en l'état, il faut que tous les onglets aient la même structure.
 
         Input : 
-            column : str. L'étiquette de la colonne à récupérer dans chaque onglet
-            label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
+            column : str. L'étiquette de la colonne à récupérer dans chaque onglet 
 
         Exemple d'utilisation : 
     
@@ -203,8 +199,7 @@ class File(UtilsForFile):
             file = File('dataset.xlsx',dataonly = False)
             file.extract_column_from_all_sheets('B') 
         """ 
-        if label:
-            column = column_index_from_string(column)
+        column = column_index_from_string(column)
          
         new_sheet = self.writebook.create_sheet(f"gather_{column}")
         column_to = 1
@@ -253,7 +248,7 @@ class File(UtilsForFile):
         self.writebook.save(self.path + self.name_file)
         
 
-    def apply_column_formula_on_all_sheets(self, *column_list, label = True):
+    def apply_column_formula_on_all_sheets(self, *column_list):
         """
         Fonction qui reproduit les formules d'une colonne ou plusieurs colonnes
           du premier onglet sur toutes les colonnes situées à la même position dans les 
@@ -280,10 +275,9 @@ class File(UtilsForFile):
                 file = File('dataset.xlsx', dataonly = False)
                 file.apply_column_formula_on_all_sheets(*[i for i in range(colmin,colmax + 1)]) 
         """
-        if label:
-            column_int_list = []
-            for column in column_list: 
-                column_int_list.append(column_index_from_string(column))  
+        column_int_list = []
+        for column in column_list: 
+            column_int_list.append(column_index_from_string(column))  
 
         #on applique les copies dans tous les onglets sauf le premier
         for name_onglet in self.sheets_name[1:]:
@@ -432,7 +426,7 @@ class Sheet(File,UtilsForSheet,Other):
         self.sheet = self.writebook[self.name_onglet]
         del self.sheets_name
 
-    def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2, insert = True, label = True):
+    def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2, insert = True):
         """
         Fonction qui prend une colonne de chaîne de caractères et qui renvoie une colonne de 0 ou de 1
         L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où mettre les 0 ou 1.
@@ -442,8 +436,7 @@ class Sheet(File,UtilsForSheet,Other):
                 colum_write : l'étiquette de la colonne d'écriture des 0 et 1. Par défaut, une colonne est insérée à cette position.
                 good_answers : une séquence d'un nombre quelconque de bonnes réponses qui valent 1pt. Chaque mot ne doit pas contenir d'espace ni au début ni à la fin.
                 line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction.
-                insert : (paramètre optionnel) le mettre à False si on ne veut pas insérer une colonne.
-                label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
+                insert : (paramètre optionnel) le mettre à False si on ne veut pas insérer une colonne. 
 
         Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
 
@@ -454,13 +447,9 @@ class Sheet(File,UtilsForSheet,Other):
 
             #Bien mettre les réponses de good_answers entre ''. 
         """  
-        
-        if label:
-            column_read = column_index_from_string(column_read) 
-            modifications = [column_write]
-            column_write = column_index_from_string(column_write)
-        else:
-            modifications = [get_column_letter(column_write)]
+        column_read = column_index_from_string(column_read) 
+        modifications = [column_write]
+        column_write = column_index_from_string(column_write)
 
         if insert:
             self.sheet.insert_cols(column_write)
@@ -473,7 +462,7 @@ class Sheet(File,UtilsForSheet,Other):
         self.updateCellFormulas(self.sheet,True,'column', modifications)         
         self.writebook.save(self.path + self.name_file)
 
-    def column_convert_in_minutes(self,column_read,column_write,line_beginning = 2, insert = True, label = True):
+    def column_convert_in_minutes(self,column_read,column_write,line_beginning = 2, insert = True):
         """
         Fonction qui prend une colonne de chaines de caractères de la forme "10 jours 5 heures" 
         ou "5 heures 10 min" ou "10 min 5s" ou "5s" et qui renvoie le temps en minutes.
@@ -481,8 +470,7 @@ class Sheet(File,UtilsForSheet,Other):
         Input : column_read : l'étiquette de la colonne de lecture des réponses.
                 colum_write : l'étiquette de la colonne d'écriture. 
                 line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction.
-                insert : (paramètre optionnel) le mettre à False si on ne veut pas insérer une colonne.
-                label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
+                insert : (paramètre optionnel) le mettre à False si on ne veut pas insérer une colonne. 
 
         Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
         
@@ -491,13 +479,10 @@ class Sheet(File,UtilsForSheet,Other):
             sheet = Sheet('dataset.xlsx','onglet1')
             sheet.column_convert_in_minutes('A','B',line_beggining = 3) 
 
-        """ 
-        if label:
-            column_read = column_index_from_string(column_read) 
-            modifications = [column_write]
-            column_write = column_index_from_string(column_write)
-        else:
-            modifications = [get_column_letter(column_write)]
+        """  
+        column_read = column_index_from_string(column_read) 
+        modifications = [column_write]
+        column_write = column_index_from_string(column_write) 
 
         if insert:
             self.sheet.insert_cols(column_write)
@@ -511,7 +496,7 @@ class Sheet(File,UtilsForSheet,Other):
         self.updateCellFormulas(self.sheet,True,'column', modifications)         
         self.writebook.save(self.path + self.name_file)
 
-    def column_set_answer_in_group(self,column_read,column_write,groups_of_responses,line_beginning = 2, insert = True, label = True):
+    def column_set_answer_in_group(self,column_read,column_write,groups_of_responses,line_beginning = 2, insert = True):
         """
         Dans le cas où il y a des groupes de réponses, cette fonction qui prend une colonne de chaîne de caractères 
         et qui renvoie une colonne remplie de chaînes contenant pour chaque cellule le groupe associé.
@@ -523,8 +508,7 @@ class Sheet(File,UtilsForSheet,Other):
                 groups_of_response : dictionnary which keys are response groups and which values are a list of responses 
         associated to this group.
                 line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction.
-                insert : (paramètre optionnel) le mettre à False si on ne veut pas insérer une colonne.
-                label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
+                insert : (paramètre optionnel) le mettre à False si on ne veut pas insérer une colonne. 
 
         Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
         
@@ -533,13 +517,10 @@ class Sheet(File,UtilsForSheet,Other):
             sheet = Sheet('dataset.xlsx','onglet1')
             sheet.column_set_answer_in_group('A', 'B', {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']} ,line_beggining = 3) 
 
-        """
-        if label:
-            column_read = column_index_from_string(column_read) 
-            modifications = [column_write]
-            column_write = column_index_from_string(column_write)
-        else:
-            modifications = [get_column_letter(column_write)]
+        """ 
+        column_read = column_index_from_string(column_read) 
+        modifications = [column_write]
+        column_write = column_index_from_string(column_write) 
 
         if insert:
             self.sheet.insert_cols(column_write)
@@ -554,7 +535,7 @@ class Sheet(File,UtilsForSheet,Other):
         self.updateCellFormulas(self.sheet,True,'column', modifications)         
         self.writebook.save(self.path + self.name_file)
         
-    def color_special_cases_in_column(self,column,chainecolor,label = True):
+    def color_special_cases_in_column(self,column,chainecolor):
         """
         Fonction qui regarde pour une colonne donnée colore les cases correspondant à certaines chaînes de caractères.
 
@@ -562,7 +543,6 @@ class Sheet(File,UtilsForSheet,Other):
             - column : le numéro de la colonne.
             - chainecolor (dict) : les chaînes de caractères qui vont être colorées et les couleurs qui correspondent à écrire avec la syntaxe suivante {'vrai':'couleur1','autre':couleur2}. Attention,
                 la couleur doit être entrée en hexadécimal et les chaînes de caractères ne doivent pas avoir d'espace au début ou à la fin.
-            - label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
         
         Exemple d'utilisation : 
         
@@ -570,8 +550,7 @@ class Sheet(File,UtilsForSheet,Other):
             sheet.color_special_cases_in_column('L', {'vrai': '#FF0000','faux': '#00FF00'}) 
 
         """
-        if label:
-            column = column_index_from_string(column)
+        column = column_index_from_string(column)
 
         for i in range(1,self.sheet.max_row + 1):
             cellule = self.sheet.cell(i,column) 
@@ -603,9 +582,9 @@ class Sheet(File,UtilsForSheet,Other):
         """
 
         for j in range(1, self.sheet.max_column + 1):
-            self.color_special_cases_in_column(j,chainecolor,label=False)
+            self.color_special_cases_in_column(j,chainecolor)
 
-    def add_column_in_sheet_differently_sorted(self,column_identifiant, column_insertion, other_sheet,label = True):
+    def add_column_in_sheet_differently_sorted(self,column_identifiant, column_insertion, other_sheet):
         """
         Fonction qui insère dans un onglet des colonnes d'un autre onglet de référence. 
         Les deux feuilles ont une colonne d'identifiants communs (exemple : des mails) mais qui peut être
@@ -618,8 +597,7 @@ class Sheet(File,UtilsForSheet,Other):
             - column_identifiant : numéro de la colonne où sont situés les identifiants dans l'onglet qu'on souhaite modifier.
             - column_insertion : numéro de la colonne où on insère les colonnes à récupérer.
             - other_sheet : liste représentant l'onglet duquel on récupère les colonnes  ['namefile','namesheet',numéro de la colonne où sont les identifiants,[numéros des colonnes à récupérer sous forme de liste]]
-                namefile doit être au format .xlsx et mis dans le dossier fichier_xls.
-            - label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
+                namefile doit être au format .xlsx et mis dans le dossier fichier_xls. 
             
         Exemple d'utilisation : 
     
@@ -633,11 +611,10 @@ class Sheet(File,UtilsForSheet,Other):
         columns_to_copy = other_sheet[3]
         dico = {}
 
-        if label:
-            column_identifiant = column_index_from_string(column_identifiant)
-            column_insertion = column_index_from_string(column_insertion)
-            other_sheet[2] = column_index_from_string(other_sheet[2])
-            columns_to_copy = [column_index_from_string(column) for column in columns_to_copy]
+        column_identifiant = column_index_from_string(column_identifiant)
+        column_insertion = column_index_from_string(column_insertion)
+        other_sheet[2] = column_index_from_string(other_sheet[2])
+        columns_to_copy = [column_index_from_string(column) for column in columns_to_copy]
 
         modifications = [get_column_letter(column_insertion + i ) for i in range(len(columns_to_copy))]
 
@@ -689,7 +666,7 @@ class Sheet(File,UtilsForSheet,Other):
         
         self.writebook.save(self.path + self.name_file)
 
-    def column_cut_string_in_parts(self,column_to_cut,column_insertion,separator, label = True):
+    def column_cut_string_in_parts(self,column_to_cut,column_insertion,separator):
         """
         Fonction qui prend une colonne dont chaque cellule contient une grande chaîne de
           caractères. Toutes les chaînes sont composés du nombre de morceaux délimités par un séparateur,
@@ -698,8 +675,7 @@ class Sheet(File,UtilsForSheet,Other):
         Inputs :
             - column_to_cut : colonne contenant les grandes str.
             - column_insertion : où insérer les colonnes
-            - separator le séparateur
-            - label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
+            - separator le séparateur 
 
         Exemple d'utilisation : 
     
@@ -707,10 +683,8 @@ class Sheet(File,UtilsForSheet,Other):
             sheet.column_cut_string_in_parts('C', 'J', ';') 
         
         """
-
-        if label:
-            column_to_cut = column_index_from_string(column_to_cut) 
-            column_insertion = column_index_from_string(column_insertion)
+        column_to_cut = column_index_from_string(column_to_cut) 
+        column_insertion = column_index_from_string(column_insertion)
         
         for i in range(2, self.sheet.max_row + 1):
             value = self.sheet.cell(i,column_to_cut).value
@@ -762,7 +736,7 @@ class Sheet(File,UtilsForSheet,Other):
         self.writebook.save(self.path + self.name_file) 
         
 
-    def delete_lines_containing_str(self,column,*chaines,label = True):
+    def delete_lines_containing_str(self, column, *chaines):
         """
         Fonction qui parcourt une colonne et qui supprime la ligne si celle-ci contient une chaîne particulière.
 
@@ -775,8 +749,7 @@ class Sheet(File,UtilsForSheet,Other):
             sheet = Sheet('dataset.xlsx','onglet1')
             sheet.delete_lines(3, 'chaine1', 'chaine2', 'chaine3', 'chaine4') 
         """
-        if label:
-            column = column_index_from_string(column)  
+        column = column_index_from_string(column)  
         
         modifications = []
         for i in range(self.sheet.max_row,0,-1):
@@ -789,7 +762,7 @@ class Sheet(File,UtilsForSheet,Other):
         self.updateCellFormulas(self.sheet,False,'row',modifications)        
         self.writebook.save(self.path + self.name_file)
 
-    def delete_doublons(self, column_identifiant, line_beginning = 2, color = False, label = True):
+    def delete_doublons(self, column_identifiant, line_beginning = 2, color = False):
         """
         Certains participants répondent plusieurs fois. Cette fonction supprime les premières réponses
         des participants dans ce cas. Elle ne garde que leur dernière réponse. On repère les participants
@@ -809,8 +782,7 @@ class Sheet(File,UtilsForSheet,Other):
             sheet = Sheet('dataset.xlsx','onglet1')
             sheet.delete_doublons('C', color = True)
         """
-        if label:
-            column_identifiant = column_index_from_string(column_identifiant) 
+        column_identifiant = column_index_from_string(column_identifiant) 
 
         participants = {} 
         modifications = []
@@ -831,7 +803,7 @@ class Sheet(File,UtilsForSheet,Other):
         self.updateCellFormulas(self.sheet,False,'row',modifications)        
         self.writebook.save(self.path + self.name_file)
     
-    def create_one_column_by_QCM_answer(self, column, column_insertion, list_string, *reponses, label = True):
+    def create_one_column_by_QCM_answer(self, column, column_insertion, list_string, *reponses):
         """
         Fonction qui regarde si des réponses sont incluses dans les cellules d'une colonne.
         Chaque cellule contient l'ensemble des réponses à une question de QCM du participant sous forme de str.
@@ -842,18 +814,15 @@ class Sheet(File,UtilsForSheet,Other):
             - column :  str : la colonne avec les réponses.
             - column_insertion : str : l'endroit où on insère les colonnes.
             - list_string : list : liste de deux str indiquant si la réponse est présente ou non.
-            - reponses : les réponses du QCM.
-            - label : bool : True si on entre les colonnes par leurs étiquettes, False sinon.
+            - reponses : les réponses du QCM. 
         
         Exemple : 
             sheet = Sheet('dataset.xlsx','onglet1')
             sheet.create_one_column_by_QCM_answer('C','D', ['oui', 'non'], 'reponse1', 'reponse2', 'reponse3')
 
         """
- 
-        if label:
-            column = column_index_from_string(column) 
-            column_insertion = column_index_from_string(column_insertion) 
+        column = column_index_from_string(column) 
+        column_insertion = column_index_from_string(column_insertion) 
         
         modifications = [get_column_letter(column_insertion + i) for i in range(len(reponses))]
 
@@ -864,7 +833,7 @@ class Sheet(File,UtilsForSheet,Other):
 
         #on remplit les colonnes suivant que les réponses correspondantes sont ou non dans la cellule.
         for i in range(2, self.sheet.max_row + 1):
-            if self.sheet.cell(i,column).value == None:
+            if self.sheet.cell(i,column).value is None:
                 for j in range(0,len(reponses)):  
                         self.sheet.cell(i,j + column_insertion).value = list_string[1]
             else:
@@ -877,7 +846,7 @@ class Sheet(File,UtilsForSheet,Other):
         self.updateCellFormulas(self.sheet,True,'column',modifications)        
         self.writebook.save(self.path + self.name_file)
         
-    def gather_multiple_answers(self, column_read, column_store, line_beggining = 2, label = True):
+    def gather_multiple_answers(self, column_read, column_store, line_beggining = 2):
         """
         Dans un onglet, nous avons les réponses de participants qui ont pu répondre plusieurs fois à un questionnaire.
         Cette fonction parcourt les noms et met dans un autre onglet. La ligne du participant est alors constituée des différentes valeurs
@@ -886,12 +855,10 @@ class Sheet(File,UtilsForSheet,Other):
         Inputs :
             - column_read (str) : la colonne avec les identifiants des participants.
             - column_store (str) : lettre de la colonne contenant la donnée qu'on veut stocker.
-            - line_beggining (int) : ligne où débute la recherche.
-            - label (bool) : False si on veut entrer le numéro de la colonne et pas la lettre.
+            - line_beggining (int) : ligne où débute la recherche. 
         """ 
-        if label:
-            column_read = column_index_from_string(column_read) 
-            column_store = column_index_from_string(column_store) 
+        column_read = column_index_from_string(column_read) 
+        column_store = column_index_from_string(column_store) 
 
         #we create a dictionary whose keys are the identifiers (of participants) and values are their number of answers and a list containing
         #the data we want to store for each answer.
@@ -939,18 +906,17 @@ class Sheet(File,UtilsForSheet,Other):
         self.updateCellFormulas(self.sheet, True, 'column', modifications)
         self.writebook.save(self.path + self.name_file) 
         
-    def column_for_prime_probe_congruence(self, first_column, second_column, column_insertion, *words,  line_beginning=2, insert=True, label=True):
+    def column_for_prime_probe_congruence(self, first_column, second_column, column_insertion, *words,  line_beginning=2, insert=True):
         """
         Vous avez deux colonnes l'une contient des chaines de caractères particulières. L'autre contient des chaines de la forme MOTnb_.jpg où MOT peut 
         être congruent, neutre, incongruent et nb est un nombre. Vous souhaitez insérer une colonne contenant soit rien soit la chaine de la première colonne
         suivi de MOT si la chaîne de la première colonne fait partie de words
         """
         # Transformer les lettres de colonnes en index et insérer la colonne d'écriture
-        if label:
-            first_column = column_index_from_string(first_column) 
-            second_column = column_index_from_string(second_column) 
-            modifications = [column_insertion]
-            column_insertion = column_index_from_string(column_insertion) 
+        first_column = column_index_from_string(first_column) 
+        second_column = column_index_from_string(second_column) 
+        modifications = [column_insertion]
+        column_insertion = column_index_from_string(column_insertion) 
 
         if insert:
             self.sheet.insert_cols(column_insertion)

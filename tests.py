@@ -18,8 +18,7 @@ class TestPath(TestCase):
     
     def test_create_one_onglet_by_participant(self):
         path = Path('fichiers_xls/gathertests/')
-        path.create_one_onglet_by_participant('test_cmd_ongletbyparticipant.xlsx',
-                                               'test', 'A', 'divided_test_cmd_ongletbyparticipant.xlsx')
+        path.apply_method_on_homononymous_files('test_cmd_ongletbyparticipant.xlsx', 'create_one_onglet_by_participant', 'test', 'A', 'divided_test_cmd_ongletbyparticipant.xlsx','fichiers_xls/gathertests/')
         file = File('divided_test_cmd_ongletbyparticipant_before.xlsx', path.pathname)
         file2 = File('divided_test_cmd_ongletbyparticipant.xlsx', path.pathname)
         
@@ -166,21 +165,17 @@ class TestSheet(TestCase, Other):
 
     def test_column_transform_string_in_binary(self):
         sheet = Sheet('test.xlsx','sheet1')  
-
-        sheet.column_transform_string_in_binary(12,13,'partie 1 : Vrai',insert=False,label = False)
-        self.column_identical('test.xlsx','test_generated.xlsx',0,0, 13, 13) 
+ 
         sheet.column_transform_string_in_binary('L','M','partie 1 : Vrai',insert=False)
         self.column_identical('test.xlsx','test_generated.xlsx',0,0, 13, 13) 
-        sheet.column_transform_string_in_binary(14,15,'partie 2 : Vrai',insert=False,label = False)
+        sheet.column_transform_string_in_binary('N','O','partie 2 : Vrai',insert=False)
         self.column_identical('test.xlsx','test_generated.xlsx',0,0, 15, 15) 
-        sheet.column_transform_string_in_binary(16,17,'partie 3 : Vrai',insert=False,label = False)
-        self.column_identical('test.xlsx','test_generated.xlsx',0,0, 17, 17)
-        sheet.column_transform_string_in_binary(41,42,'Laser Interferometer Gravitational-Wave Observatory(LIGO)','virgo','Virgo',insert=False,label = False)
-        self.column_identical('test.xlsx','test_generated.xlsx',0,0, 42, 42)
+        sheet.column_transform_string_in_binary('P','Q','partie 3 : Vrai',insert=False)
+        self.column_identical('test.xlsx','test_generated.xlsx',0,0, 17, 17) 
 
         sheet2 = Sheet('test.xlsx', 'Feuille2')
          
-        sheet2.column_transform_string_in_binary(6,7,'partie 12 : Faux',1,label = False)
+        sheet2.column_transform_string_in_binary('F','G','partie 12 : Faux',1)
         self.column_identical('test.xlsx','test.xlsx', 1, 1, 7,8)
         sheet2.sheet.delete_cols(7) #sinon à chaque lancement de test.py il insère une colonne en plus.
         sheet2.writebook.save(sheet2.path + 'test.xlsx') 
@@ -225,10 +220,6 @@ class TestSheet(TestCase, Other):
         self.column_identical('test.xlsx','test.xlsx',4,5,6,6)
         sheet1.sheet.delete_cols(5,2)
 
-        sheet1.add_column_in_sheet_differently_sorted(3,5,['test.xlsx','sheet1',3,[2,6]],label = False) 
-        self.column_identical('test.xlsx','test.xlsx',4,5,5,5)
-        self.column_identical('test.xlsx','test.xlsx',4,5,6,6)
-        sheet1.sheet.delete_cols(5,2)
         sheet1.writebook.save(sheet1.path + 'test.xlsx')
         
     def test_color_line_containing_chaines(self):

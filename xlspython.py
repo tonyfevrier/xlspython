@@ -92,7 +92,7 @@ def multipletabs(file : Annotated[str, typer.Option(prompt = 'Enter the name of 
     # Apply command to a single file
     else:
         fileobject = File(file) 
-        fileobject.create_one_onglet_by_participant(sheet, colread, f'divided_{file}', 'fichiers_xls/', first_line=line, label=True)
+        fileobject.create_one_onglet_by_participant(sheet, colread, f'divided_{file}', 'fichiers_xls/', first_line=line)
         path = fileobject.path
     
     # Eventually verify if each tab has the same number of lines
