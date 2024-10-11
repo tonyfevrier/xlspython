@@ -132,6 +132,13 @@ class TestFile(TestCase):
         tabs = file.check_linenumber_of_tabs(14)
         self.assertListEqual(tabs, ['cutinparts', 'cutinpartsbis', 'delete_lines', 'delete_lines_bis'])
 
+    def test_extract_cells_from_all_sheets(self):
+        file = File('test_extract_cells_from_all_sheets.xlsx')
+        file.extract_cells_from_all_sheets('C7','D7','C8','D8') 
+        verify_files_identical(file, File('test_extract_cells_from_all_sheets - after.xlsx'))
+        del file.writebook['gathered_data']
+        file.writebook.save(file.path + 'test_extract_cells_from_all_sheets.xlsx')
+
 
 class TestSheet(TestCase, Other):
     def test_sheet_correctly_opened(self):

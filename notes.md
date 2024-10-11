@@ -194,6 +194,9 @@ Performance :
     Voir si on ne peut pas faire une seule fonction pour 2a et 2b qui utilise en argument les ss fonctions transform_string_in_binary et ...
     Quand on met 0 ou '0' ce n'est pas pareil, modifier les fonctions ou non pour que l'utilisateur ne voit pas la différence? Ou alors mettre un message d'erreur style on veut une chaîne.
 
+- Interface graphique pour rendre l'expérience utilisateur simplifiée
+    - sélection de colonne en cliquant sur les colonnes d'intérêt, les cellules d'intérêt
+
 # Bug intéressants : 
     -oubli de sauvegarder la feuille en fin de fonction : le prog ne fait alors rien.     
     -certaines str sortant d'excel ont des espaces insécables \xa0 différents des espaces réguliers. Python voit ainsi parfois des str qui semblent identiques différemment.

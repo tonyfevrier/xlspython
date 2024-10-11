@@ -268,19 +268,21 @@ class File(UtilsForFile):
         
         # Create a new tab
         gathered_sheet = self.writebook.create_sheet('gathered_data')
+        current_line = 2
 
         # Fill one line by tab
-        for name_onglet in self.sheets_name[:-1]: 
-            current_line = gathered_sheet.max_row + 1
-
+        for name_onglet in self.sheets_name:  
+            current_onglet = self.writebook[name_onglet]
             gathered_sheet.cell(current_line, 1).value = name_onglet
             current_column = 2
 
             # Fill selected values one by one
-            for tuple in cell_list: 
-                gathered_sheet.cell(current_line, current_column).value = gathered_sheet(tuple[0],tuple[1]).value 
+            for tuple in cell_list:  
+                gathered_sheet.cell(current_line, current_column).value = current_onglet.cell(tuple[0],tuple[1]).value
                 current_column += 1
+            current_line += 1
 
+        self.sheets_name = self.writebook.sheetnames 
         self.writebook.save(self.path + self.name_file)
         
 

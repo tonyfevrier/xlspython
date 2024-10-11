@@ -169,6 +169,15 @@ def gathercolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
     fileobject.gather_columns_in_one(sheet,*column_lists)
 
 
+@app.command()
+def extractcellsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
+                 cells : Annotated[Optional[List[str]], typer.Option()] = None):
+    
+    cells = Ufc.askArgumentUntilNone(cells, "Entrez une cellule que vous souhaitez copier : ")
+    fileobject = File(file)
+    fileobject.extract_cells_from_all_sheets(*cells)
+
+
 # Sheet commands
 
 @app.command()
