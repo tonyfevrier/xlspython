@@ -133,6 +133,7 @@ Performance :
 - Attention, pour toutes les fonctions où on travaille sur des formules, il faut utiliser la fonction self.updateCellFormulas(self.sheet,True,'column', modifications) si jamais on a inséré ou supprimé des formules, mettre à jour les fonctions de sheet et éventuellement de File et Path si nécessaire. 
     - Il faudra n'appeler cette fonction que si on travaille sur des formules afin d'éviter un coup supplémentaire.
     - Afin de moins l'oublier, l'ajouter en descripteur (qui contient update et save) 
+- Fonction qui prend un xls avec une feuille par participant et qui crée un onglet qui rassemble une ligne par ptcpt contenant des cellules de chaque onglet de notre choix
 
 - Nettoyage : enlever le booléen label et obliger les gens à mettre les lettres (enlèvera des cas et de toute façon c'est naturel en pratique).
 - Faut-il aussi nettoyer le booléen insertion pour forcer cette insertion par défaut.

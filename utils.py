@@ -512,7 +512,7 @@ class UtilsForcommands():
 
         
     @classmethod
-    def createDictListValueByCmd(cls,message):
+    def createDictListValueByCmd(cls, message1, message2):
         """
         Fonction qui demande en ligne de commande à l'utilisateur de rentrer un par un les groupes de réponses et, pour chaque groupe, de rentrer
         les réponses qui lui sont associées.
@@ -520,11 +520,11 @@ class UtilsForcommands():
         answers = None
         dictionary = {} 
         while True:
-            user_input = typer.prompt(message,default = "")
+            user_input = typer.prompt(message1, default = "")
             if not user_input:
                 break
             else: 
-                values = cls.askArgumentUntilNone(answers,"") 
+                values = cls.askArgumentUntilNone(answers, message2) 
             dictionary[user_input] = values
         return dictionary
             

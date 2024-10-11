@@ -966,7 +966,7 @@ class Sheet(File,UtilsForSheet,Other):
         self.updateCellFormulas(self.sheet, True, 'column', modifications)         
         self.writebook.save(self.path + self.name_file)
 
-    def column_get_part_of_str(self, column_read, column_insertion, separator, line_beginning=2):
+    def column_get_begin_of_str(self, column_read, column_insertion, separator, line_beginning=2):
         """
         Vous avez une colonne qui contient une chaîne dont vous voulez prendre le début jusqu'à un certain séparateur.
         Ce mot est inséré dans une nouvelle colonne.
@@ -983,14 +983,13 @@ class Sheet(File,UtilsForSheet,Other):
         column_insertion = column_index_from_string(column_insertion)
         self.sheet.insert_cols(column_insertion)
 
-        # Fill cells of the new columns
-        for i in range(line_beginning,self.sheet.max_row + 1):
-            self.sheet.cell(i, column_insertion).value = re.sub(fr'([A-Za-z]+){separator}.*', r'\1', self.sheet.cell(i, column_read).value)
+        # Fill cells of the new columns 
+        for i in range(line_beginning,self.sheet.max_row + 1): 
+            self.sheet.cell(i, column_insertion).value = re.sub(fr'([A-Za-z\d]+){separator}.*', r'\1', self.sheet.cell(i, column_read).value)
         
         # Update formulas and save
         self.updateCellFormulas(self.sheet, True, 'column', modifications)         
         self.writebook.save(self.path + self.name_file)
-
 
     def map_two_columns_to_a_third_column(self, columns_read, column_insertion, mapping, line_beginning=2):
         """
@@ -1007,12 +1006,13 @@ class Sheet(File,UtilsForSheet,Other):
         modifications = [column_insertion]
         columns_read_index = [column_index_from_string(column) for column in columns_read]
         column_insertion = column_index_from_string(column_insertion)
+        self.sheet.insert_cols(column_insertion)
 
         for i in range(line_beginning, self.sheet.max_row + 1):
             # Fill the new column if columns read contain some expected values
             for key, value in mapping.items():
-                value1 = self.sheet.cell(i, columns_read_index[0])
-                value2 = self.sheet.cell(i, columns_read_index[1])
+                value1 = str(self.sheet.cell(i, columns_read_index[0]).value)
+                value2 = str(self.sheet.cell(i, columns_read_index[1]).value) 
                 if [value1, value2] == value:
                     self.sheet.cell(i, column_insertion).value = key
                     break

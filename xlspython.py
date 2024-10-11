@@ -301,7 +301,7 @@ def groupofanswers(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
         Version complète : python xlspython.py groupofanswers --file name.xlsx --sheet nametab --colread columnletter --colwrite columnletter --line linenumber
     """
     #Creation of the groups of answers dictionary 
-    groups_of_responses = Ufc.createDictListValueByCmd("Enter the name of one group of answers")
+    groups_of_responses = Ufc.createDictListValueByCmd("Enter the name of one group of answers", "")
 
     sheetobject = Sheet(file,sheet)
     bool = Ufc.insertOrOverwrite(colwrite)
@@ -559,7 +559,28 @@ def colcongruent(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
 
     sheetobject = Sheet(file,sheet)
     sheetobject.column_for_prime_probe_congruence(firstcol, secondcol, colwrite, *words) 
+
+@app.command()
+def colgetbegin(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
+                sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
+                colread : Annotated[str, typer.Option(prompt = 'Enter the column letter to read ')],
+                colwrite : Annotated[str, typer.Option(prompt = 'Enter the column letter where to write')],
+                separator : Annotated[str, typer.Option(prompt = 'Enter the separator')],
+                line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
     
+    sheetobject = Sheet(file,sheet)
+    sheetobject.column_get_begin_of_str(colread, colwrite, separator, line_beginning=line)
+
+@app.command()
+def maptwocols(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
+               sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
+               colread : Annotated[str, typer.Option(prompt = 'Enter the column letters to read separated by a comma (C,E)')],
+               colwrite : Annotated[str, typer.Option(prompt = 'Enter the column letter where to write')],
+               line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
+    
+    mapping = Ufc.createDictListValueByCmd("Enter a value you want to put in the new column", "Enter the two strings which should lead to this new value. You must enter it with the same order as the order you entered the columns to read")
+    sheetobject = Sheet(file,sheet)
+    sheetobject.map_two_columns_to_a_third_column(colread.split(","), colwrite, mapping, line_beginning=line)
 
 
 if __name__ == "__main__":
