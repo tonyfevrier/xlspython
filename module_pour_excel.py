@@ -49,36 +49,6 @@ class Path(UtilsForFile):
             method = getattr(sheet, method_name)
             method(*args, **kwargs) 
            
-    def delete_other_columns(self, columns, filename, sheetname):
-        """
-        Vous avez plusieurs dossiers contenant un fichier ayant le même nom. Fonction qui prend tous les fichiers 
-        d'un même nom et qui ne conserve que les colonnes entrées par l'utilisateur.
-        """ 
-
-        for directory in self.directories:
-            sheet = Sheet(filename, sheetname, self.pathname + directory + '/')
-            sheet.delete_other_columns(columns)
-
-    def create_one_onglet_by_participant(self, file_from, onglet_from, column_read, newfile_name, first_line=2, label=True):
-        """
-        Un dossier contient des sous-dossiers contenant eux-mêmes un fichier de même nom et de même structure. Chaque fichier contient 
-        un onglet dont une colonne contient des chaînes de caractères comme par exemple un nom. Chaque chaîne de caractères peut
-        apparaître plusieurs fois dans cette colonne (exe : quand un participant répond plusieurs fois).La fonction retourne un fichier 
-        contenant un onglet par chaîne de caractères. Chaque onglet contient toutes les lignes correspondant à cette chaîne de caractères.  
-
-        Input : 
-            - file_from (str): nom du fichier de référence
-            - onglet_from (str): onglet de référence.
-            - column_read (str): l'étiquette de la colonne qui contient les chaînes de caractères.
-            - newfile_name (str): name of the newfile
-            - first_line (int=2): ligne où commencer à parcourir. 
-            - label : bool. Mettre sur False si on souhaite entrer les colonnes par leurs positions plutôt que leur label.
-        """ 
-
-        for directory in self.directories:
-            file = File(file_from, self.pathname + directory + '/')
-            file.create_one_onglet_by_participant(onglet_from, column_read, newfile_name, self.pathname, first_line=int(first_line), label=True)
-
     def gather_files_in_different_directories(self, name_file, name_sheet, values_only=False):
         """
         Vous avez plusieurs dossiers contenant un fichier ayant le même nom. Vous souhaitez créer un seul fichier regroupant 
@@ -113,13 +83,6 @@ class Path(UtilsForFile):
 
             # save at the end of each directory not to use too much memory
             new_file.save(self.pathname  + "gathered_" + name_file)
-        
-
-    def gather_files(self):
-        """
-        Vous souhaitez créer un seul fichier regroupant toutes les lignes des fichiers compris dans un dossier donné.
-        """
-        pass
 
 
 class File(UtilsForFile): 
@@ -194,6 +157,7 @@ class File(UtilsForFile):
         sheet = self.writebook[onglet_from] 
 
         # Creation of the file aiming to contain the data if it does not already exists
+        print(newfile_name, newfile_name not in os.listdir(newfile_path))
         if newfile_name not in os.listdir(newfile_path):
             new_file = openpyxl.Workbook()
         else:
@@ -259,6 +223,9 @@ class File(UtilsForFile):
         récupérer des cellules identiques dans tous les onglets et créer un onglet avec une ligne par participant,
         qui contient les valeurs de ces cellules. Fonction analogue à gather_multiple_answers mais ne portant pas sur une
         seule feuille.
+
+        Inputs:
+            - cells (list[str])
         """ 
 
         # Recover cells coordinates

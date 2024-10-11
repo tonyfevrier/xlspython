@@ -42,8 +42,8 @@ def multidelcols(directory : Annotated[str, typer.Option(prompt = 'Enter the nam
 
         Version guidée : python xlspython.py multidelcols 
     """  
-    pathobject = Path(directory + '/')
-    pathobject.delete_other_columns(columns, file, sheet)
+    pathobject = Path(directory + '/') 
+    pathobject.apply_method_on_homononymous_sheets(file, sheet, 'delete_other_columns', columns)
 
 
 # File commands
@@ -83,13 +83,13 @@ def multipletabs(file : Annotated[str, typer.Option(prompt = 'Enter the name of 
         Version complète : python xlspython.py multipletabs --file name.xlsx --sheet nametab --colread columnletter --newfilepath name --line linenumber
     
     """
-    # Application to same name files contained in folders
+    # Apply command to same name files contained in folders
     if newfilepath:
         pathobject = Path(newfilepath + '/')
-        pathobject.create_one_onglet_by_participant(file, sheet, colread, f'divided_{file}', first_line=line, label=True)
+        pathobject.apply_method_on_homononymous_files(file, 'create_one_onglet_by_participant', sheet, colread, f'divided_{file}', newfilepath + '/', first_line=line)
         path = pathobject.pathname
 
-    # Application to a single file
+    # Apply command to a single file
     else:
         fileobject = File(file) 
         fileobject.create_one_onglet_by_participant(sheet, colread, f'divided_{file}', 'fichiers_xls/', first_line=line, label=True)
@@ -172,6 +172,16 @@ def gathercolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
 @app.command()
 def extractcellsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
                  cells : Annotated[Optional[List[str]], typer.Option()] = None):
+    """
+    Vous avez un fichier avec des onglets de structure identique avec un onglet par participant. Vous souhaitez
+    récupérer des cellules identiques dans tous les onglets et créer un onglet avec une ligne par participant,
+    qui contient les valeurs de ces cellules. Fonction analogue à gather_multiple_answers mais ne portant pas sur une
+    seule feuille.
+
+    Commande :
+
+        Version guidée: python xlspython.py extractcellsheets
+    """
     
     cells = Ufc.askArgumentUntilNone(cells, "Entrez une cellule que vous souhaitez copier : ")
     fileobject = File(file)
@@ -447,7 +457,8 @@ def deletelinesstr(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
                 colread : Annotated[str, typer.Option(prompt = 'Enter the column letter containing identifiers ')],
                 strings : Annotated[Optional[List[str]], typer.Option()] = None):                    
     """
-    Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. Vous souhaitez parcourir une colonne (colread) et si une chaîne (strings) apparaît dans cette colonne, supprimer la ligne associée.
+    Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
+    Vous souhaitez parcourir une colonne (colread) et si une chaîne (strings) apparaît dans cette colonne, supprimer la ligne associée.
 
     Commande : 
 
@@ -576,7 +587,15 @@ def colgetbegin(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file
                 colwrite : Annotated[str, typer.Option(prompt = 'Enter the column letter where to write')],
                 separator : Annotated[str, typer.Option(prompt = 'Enter the separator')],
                 line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
-    
+    """
+    Vous avez une colonne qui contient une chaîne dont vous voulez prendre le début jusqu'à un certain séparateur. 
+    Ce mot est inséré dans une nouvelle colonne. 
+
+    Commande : 
+
+        Version guidée : python xlspython.py colgetbegin
+    """
+
     sheetobject = Sheet(file,sheet)
     sheetobject.column_get_begin_of_str(colread, colwrite, separator, line_beginning=line)
 
@@ -586,7 +605,15 @@ def maptwocols(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file 
                colread : Annotated[str, typer.Option(prompt = 'Enter the column letters to read separated by a comma (C,E)')],
                colwrite : Annotated[str, typer.Option(prompt = 'Enter the column letter where to write')],
                line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
-    
+    """
+    Vous avez deux colonnes de lecture, suivant ce qui est écrit sur une ligne, vous voulez ou non insérer quelque chose 
+    dans une nouvelle colonne.
+
+    Commande : 
+
+        Version guidée : python xlspython.py maptwocols
+    """
+
     mapping = Ufc.createDictListValueByCmd("Enter a value you want to put in the new column", "Enter the two strings which should lead to this new value. You must enter it with the same order as the order you entered the columns to read")
     sheetobject = Sheet(file,sheet)
     sheetobject.map_two_columns_to_a_third_column(colread.split(","), colwrite, mapping, line_beginning=line)

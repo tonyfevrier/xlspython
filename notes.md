@@ -124,16 +124,15 @@ Performance :
     `m'en servir pour la fonction faite dans path`
     `modifier commande create one tab et écrire create one tab pour Path (ou alors n'en écrire qu'une pour les deux fonctions.)`
     `factoriser mes fonctions deleteother et createoneonglet de path en faisant une fonction qui agit sur tous les fichiers`
-        appliquer ces fonctions sur mes commandes pour voir si ça fonctionne et si oui supprimer deleteothercolumns et createoneonglet... de Path.
-    il faudra modifier ma fonction pour qu'elle n'exige plus le même nom mais le même début de nom
-- fonction qui prend la colonne congruentmuche et qui rend congruent
-- fonctino qui regarde deux cellules et qui affiche qqch dans la troisième si a et b alors c, si a1 et b1 alors c1
-- enlever les xlsx dans les commandes pour ne mettre que le nom du fichier
+        `appliquer ces fonctions sur mes commandes pour voir si ça fonctionne et si oui supprimer deleteothercolumns et createoneonglet... de Path.`
+    il faudra modifier cette fonction pour qu'elle n'exige plus le même nom mais le même début de nom
+- `fonction qui prend la colonne congruentmuche et qui rend congruent`
+- `fonction qui regarde deux cellules et qui affiche qqch dans la troisième si a et b alors c, si a1 et b1 alors c1` 
 - voir si pour deletecolumns on peut optimiser en évitant de boucler sur toutes les colonnes        
-- Attention, pour toutes les fonctions où on travaille sur des formules, il faut utiliser la fonction self.updateCellFormulas(self.sheet,True,'column', modifications) si jamais on a inséré ou supprimé des formules, mettre à jour les fonctions de sheet et éventuellement de File et Path si nécessaire. 
+- `Attention, pour toutes les fonctions où on travaille sur des formules, il faut utiliser la fonction self.updateCellFormulas(self.sheet,True,'column', modifications) si jamais on a inséré ou supprimé des formules, mettre à jour les fonctions de sheet et éventuellement de File et Path si nécessaire. `
     - Il faudra n'appeler cette fonction que si on travaille sur des formules afin d'éviter un coup supplémentaire.
     - Afin de moins l'oublier, l'ajouter en descripteur (qui contient update et save) 
-- Fonction qui prend un xls avec une feuille par participant et qui crée un onglet qui rassemble une ligne par ptcpt contenant des cellules de chaque onglet de notre choix
+- `Fonction qui prend un xls avec une feuille par participant et qui crée un onglet qui rassemble une ligne par ptcpt contenant des cellules de chaque onglet de notre choix`
 
 - Nettoyage : enlever le booléen label et obliger les gens à mettre les lettres (enlèvera des cas et de toute façon c'est naturel en pratique).
 - Faut-il aussi nettoyer le booléen insertion pour forcer cette insertion par défaut.
