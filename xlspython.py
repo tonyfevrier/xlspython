@@ -554,7 +554,7 @@ def maxnames(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')
     columnlist = Ufc.askArgumentUntilNone(columnlist, "Enter the letter of a column you want to read")
 
     sheetobject = Sheet(file,sheet)
-    sheetobject.give_names_of_maximum(colstore, *columnlist, line_beggining=line)
+    sheetobject.give_names_of_maximum(columnlist, colstore, line_beggining=line)
 
 @app.command()
 def colcongruent(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
@@ -578,7 +578,7 @@ def colcongruent(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
     words = Ufc.askArgumentUntilNone(words, "Enter the words (like prime, probe), for which you want to write something in the new column")
 
     sheetobject = Sheet(file,sheet)
-    sheetobject.column_for_prime_probe_congruence(firstcol, secondcol, colwrite, *words) 
+    sheetobject.column_for_prime_probe_congruence([firstcol, secondcol], colwrite, *words) 
 
 @app.command()
 def colgetbegin(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],

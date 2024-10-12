@@ -426,108 +426,108 @@ class Sheet(File,UtilsForSheet,Other):
         self.sheet = self.writebook[self.name_onglet]
         del self.sheets_name
 
-    def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2):
-        """
-        Fonction qui prend une colonne de chaîne de caractères et qui renvoie une colonne de 0 ou de 1
-        L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où mettre les 0 ou 1.
+    # def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2):
+    #     """
+    #     Fonction qui prend une colonne de chaîne de caractères et qui renvoie une colonne de 0 ou de 1
+    #     L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où mettre les 0 ou 1.
 
-        Inputs :
-                column_read : l'étiquette de la colonne de lecture des réponses.
-                colum_write : l'étiquette de la colonne d'écriture des 0 et 1. Par défaut, une colonne est insérée à cette position.
-                good_answers : une séquence d'un nombre quelconque de bonnes réponses qui valent 1pt. Chaque mot ne doit pas contenir d'espace ni au début ni à la fin.
-                line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction. 
+    #     Inputs :
+    #             column_read : l'étiquette de la colonne de lecture des réponses.
+    #             colum_write : l'étiquette de la colonne d'écriture des 0 et 1. Par défaut, une colonne est insérée à cette position.
+    #             good_answers : une séquence d'un nombre quelconque de bonnes réponses qui valent 1pt. Chaque mot ne doit pas contenir d'espace ni au début ni à la fin.
+    #             line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction. 
 
-        Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
+    #     Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
 
-        Exemple d'utilisation : 
+    #     Exemple d'utilisation : 
         
-            sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.column_transform_string_in_binary('A','B','reponse1','reponse2') 
+    #         sheet = Sheet('dataset.xlsx','onglet1')
+    #         sheet.column_transform_string_in_binary('A','B','reponse1','reponse2') 
 
-            #Bien mettre les réponses de good_answers entre ''. 
-        """  
-        column_read = column_index_from_string(column_read) 
-        modifications = [column_write]
-        column_write = column_index_from_string(column_write)
+    #         #Bien mettre les réponses de good_answers entre ''. 
+    #     """  
+    #     column_read = column_index_from_string(column_read) 
+    #     modifications = [column_write]
+    #     column_write = column_index_from_string(column_write)
 
-        self.sheet.insert_cols(column_write)
+    #     self.sheet.insert_cols(column_write)
 
-        for i in range(line_beginning, self.sheet.max_row + 1):
-            chaine_object = Str(self.sheet.cell(i,column_read).value)  
-            bool = chaine_object.clean_string().transform_string_in_binary(*good_answers) 
-            self.sheet.cell(i,column_write).value = bool
+    #     for i in range(line_beginning, self.sheet.max_row + 1):
+    #         chaine_object = Str(self.sheet.cell(i,column_read).value)  
+    #         bool = chaine_object.clean_string().transform_string_in_binary(*good_answers) 
+    #         self.sheet.cell(i,column_write).value = bool
  
-        self.updateCellFormulas(self.sheet,True,'column', modifications)         
-        self.writebook.save(self.path + self.name_file)
+    #     self.updateCellFormulas(self.sheet,True,'column', modifications)         
+    #     self.writebook.save(self.path + self.name_file)
 
-    def column_convert_in_minutes(self,column_read,column_write,line_beginning = 2):
-        """
-        Fonction qui prend une colonne de chaines de caractères de la forme "10 jours 5 heures" 
-        ou "5 heures 10 min" ou "10 min 5s" ou "5s" et qui renvoie le temps en minutes.
-        L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne à remplir.
-        Input : column_read : l'étiquette de la colonne de lecture des réponses.
-                colum_write : l'étiquette de la colonne d'écriture. 
-                line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction. 
+    # def column_convert_in_minutes(self,column_read,column_write,line_beginning = 2):
+    #     """
+    #     Fonction qui prend une colonne de chaines de caractères de la forme "10 jours 5 heures" 
+    #     ou "5 heures 10 min" ou "10 min 5s" ou "5s" et qui renvoie le temps en minutes.
+    #     L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne à remplir.
+    #     Input : column_read : l'étiquette de la colonne de lecture des réponses.
+    #             colum_write : l'étiquette de la colonne d'écriture. 
+    #             line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction. 
 
-        Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
+    #     Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
         
-        Exemple d'utilisation : 
+    #     Exemple d'utilisation : 
         
-            sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.column_convert_in_minutes('A','B',line_beggining = 3) 
+    #         sheet = Sheet('dataset.xlsx','onglet1')
+    #         sheet.column_convert_in_minutes('A','B',line_beggining = 3) 
 
-        """  
-        column_read = column_index_from_string(column_read) 
-        modifications = [column_write]
-        column_write = column_index_from_string(column_write) 
+    #     """  
+    #     column_read = column_index_from_string(column_read) 
+    #     modifications = [column_write]
+    #     column_write = column_index_from_string(column_write) 
 
-        self.sheet.insert_cols(column_write)
+    #     self.sheet.insert_cols(column_write)
 
-        for i in range(line_beginning,self.sheet.max_row + 1):
-            chaine_object = Str(self.sheet.cell(i,column_read).value) 
-            if chaine_object.chaine != "None": 
-                bool = chaine_object.clean_string().convert_time_in_minutes() 
-                self.sheet.cell(i,column_write).value = bool
+    #     for i in range(line_beginning,self.sheet.max_row + 1):
+    #         chaine_object = Str(self.sheet.cell(i,column_read).value) 
+    #         if chaine_object.chaine != "None": 
+    #             bool = chaine_object.clean_string().convert_time_in_minutes() 
+    #             self.sheet.cell(i,column_write).value = bool
  
-        self.updateCellFormulas(self.sheet,True,'column', modifications)         
-        self.writebook.save(self.path + self.name_file)
+    #     self.updateCellFormulas(self.sheet,True,'column', modifications)         
+    #     self.writebook.save(self.path + self.name_file)
 
-    def column_set_answer_in_group(self,column_read,column_write,groups_of_responses,line_beginning = 2):
-        """
-        Dans le cas où il y a des groupes de réponses, cette fonction qui prend une colonne de chaîne de caractères 
-        et qui renvoie une colonne remplie de chaînes contenant pour chaque cellule le groupe associé.
-        L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où écrire.
+    # def column_set_answer_in_group(self,column_read,column_write,groups_of_responses,line_beginning = 2):
+    #     """
+    #     Dans le cas où il y a des groupes de réponses, cette fonction qui prend une colonne de chaîne de caractères 
+    #     et qui renvoie une colonne remplie de chaînes contenant pour chaque cellule le groupe associé.
+    #     L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où écrire.
 
-        Input : 
-                column_read : l'étiquette de la colonne de lecture des réponses.
-                colum_write : l'étiquette de la colonne d'écriture. 
-                groups_of_response : dictionnary which keys are response groups and which values are a list of responses 
-        associated to this group.
-                line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction. 
+    #     Input : 
+    #             column_read : l'étiquette de la colonne de lecture des réponses.
+    #             colum_write : l'étiquette de la colonne d'écriture. 
+    #             groups_of_response : dictionnary which keys are response groups and which values are a list of responses 
+    #     associated to this group.
+    #             line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction. 
 
-        Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
+    #     Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
         
-        Exemple d'utilisation : 
+    #     Exemple d'utilisation : 
         
-            sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.column_set_answer_in_group('A', 'B', {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']} ,line_beggining = 3) 
+    #         sheet = Sheet('dataset.xlsx','onglet1')
+    #         sheet.column_set_answer_in_group('A', 'B', {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']} ,line_beggining = 3) 
 
-        """ 
-        column_read = column_index_from_string(column_read) 
-        modifications = [column_write]
-        column_write = column_index_from_string(column_write) 
+    #     """ 
+    #     column_read = column_index_from_string(column_read) 
+    #     modifications = [column_write]
+    #     column_write = column_index_from_string(column_write) 
 
-        self.sheet.insert_cols(column_write)
+    #     self.sheet.insert_cols(column_write)
 
-        reversed_group_of_responses = self.reverse_dico_for_set_answer_in_group(groups_of_responses)
+    #     reversed_group_of_responses = self.reverse_dico_for_set_answer_in_group(groups_of_responses)
 
-        for i in range(line_beginning,self.sheet.max_row + 1): 
-            chaine_object = Str(self.sheet.cell(i,column_read).value)  
-            group = chaine_object.clean_string().set_answer_in_group(reversed_group_of_responses) 
-            self.sheet.cell(i,column_write).value = group
+    #     for i in range(line_beginning,self.sheet.max_row + 1): 
+    #         chaine_object = Str(self.sheet.cell(i,column_read).value)  
+    #         group = chaine_object.clean_string().set_answer_in_group(reversed_group_of_responses) 
+    #         self.sheet.cell(i,column_write).value = group
             
-        self.updateCellFormulas(self.sheet,True,'column', modifications)         
-        self.writebook.save(self.path + self.name_file)
+    #     self.updateCellFormulas(self.sheet,True,'column', modifications)         
+    #     self.writebook.save(self.path + self.name_file)
         
     def color_special_cases_in_column(self,column,chainecolor):
         """
@@ -864,91 +864,91 @@ class Sheet(File,UtilsForSheet,Other):
 
         self.writebook.save(self.path + self.name_file) 
 
-    def give_names_of_maximum(self, column_insertion, *columnlist, line_beggining = 2):
-        """
-        Vous avez une liste de colonnes avec des chiffres, chaque colonne a un nom dans sa première cellule. 
-        Cette fonction crée une colonne dans laquelle on entre pour chaque ligne le nom de la colonne ou des colonnes qui contient le max.
+    # def give_names_of_maximum(self, column_insertion, *columnlist, line_beggining = 2):
+    #     """
+    #     Vous avez une liste de colonnes avec des chiffres, chaque colonne a un nom dans sa première cellule. 
+    #     Cette fonction crée une colonne dans laquelle on entre pour chaque ligne le nom de la colonne ou des colonnes qui contient le max.
 
-        Inputs : 
-            - column_insertion : 
-            - columnlist :
-        """
+    #     Inputs : 
+    #         - column_insertion : 
+    #         - columnlist :
+    #     """
 
-        number_column_insertion = column_index_from_string(column_insertion)
-        self.sheet.insert_cols(number_column_insertion)
-        modifications = [column_insertion]
-        self.sheet.cell(1, number_column_insertion).value = "Colonne de(s) maximum(s)"
+    #     number_column_insertion = column_index_from_string(column_insertion)
+    #     self.sheet.insert_cols(number_column_insertion)
+    #     modifications = [column_insertion]
+    #     self.sheet.cell(1, number_column_insertion).value = "Colonne de(s) maximum(s)"
 
-        #dico qui à une colonne associe le nom de la colonne
-        dico = {}
-        for column in columnlist:
-            dico[column] = self.sheet.cell(1,column_index_from_string(column)).value
+    #     #dico qui à une colonne associe le nom de la colonne
+    #     dico = {}
+    #     for column in columnlist:
+    #         dico[column] = self.sheet.cell(1,column_index_from_string(column)).value
  
-        for line in range(line_beggining, self.sheet.max_row + 1):
-            #pour une ligne donnée, on récupère le nom de la colonne associé aux maximum(s).
-            maximum = -1
-            chaine = ""
-            for column in columnlist:
-                cellvalue = self.sheet.cell(line, column_index_from_string(column)).value
-                if cellvalue > maximum:
-                    maximum = cellvalue
-                    chaine = dico[column]
-                elif cellvalue == maximum:
-                    chaine += "_" + dico[column]
-            self.sheet.cell(line, number_column_insertion).value = chaine
+    #     for line in range(line_beggining, self.sheet.max_row + 1):
+    #         #pour une ligne donnée, on récupère le nom de la colonne associé aux maximum(s).
+    #         maximum = -1
+    #         chaine = ""
+    #         for column in columnlist:
+    #             cellvalue = self.sheet.cell(line, column_index_from_string(column)).value
+    #             if cellvalue > maximum:
+    #                 maximum = cellvalue
+    #                 chaine = dico[column]
+    #             elif cellvalue == maximum:
+    #                 chaine += "_" + dico[column]
+    #         self.sheet.cell(line, number_column_insertion).value = chaine
         
-        self.updateCellFormulas(self.sheet, True, 'column', modifications)
-        self.writebook.save(self.path + self.name_file) 
+    #     self.updateCellFormulas(self.sheet, True, 'column', modifications)
+    #     self.writebook.save(self.path + self.name_file) 
         
-    def column_for_prime_probe_congruence(self, first_column, second_column, column_insertion, *words,  line_beginning=2):
-        """
-        Vous avez deux colonnes l'une contient des chaines de caractères particulières. L'autre contient des chaines de la forme MOTnb_.jpg où MOT peut 
-        être congruent, neutre, incongruent et nb est un nombre. Vous souhaitez insérer une colonne contenant soit rien soit la chaine de la première colonne
-        suivi de MOT si la chaîne de la première colonne fait partie de words
-        """
-        # Transformer les lettres de colonnes en index et insérer la colonne d'écriture
-        first_column = column_index_from_string(first_column) 
-        second_column = column_index_from_string(second_column) 
-        modifications = [column_insertion]
-        column_insertion = column_index_from_string(column_insertion) 
+    # def column_for_prime_probe_congruence(self, first_column, second_column, column_insertion, *words,  line_beginning=2):
+    #     """
+    #     Vous avez deux colonnes l'une contient des chaines de caractères particulières. L'autre contient des chaines de la forme MOTnb_.jpg où MOT peut 
+    #     être congruent, neutre, incongruent et nb est un nombre. Vous souhaitez insérer une colonne contenant soit rien soit la chaine de la première colonne
+    #     suivi de MOT si la chaîne de la première colonne fait partie de words
+    #     """
+    #     # Transformer les lettres de colonnes en index et insérer la colonne d'écriture
+    #     first_column = column_index_from_string(first_column) 
+    #     second_column = column_index_from_string(second_column) 
+    #     modifications = [column_insertion]
+    #     column_insertion = column_index_from_string(column_insertion) 
 
-        self.sheet.insert_cols(column_insertion)
+    #     self.sheet.insert_cols(column_insertion)
 
-        # Remplissage de la nouvelle colonne
-        for i in range(line_beginning,self.sheet.max_row + 1):
+    #     # Remplissage de la nouvelle colonne
+    #     for i in range(line_beginning,self.sheet.max_row + 1):
 
-            # Adjonction de la chaine de first_column à MOT
-            if self.sheet.cell(i, first_column).value in words:
-                mot = re.sub(r'([A-Z-a-z]+)\d+_[A-Z-a-z].jpg', r'\1', self.sheet.cell(i, second_column).value)
-                self.sheet.cell(i,column_insertion).value = self.sheet.cell(i, first_column).value + "_" + mot
+    #         # Adjonction de la chaine de first_column à MOT
+    #         if self.sheet.cell(i, first_column).value in words:
+    #             mot = re.sub(r'([A-Z-a-z]+)\d+_[A-Z-a-z].jpg', r'\1', self.sheet.cell(i, second_column).value)
+    #             self.sheet.cell(i,column_insertion).value = self.sheet.cell(i, first_column).value + "_" + mot
         
-        self.updateCellFormulas(self.sheet, True, 'column', modifications)         
-        self.writebook.save(self.path + self.name_file)
+    #     self.updateCellFormulas(self.sheet, True, 'column', modifications)         
+    #     self.writebook.save(self.path + self.name_file)
 
-    def column_get_begin_of_str(self, column_read, column_insertion, separator, line_beginning=2):
-        """
-        Vous avez une colonne qui contient une chaîne dont vous voulez prendre le début jusqu'à un certain séparateur.
-        Ce mot est inséré dans une nouvelle colonne.
+    # def column_get_begin_of_str(self, column_read, column_insertion, separator, line_beginning=2):
+    #     """
+    #     Vous avez une colonne qui contient une chaîne dont vous voulez prendre le début jusqu'à un certain séparateur.
+    #     Ce mot est inséré dans une nouvelle colonne.
         
-        Inputs:
-            - column_read (str): lettre de la colonne de lecture.
-            - column_insertion (str): lettre de la colonne où l'insertion doit avoir lieu.
-            - separator (str): le symbole délimitant le début du mot
-            - line_beggining (int) : ligne où débute la recherche.
-        """
-        # Get indexes of columns and insert one
-        modifications = [column_insertion]
-        column_read = column_index_from_string(column_read)
-        column_insertion = column_index_from_string(column_insertion)
-        self.sheet.insert_cols(column_insertion)
+    #     Inputs:
+    #         - column_read (str): lettre de la colonne de lecture.
+    #         - column_insertion (str): lettre de la colonne où l'insertion doit avoir lieu.
+    #         - separator (str): le symbole délimitant le début du mot
+    #         - line_beggining (int) : ligne où débute la recherche.
+    #     """
+    #     # Get indexes of columns and insert one
+    #     modifications = [column_insertion]
+    #     column_read = column_index_from_string(column_read)
+    #     column_insertion = column_index_from_string(column_insertion)
+    #     self.sheet.insert_cols(column_insertion)
 
-        # Fill cells of the new columns 
-        for i in range(line_beginning,self.sheet.max_row + 1): 
-            self.sheet.cell(i, column_insertion).value = re.sub(fr'([A-Za-z\d]+){separator}.*', r'\1', self.sheet.cell(i, column_read).value)
+    #     # Fill cells of the new columns 
+    #     for i in range(line_beginning,self.sheet.max_row + 1): 
+    #         self.sheet.cell(i, column_insertion).value = re.sub(fr'([A-Za-z\d]+){separator}.*', r'\1', self.sheet.cell(i, column_read).value)
         
-        # Update formulas and save
-        self.updateCellFormulas(self.sheet, True, 'column', modifications)         
-        self.writebook.save(self.path + self.name_file)
+    #     # Update formulas and save
+    #     self.updateCellFormulas(self.sheet, True, 'column', modifications)         
+    #     self.writebook.save(self.path + self.name_file)
 
     # def map_two_columns_to_a_third_column(self, columns_read, column_insertion, mapping, line_beginning=2):
     #     """
@@ -981,18 +981,23 @@ class Sheet(File,UtilsForSheet,Other):
     #     self.writebook.save(self.path + self.name_file)
 
     
-    ######## EN TESTS
-    """Décorateur qui ferait modifications, prendrait toutes les colonnes pour
-      donner leur index, appellerait une fonction dans une boucle, la fonction serait la boucle et son contenu, lancerait update et save
-    JE PENSE QUIL FAUDRA QUE TOUTES LES COLONNES DE LECTURE SOIT DANS ARG[0], ECRITURE DANS ARG[1]
-    En l'état, il s'applique aux fonctions qui ont en premier argument une liste de colonnes à lire, une colonne à insérer et d'autres arguments.
-    On pourra la modifier si plusieurs colonnes sont à insérer mais je pense qu'il faudra donner une liste pour column_insertion
-    """
+    
     def act_on_columns(function):
+        """
+        Décorateur qui en plus d'appliquer la fonction, transforme les lettres de colonnes en index, met à jour les formules 
+        après l'insertion de la colonne et sauvegarde le fichier.
+        """
         def wrapper(self, *args, **kwargs):
-            # Transform first two column args in indexes
+            """
+            - args[0] (list[str] or str): letters of columns to read
+            - args[1] (str): letter of column in which to write
+            """
+            # Transform all args corresponding to columns in indexes
             modifications = [args[1]]
-            columns_read = [column_index_from_string(column) for column in args[0]]
+            if isinstance(args[0], list):
+                columns_read = [column_index_from_string(column) for column in args[0]]
+            else:
+                columns_read = column_index_from_string(args[0]) 
             column_insertion = column_index_from_string(args[1]) 
 
             # Apply the function on column indexes
@@ -1025,12 +1030,151 @@ class Sheet(File,UtilsForSheet,Other):
                 if [value1, value2] == value:
                     self.sheet.cell(i, column_insertion).value = key
                     break
-             
-
-
-
     
+    @act_on_columns
+    def column_get_begin_of_str(self, column_read, column_insertion, separator, line_beginning=2):
+        """
+        Vous avez une colonne qui contient une chaîne dont vous voulez prendre le début jusqu'à un certain séparateur.
+        Ce mot est inséré dans une nouvelle colonne.
+        
+        Inputs:
+            - column_read (str): lettre de la colonne de lecture.
+            - column_insertion (str): lettre de la colonne où l'insertion doit avoir lieu.
+            - separator (str): le symbole délimitant le début du mot
+            - line_beggining (int) : ligne où débute la recherche.
+        """
+        # Fill cells of the new columns 
+        for i in range(line_beginning,self.sheet.max_row + 1): 
+            self.sheet.cell(i, column_insertion).value = re.sub(fr'([A-Za-z\d]+){separator}.*', r'\1', self.sheet.cell(i, column_read).value)
+             
+    @act_on_columns
+    def column_for_prime_probe_congruence(self, columns_read, column_insertion, *words,  line_beginning=2):
+        """
+        Vous avez deux colonnes l'une contient des chaines de caractères particulières. L'autre contient des chaines de la forme MOTnb_.jpg où MOT peut 
+        être congruent, neutre, incongruent et nb est un nombre. Vous souhaitez insérer une colonne contenant soit rien soit la chaine de la première colonne
+        suivi de MOT si la chaîne de la première colonne fait partie de words
 
+        Inputs:
+            - columns_read (list[str]): the two columns to read, the second contains MOTnb_.jpg
+            - column_insertion (str): lettre de la colonne où l'insertion doit avoir lieu.
+            - words (list[str]): les mots auxquels doit correspondre la première colonne à lire
+            - line_beggining (int) : ligne où débute la recherche.
+        """ 
+        for i in range(line_beginning,self.sheet.max_row + 1):
+            # Adjonction de la chaine de first_column à MOT
+            if self.sheet.cell(i, columns_read[0]).value in words:
+                mot = re.sub(r'([A-Z-a-z]+)\d+_[A-Z-a-z].jpg', r'\1', self.sheet.cell(i, columns_read[1]).value)
+                self.sheet.cell(i,column_insertion).value = self.sheet.cell(i, columns_read[0]).value + "_" + mot 
+
+    @act_on_columns
+    def give_names_of_maximum(self, column_list, column_insertion, line_beggining = 2):
+        """
+        Vous avez une liste de colonnes avec des chiffres, chaque colonne a un nom dans sa première cellule. 
+        Cette fonction crée une colonne dans laquelle on entre pour chaque ligne le nom de la colonne ou des colonnes qui contient le max.
+
+        Inputs : 
+            - column_insertion : 
+            - columnlist :
+        """ 
+
+        self.sheet.cell(1, column_insertion).value = "Colonne de(s) maximum(s)"
+
+        #dico qui à une colonne associe le nom de la colonne
+        dico = {}
+        for column in column_list:
+            dico[column] = self.sheet.cell(1,column).value
+ 
+        for line in range(line_beggining, self.sheet.max_row + 1):
+            #pour une ligne donnée, on récupère le nom de la colonne associé aux maximum(s).
+            maximum = -1
+            chaine = ""
+            for column in column_list:
+                cellvalue = self.sheet.cell(line, column).value
+                if cellvalue > maximum:
+                    maximum = cellvalue
+                    chaine = dico[column]
+                elif cellvalue == maximum:
+                    chaine += "_" + dico[column]
+            self.sheet.cell(line, column_insertion).value = chaine 
+
+    @act_on_columns 
+    def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2):
+        """
+        Fonction qui prend une colonne de chaîne de caractères et qui renvoie une colonne de 0 ou de 1
+        L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où mettre les 0 ou 1.
+
+        Inputs :
+                column_read : l'étiquette de la colonne de lecture des réponses.
+                colum_write : l'étiquette de la colonne d'écriture des 0 et 1. Par défaut, une colonne est insérée à cette position.
+                good_answers : une séquence d'un nombre quelconque de bonnes réponses qui valent 1pt. Chaque mot ne doit pas contenir d'espace ni au début ni à la fin.
+                line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction. 
+
+        Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
+
+        Exemple d'utilisation : 
+        
+            sheet = Sheet('dataset.xlsx','onglet1')
+            sheet.column_transform_string_in_binary('A','B','reponse1','reponse2') 
+
+            #Bien mettre les réponses de good_answers entre ''. 
+        """  
+        for i in range(line_beginning, self.sheet.max_row + 1):
+            chaine_object = Str(self.sheet.cell(i,column_read).value)  
+            bool = chaine_object.clean_string().transform_string_in_binary(*good_answers) 
+            self.sheet.cell(i,column_write).value = bool
+
+    @act_on_columns 
+    def column_convert_in_minutes(self,column_read,column_write,line_beginning = 2):
+        """
+        Fonction qui prend une colonne de chaines de caractères de la forme "10 jours 5 heures" 
+        ou "5 heures 10 min" ou "10 min 5s" ou "5s" et qui renvoie le temps en minutes.
+        L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne à remplir.
+        Input : column_read : l'étiquette de la colonne de lecture des réponses.
+                colum_write : l'étiquette de la colonne d'écriture. 
+                line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction. 
+
+        Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
+        
+        Exemple d'utilisation : 
+        
+            sheet = Sheet('dataset.xlsx','onglet1')
+            sheet.column_convert_in_minutes('A','B',line_beggining = 3) 
+
+        """  
+        for i in range(line_beginning,self.sheet.max_row + 1):
+            chaine_object = Str(self.sheet.cell(i,column_read).value) 
+            if chaine_object.chaine != "None": 
+                bool = chaine_object.clean_string().convert_time_in_minutes() 
+                self.sheet.cell(i,column_write).value = bool
+
+    @act_on_columns 
+    def column_set_answer_in_group(self,column_read,column_write,groups_of_responses,line_beginning = 2):
+        """
+        Dans le cas où il y a des groupes de réponses, cette fonction qui prend une colonne de chaîne de caractères 
+        et qui renvoie une colonne remplie de chaînes contenant pour chaque cellule le groupe associé.
+        L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où écrire.
+
+        Input : 
+                column_read : l'étiquette de la colonne de lecture des réponses.
+                colum_write : l'étiquette de la colonne d'écriture. 
+                groups_of_response : dictionnary which keys are response groups and which values are a list of responses 
+        associated to this group.
+                line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction. 
+
+        Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
+        
+        Exemple d'utilisation : 
+        
+            sheet = Sheet('dataset.xlsx','onglet1')
+            sheet.column_set_answer_in_group('A', 'B', {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']} ,line_beggining = 3) 
+
+        """ 
+        reversed_group_of_responses = self.reverse_dico_for_set_answer_in_group(groups_of_responses)
+
+        for i in range(line_beginning,self.sheet.max_row + 1): 
+            chaine_object = Str(self.sheet.cell(i,column_read).value)  
+            group = chaine_object.clean_string().set_answer_in_group(reversed_group_of_responses) 
+            self.sheet.cell(i,column_write).value = group 
         
 
 
