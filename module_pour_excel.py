@@ -797,7 +797,7 @@ class Sheet(File,UtilsForSheet,Other):
         self.updateCellFormulas(self.sheet,False,'row',modifications)        
         self.writebook.save(self.path + self.name_file)
     
-    def create_one_column_by_QCM_answer(self, column, column_insertion, list_string, *reponses):
+    def create_one_column_by_QCM_answer(self, column, column_insertion, list_string, *reponses, line_beggining = 2):
         """
         Fonction qui regarde si des réponses sont incluses dans les cellules d'une colonne.
         Chaque cellule contient l'ensemble des réponses à une question de QCM du participant sous forme de str.
@@ -826,7 +826,7 @@ class Sheet(File,UtilsForSheet,Other):
             self.sheet.cell(1,j + column_insertion).value = reponses[j]
 
         #on remplit les colonnes suivant que les réponses correspondantes sont ou non dans la cellule.
-        for i in range(2, self.sheet.max_row + 1):
+        for i in range(line_beggining, self.sheet.max_row + 1):
             if self.sheet.cell(i,column).value is None:
                 for j in range(0,len(reponses)):  
                         self.sheet.cell(i,j + column_insertion).value = list_string[1]
@@ -864,7 +864,7 @@ class Sheet(File,UtilsForSheet,Other):
 
         self.writebook.save(self.path + self.name_file) 
 
-    def give_names_of_maximum(self, column_insertion, *columnlist):
+    def give_names_of_maximum(self, column_insertion, *columnlist, line_beggining = 2):
         """
         Vous avez une liste de colonnes avec des chiffres, chaque colonne a un nom dans sa première cellule. 
         Cette fonction crée une colonne dans laquelle on entre pour chaque ligne le nom de la colonne ou des colonnes qui contient le max.
@@ -884,7 +884,7 @@ class Sheet(File,UtilsForSheet,Other):
         for column in columnlist:
             dico[column] = self.sheet.cell(1,column_index_from_string(column)).value
  
-        for line in range(2, self.sheet.max_row + 1):
+        for line in range(line_beggining, self.sheet.max_row + 1):
             #pour une ligne donnée, on récupère le nom de la colonne associé aux maximum(s).
             maximum = -1
             chaine = ""
@@ -950,6 +950,61 @@ class Sheet(File,UtilsForSheet,Other):
         self.updateCellFormulas(self.sheet, True, 'column', modifications)         
         self.writebook.save(self.path + self.name_file)
 
+    # def map_two_columns_to_a_third_column(self, columns_read, column_insertion, mapping, line_beginning=2):
+    #     """
+    #     Vous avez deux colonnes de lecture, suivant ce qui est écrit sur une ligne, vous voulez ou non insérer quelque chose 
+    #     dans une nouvelle colonne.
+
+    #     Inputs:
+    #         - columns_read (list[str]): liste de deux lettres contenant les colonnes de lecture.
+    #         - column_insertion (str): lettre de la colonne où l'insertion doit avoir lieu.
+    #         - mapping (dict): dictionnaire dont les clés sont les chaînes à écrire. Les valeurs sont dans l'ordre les 
+    #         str qui si elles sont présentes, entraînent l'écriture de ces chaînes.
+    #         - line_beggining (int) : ligne où débute la recherche.
+    #     """
+    #     modifications = [column_insertion]
+    #     columns_read_index = [column_index_from_string(column) for column in columns_read]
+    #     column_insertion = column_index_from_string(column_insertion)
+    #     self.sheet.insert_cols(column_insertion)
+
+    #     for i in range(line_beginning, self.sheet.max_row + 1):
+    #         # Fill the new column if columns read contain some expected values
+    #         for key, value in mapping.items():
+    #             value1 = str(self.sheet.cell(i, columns_read_index[0]).value)
+    #             value2 = str(self.sheet.cell(i, columns_read_index[1]).value) 
+    #             if [value1, value2] == value:
+    #                 self.sheet.cell(i, column_insertion).value = key
+    #                 break
+            
+    #     # Update formulas and save
+    #     self.updateCellFormulas(self.sheet,True,'column', modifications)         
+    #     self.writebook.save(self.path + self.name_file)
+
+    
+    ######## EN TESTS
+    """Décorateur qui ferait modifications, prendrait toutes les colonnes pour
+      donner leur index, appellerait une fonction dans une boucle, la fonction serait la boucle et son contenu, lancerait update et save
+    JE PENSE QUIL FAUDRA QUE TOUTES LES COLONNES DE LECTURE SOIT DANS ARG[0], ECRITURE DANS ARG[1]
+    En l'état, il s'applique aux fonctions qui ont en premier argument une liste de colonnes à lire, une colonne à insérer et d'autres arguments.
+    On pourra la modifier si plusieurs colonnes sont à insérer mais je pense qu'il faudra donner une liste pour column_insertion
+    """
+    def act_on_columns(function):
+        def wrapper(self, *args, **kwargs):
+            # Transform first two column args in indexes
+            modifications = [args[1]]
+            columns_read = [column_index_from_string(column) for column in args[0]]
+            column_insertion = column_index_from_string(args[1]) 
+
+            # Apply the function on column indexes
+            self.sheet.insert_cols(column_insertion)
+            function(self, columns_read, column_insertion, *args[2:], **kwargs)
+
+            # Update eventual formulas and save
+            self.updateCellFormulas(self.sheet, True, 'column', modifications)         
+            self.writebook.save(self.path + self.name_file)
+        return wrapper
+    
+    @act_on_columns
     def map_two_columns_to_a_third_column(self, columns_read, column_insertion, mapping, line_beginning=2):
         """
         Vous avez deux colonnes de lecture, suivant ce qui est écrit sur une ligne, vous voulez ou non insérer quelque chose 
@@ -961,24 +1016,16 @@ class Sheet(File,UtilsForSheet,Other):
             - mapping (dict): dictionnaire dont les clés sont les chaînes à écrire. Les valeurs sont dans l'ordre les 
             str qui si elles sont présentes, entraînent l'écriture de ces chaînes.
             - line_beggining (int) : ligne où débute la recherche.
-        """
-        modifications = [column_insertion]
-        columns_read_index = [column_index_from_string(column) for column in columns_read]
-        column_insertion = column_index_from_string(column_insertion)
-        self.sheet.insert_cols(column_insertion)
-
+        """ 
         for i in range(line_beginning, self.sheet.max_row + 1):
             # Fill the new column if columns read contain some expected values
             for key, value in mapping.items():
-                value1 = str(self.sheet.cell(i, columns_read_index[0]).value)
-                value2 = str(self.sheet.cell(i, columns_read_index[1]).value) 
+                value1 = str(self.sheet.cell(i, columns_read[0]).value)
+                value2 = str(self.sheet.cell(i, columns_read[1]).value) 
                 if [value1, value2] == value:
                     self.sheet.cell(i, column_insertion).value = key
                     break
-            
-        # Update formulas and save
-        self.updateCellFormulas(self.sheet,True,'column', modifications)         
-        self.writebook.save(self.path + self.name_file)
+             
 
 
 

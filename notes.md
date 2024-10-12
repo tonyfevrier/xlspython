@@ -130,12 +130,12 @@ Performance :
 - `fonction qui regarde deux cellules et qui affiche qqch dans la troisième si a et b alors c, si a1 et b1 alors c1` 
 - voir si pour deletecolumns on peut optimiser en évitant de boucler sur toutes les colonnes        
 - `Attention, pour toutes les fonctions où on travaille sur des formules, il faut utiliser la fonction self.updateCellFormulas(self.sheet,True,'column', modifications) si jamais on a inséré ou supprimé des formules, mettre à jour les fonctions de sheet et éventuellement de File et Path si nécessaire. `
-    - Il faudra n'appeler cette fonction que si on travaille sur des formules afin d'éviter un coup supplémentaire.
+    - Il faudra n'appeler cette fonction que si on travaille sur des formules afin d'éviter un coup supplémentaire. A voir lorsque j'aurai bossé sur le pb ci-dessous lié au values_only.
     - Afin de moins l'oublier, l'ajouter en descripteur (qui contient update et save) 
 - `Fonction qui prend un xls avec une feuille par participant et qui crée un onglet qui rassemble une ligne par ptcpt contenant des cellules de chaque onglet de notre choix`
 
 - `Nettoyage : enlever le booléen label et obliger les gens à mettre les lettres (enlèvera des cas et de toute façon c'est naturel en pratique).`
-- Faut-il aussi nettoyer le booléen insertion pour forcer cette insertion par défaut.
+- `Faut-il aussi nettoyer le booléen insertion pour forcer cette insertion par défaut.`
 - Factorisation : il y a peut être moyen de faire une grosse fonction commune pour le travail de colonnes qui contient la structure jusque la boucle à l'intérieur de laquelle on appelle plusieurs petites fonctions qui font des choses différentes. Mais la structure de ces fonctions est identiques hormis à l'intérieur de la boucle (column en index, boucle puis update save). Pourrait se faire via un descripteur? 
 
 - `écrire une fonction qui contrôle si tous les onglets d'un fichier a bien un nombre de lignes préchoisi.`

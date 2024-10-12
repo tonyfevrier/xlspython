@@ -488,11 +488,13 @@ def deletetwins(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file
 
 @app.command()
 def columnbyqcmanswer(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
-                   sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
-                   colread : Annotated[str, typer.Option(prompt = 'Enter the column containing the answers')],
-                   colwrite : Annotated[str, typer.Option(prompt = 'Enter the column from which you want to write')], 
-                   answers : Annotated[Optional[List[str]], typer.Option()] = None,
-                   list : Annotated[Tuple[str, str], typer.Option(prompt = 'Enter what you want to write in the cells or press enter')] = ('oui', 'non')):
+                     sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
+                     colread : Annotated[str, typer.Option(prompt = 'Enter the column containing the answers')],
+                     colwrite : Annotated[str, typer.Option(prompt = 'Enter the column from which you want to write')], 
+                     answers : Annotated[Optional[List[str]], typer.Option()] = None,
+                     list : Annotated[Tuple[str, str], typer.Option(prompt = 'Enter what you want to write in the cells or press enter')] = ('oui', 'non'),
+                     line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
+                   
 
     """
     Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. Une colonne (colread) contient toutes les réponses d'un participant à une question de QCM. Vous souhaitez créer autant de colonnes que
@@ -508,7 +510,7 @@ def columnbyqcmanswer(file : Annotated[str, typer.Option(prompt = 'Enter the xls
     answers = Ufc.askArgumentUntilNone(answers,"Enter one QCM answer and then press enter. Press directly enter if you have entered all the answers.")
 
     sheetobject = Sheet(file,sheet)
-    sheetobject.create_one_column_by_QCM_answer(colread,colwrite,list,*answers)
+    sheetobject.create_one_column_by_QCM_answer(colread,colwrite,list,*answers, line_beggining=line)
 
 @app.command()
 def gathermultianswers(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
@@ -535,7 +537,9 @@ def gathermultianswers(file : Annotated[str, typer.Option(prompt = 'Enter the xl
 def maxnames(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
              sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
              colstore : Annotated[str, typer.Option(prompt = 'Enter the column letter containing the data to store ')],
-             columnlist : Annotated[Optional[List[str]], typer.Option()] = None):
+             columnlist : Annotated[Optional[List[str]], typer.Option()] = None,
+             line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
+    
     """
     Vous avez une liste de colonnes avec des chiffres, chaque colonne a un nom dans sa première cellule. Cette fonction crée une colonne dans laquelle on entre pour chaque 
     ligne le nom de la colonne ou des colonnes qui contient le max.
@@ -550,7 +554,7 @@ def maxnames(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')
     columnlist = Ufc.askArgumentUntilNone(columnlist, "Enter the letter of a column you want to read")
 
     sheetobject = Sheet(file,sheet)
-    sheetobject.give_names_of_maximum(colstore, *columnlist)
+    sheetobject.give_names_of_maximum(colstore, *columnlist, line_beggining=line)
 
 @app.command()
 def colcongruent(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],

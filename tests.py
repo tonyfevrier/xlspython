@@ -304,7 +304,8 @@ class TestSheet(TestCase, Other):
 
     def test_map_two_columns_to_a_third_column(self):
         sheet = Sheet('test_maptwocolumns.xlsx','Feuille2')
-        sheet.map_two_columns_to_a_third_column(['B', 'C'], 'D', {'cat1':['prime','1'], 'cat2':['probe','2']})
+        #sheet.map_two_columns_to_a_third_column(['B', 'C'], 'D', {'cat1':['prime','1'], 'cat2':['probe','2']})
+        sheet.map_two_columns_to_a_third_column_bis(['B', 'C'], 'D', {'cat1':['prime','1'], 'cat2':['probe','2']}, line_beginning=2)
         verify_sheets_identical(sheet, Sheet('test_maptwocolumns.xlsx','expected'))
         sheet.sheet.delete_cols(4)
         sheet.writebook.save(sheet.path + 'test_maptwocolumns.xlsx')        
