@@ -418,18 +418,18 @@ class File(UtilsForFile):
                 wrong_tabs.append(tab)
         return wrong_tabs
     
-    def apply_method_on_all_sheets(self, method_name, *args, **kwargs):
+    def apply_method_on_some_sheets(self, onglets, method_name, *args, **kwargs):
         """ 
         Vous avez un fichier contenant plusieurs onglets et vous souhaitez appliquer une même méthode de la 
-        classe Sheet sur tous les onglets du fichier. On s'attend à ce que tous les onglets aient une structure identique.
+        classe Sheet sur une liste de ces onglets du fichier. On s'attend à ce que tous les onglets aient une structure identique.
 
         Inputs:
             - filename (str)
             - method_name (str): the name of the method to execute 
             - *args, **kwargs : arguments of the method associated with method_name
         """  
-        for sheetname in self.sheets_name:
-            print(f'Percentage of advancement in the method : {round(self.sheets_name.index(sheetname)/len(self.sheets_name) * 100,2)}%')
+        for sheetname in onglets:
+            Other.display_running_infos(sheetname, onglets) 
             sheet = Sheet(self.name_file, sheetname, self.path)
 
             # Get the method and apply it

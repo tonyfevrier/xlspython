@@ -560,3 +560,14 @@ class Other():
         else:
             value = formula
         return value
+    
+    @staticmethod
+    def display_running_infos(name, list_name):
+        """ 
+        Print the percentage of completion of a method 
+        
+        Inputs:
+            - name (str): represents the current run (could be a tab if we run on multiple tabs)
+            - list_name (list[str]) : list of names the program must run
+        """
+        print(f'Percentage of advancement in the method : {round(list_name.index(name)/len(list_name) * 100,2)}%')

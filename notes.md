@@ -139,7 +139,7 @@ Performance :
 -  `Factorisation : il y a peut être moyen de faire une grosse fonction commune pour le travail de colonnes qui contient la structure jusque la boucle à l'intérieur de laquelle on appelle plusieurs petites fonctions qui font des choses différentes. Mais la structure de ces fonctions est identiques hormis à l'intérieur de la boucle (column en index, boucle puis update save). Pourrait se faire via un descripteur? `
     - `factoriser le maximum de fonctions`
     - si possible faire un descripteur également lorsqu'on agit sur des lignes et éventuellement accepter le cas où on supprime au lieu d'insérer.
-- écrire une fonction globale pour appliquer une même fonction sheet sur tous les onglets d'un fichier.
+- `écrire une fonction globale pour appliquer une même fonction sheet sur tous les onglets d'un fichier.`
 - écrire dans xlspython un descripteur qui puisse être apposé aux commandes qui s'exercent sur sheets et qui demandent si on l'applique à un fichier entier? 
 - écrire une fonction de pourcentage d'avancée comme je l'ai fait dans applymethodonallsheets
 
@@ -178,6 +178,8 @@ Performance :
 
 - si j'adoptais MVC pour le projet, est-ce que ce que j'ai programmé le respecterait?
     voir ma feuille volante
+    A terme si j'élimine l'objet Sheet, je pourrai donner à apply_method_on_all_sheets une liste de feuille pour appliquer la méthode
+    ce qui simplifierait la commande
 
 
 - pb xls A REGLER : ouvrir en data only =true pour créer un nouvel onglet scratche toutes les formules des onglets initiaux.

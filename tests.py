@@ -140,7 +140,7 @@ class TestFile(TestCase):
 
     def test_apply_same_method_on_all_sheets(self):
         file = File("test_method_on_all_sheets.xlsx")
-        file.apply_method_on_all_sheets('column_transform_string_in_binary', 'C', 'D', "partie 7 : Faux")
+        file.apply_method_on_some_sheets(file.sheets_name, 'column_transform_string_in_binary', 'C', 'D', "partie 7 : Faux")
         ref_sheet = Sheet('test_method_on_all_sheets - ref.xlsx', 'Feuille5')
         for sheet in file.sheets_name:
             actual_sheet = Sheet("test_method_on_all_sheets.xlsx", sheet)
