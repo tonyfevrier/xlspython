@@ -192,9 +192,10 @@ def extractcellsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xls
 
 @app.command()
 def stringinbinary(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
-                   sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
+                   #sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
                    colread : Annotated[str, typer.Option(prompt = 'Enter the column containing the answers')],
                    colwrite : Annotated[str, typer.Option(prompt = 'Enter the column where you want to write')], 
+                   sheets : Annotated[Optional[List[str]], typer.Option()] = None,
                    answers : Annotated[Optional[List[str]], typer.Option()] = None):
     """
     Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -208,10 +209,17 @@ def stringinbinary(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
         Version complète : python xlspython.py stringinbinary --file name.xlsx --sheet nametab --colread columnletter --colwrite columnletter --answers chaine1 --answers chaine2
     
     """ 
+    sheets = Ufc.askArgumentUntilNone(sheets,"If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
     answers = Ufc.askArgumentUntilNone(answers,"Enter one good answer and then press enter. Press directly enter if you have entered all the good answers")
     
-    sheetobject = Sheet(file,sheet)
-    sheetobject.column_transform_string_in_binary(colread,colwrite,*answers) 
+    #sheetobject = Sheet(file,sheet)
+    #sheetobject.column_transform_string_in_binary(colread,colwrite,*answers) 
+    file_object = File(file)
+    if sheets:
+        file_object.apply_method_on_some_sheets(sheets, 'column_transform_string_in_binary', colread, colwrite, *answers)
+    else:
+        file_object.apply_method_on_some_sheets(file_object.sheets_name, 'column_transform_string_in_binary', colread, colwrite, *answers)
+
 
 # Créer un fichier test pour tester cette fonction.
 @app.command()

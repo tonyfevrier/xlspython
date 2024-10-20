@@ -140,8 +140,9 @@ Performance :
     - `factoriser le maximum de fonctions`
     - si possible faire un descripteur également lorsqu'on agit sur des lignes et éventuellement accepter le cas où on supprime au lieu d'insérer.
 - `écrire une fonction globale pour appliquer une même fonction sheet sur tous les onglets d'un fichier.`
-- écrire dans xlspython un descripteur qui puisse être apposé aux commandes qui s'exercent sur sheets et qui demandent si on l'applique à un fichier entier? 
-- écrire une fonction de pourcentage d'avancée comme je l'ai fait dans applymethodonallsheets
+- faire disparaitre l'objet Sheet des commandes qui ne modifient que leur propre feuille (qui ne créent pas d'onglet)
+- changer la documentation des fonctions concernées
+- `écrire une fonction de pourcentage d'avancée comme je l'ai fait dans applymethodonallsheets.`
 
 - `écrire une fonction qui contrôle si tous les onglets d'un fichier a bien un nombre de lignes préchoisi.` 
 - possibilité de faire une macro?
@@ -177,9 +178,7 @@ Performance :
 - Faire un indicateur d'avancement dans l'exécution des colonnes, peut-on écrire un estimateur de temps restant d'exécution de programme
 
 - si j'adoptais MVC pour le projet, est-ce que ce que j'ai programmé le respecterait?
-    voir ma feuille volante
-    A terme si j'élimine l'objet Sheet, je pourrai donner à apply_method_on_all_sheets une liste de feuille pour appliquer la méthode
-    ce qui simplifierait la commande
+    voir ma feuille volante 
 
 
 - pb xls A REGLER : ouvrir en data only =true pour créer un nouvel onglet scratche toutes les formules des onglets initiaux.
