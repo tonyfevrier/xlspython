@@ -417,10 +417,28 @@ class File(UtilsForFile):
             if self.writebook[tab].max_row != line_number:
                 wrong_tabs.append(tab)
         return wrong_tabs
+    
+    def apply_method_on_all_sheets(self, method_name, *args, **kwargs):
+        """ 
+        Vous avez un fichier contenant plusieurs onglets et vous souhaitez appliquer une même méthode de la 
+        classe Sheet sur tous les onglets du fichier. On s'attend à ce que tous les onglets aient une structure identique.
+
+        Inputs:
+            - filename (str)
+            - method_name (str): the name of the method to execute 
+            - *args, **kwargs : arguments of the method associated with method_name
+        """  
+        for sheetname in self.sheets_name:
+            print(f'Percentage of advancement in the method : {round(self.sheets_name.index(sheetname)/len(self.sheets_name) * 100,2)}%')
+            sheet = Sheet(self.name_file, sheetname, self.path)
+
+            # Get the method and apply it
+            method = getattr(sheet, method_name)
+            method(*args, **kwargs) 
 
 
 class Sheet(File,UtilsForSheet,Other): 
-    def __init__(self, name_file, name_onglet,path = 'fichiers_xls/'): 
+    def __init__(self, name_file, name_onglet, path = 'fichiers_xls/'): 
         super().__init__(name_file, path)
         self.name_onglet = name_onglet  
         self.sheet = self.writebook[self.name_onglet]
@@ -878,7 +896,7 @@ class Sheet(File,UtilsForSheet,Other):
             self.sheet.cell(line, column_insertion).value = chaine 
 
     @act_on_columns 
-    def column_transform_string_in_binary(self,column_read,column_write,*good_answers,line_beginning = 2):
+    def column_transform_string_in_binary(self, column_read, column_write,*good_answers,line_beginning = 2):
         """
         Fonction qui prend une colonne de chaîne de caractères et qui renvoie une colonne de 0 ou de 1
         L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où mettre les 0 ou 1.
@@ -899,7 +917,7 @@ class Sheet(File,UtilsForSheet,Other):
             #Bien mettre les réponses de good_answers entre ''. 
         """  
         for i in range(line_beginning, self.sheet.max_row + 1):
-            chaine_object = Str(self.sheet.cell(i,column_read).value)  
+            chaine_object = Str(self.sheet.cell(i,column_read).value)   
             bool = chaine_object.clean_string().transform_string_in_binary(*good_answers) 
             self.sheet.cell(i,column_write).value = bool
 

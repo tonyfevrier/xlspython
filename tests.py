@@ -138,6 +138,16 @@ class TestFile(TestCase):
         del file.writebook['gathered_data']
         file.writebook.save(file.path + 'test_extract_cells_from_all_sheets.xlsx')
 
+    def test_apply_same_method_on_all_sheets(self):
+        file = File("test_method_on_all_sheets.xlsx")
+        file.apply_method_on_all_sheets('column_transform_string_in_binary', 'C', 'D', "partie 7 : Faux")
+        ref_sheet = Sheet('test_method_on_all_sheets - ref.xlsx', 'Feuille5')
+        for sheet in file.sheets_name:
+            actual_sheet = Sheet("test_method_on_all_sheets.xlsx", sheet)
+            verify_sheets_identical(actual_sheet, ref_sheet)
+            actual_sheet.sheet.delete_cols(4)
+            actual_sheet.writebook.save(actual_sheet.path + 'test_method_on_all_sheets.xlsx') 
+
 
 class TestSheet(TestCase, Other):
     def test_sheet_correctly_opened(self):

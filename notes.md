@@ -138,12 +138,12 @@ Performance :
 - `Faut-il aussi nettoyer le booléen insertion pour forcer cette insertion par défaut.`
 -  `Factorisation : il y a peut être moyen de faire une grosse fonction commune pour le travail de colonnes qui contient la structure jusque la boucle à l'intérieur de laquelle on appelle plusieurs petites fonctions qui font des choses différentes. Mais la structure de ces fonctions est identiques hormis à l'intérieur de la boucle (column en index, boucle puis update save). Pourrait se faire via un descripteur? `
     - `factoriser le maximum de fonctions`
-    - peut on aussi inclure add_column_in_sheet_differently_sorted?
-    - voir également pour inclure les fonctions qui insèrent plusieurs colonnes comme create_one_column_by_QCM_answer, columns_cutstringinparts en modifiant args[1] comme étant possiblement une liste dans le descripteur.
     - si possible faire un descripteur également lorsqu'on agit sur des lignes et éventuellement accepter le cas où on supprime au lieu d'insérer.
+- écrire une fonction globale pour appliquer une même fonction sheet sur tous les onglets d'un fichier.
+- écrire dans xlspython un descripteur qui puisse être apposé aux commandes qui s'exercent sur sheets et qui demandent si on l'applique à un fichier entier? 
+- écrire une fonction de pourcentage d'avancée comme je l'ai fait dans applymethodonallsheets
 
-- `écrire une fonction qui contrôle si tous les onglets d'un fichier a bien un nombre de lignes préchoisi.`
-- créer la fonction qui prend les moyennes SD de chaque onglets et qui crée l'onglet les récapitulant avec une ligne par participant
+- `écrire une fonction qui contrôle si tous les onglets d'un fichier a bien un nombre de lignes préchoisi.` 
 - possibilité de faire une macro?
 
 - Tester si gather files conserve les formules si values only = False
@@ -173,8 +173,6 @@ Performance :
     `fonctions copyline qui existent dans openpyxl?`
     modifier mes copies en allant chercher ws.iterrows pour éviter trop d'accès cellules et voir la différence de temps.
 
-
-- existe til une fonction ou une combinairsonn de fonctions qui prend plusieurs lignes d'un onglet correspondant à un ptcpt. Cet onglet contient moyenne et SD. et on veut créer dans un onglet une ligne par participant qui contient toutes ses moyennes SD etc
 
 - Faire un indicateur d'avancement dans l'exécution des colonnes, peut-on écrire un estimateur de temps restant d'exécution de programme
 

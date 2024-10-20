@@ -238,7 +238,7 @@ class Str():
         Inputs : args : des chaînes de caractère devant renvoyer 1 
         Outputs : bool : 0 ou 1.
         """
-        bool = 0
+        bool = 0 
         if self.chaine in args:
             bool = 1
         return bool
