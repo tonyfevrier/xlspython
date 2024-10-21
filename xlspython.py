@@ -595,10 +595,10 @@ def maxnames(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')
 @app.command()
 def colcongruent(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
                 firstcol : Annotated[str, typer.Option(prompt = 'Enter the column letter containing the word (example: prime, probe)')],
-                secondcol : Annotated[str, typer.Option(prompt = 'Enter the column letter containing congruence data')],
+                secondcol : Annotated[str, typer.Option(prompt = 'Enter the column letter corresponding to prime')],
+                thirdcol : Annotated[str, typer.Option(prompt = 'Enter the column letter corresponding to probe')],
                 colwrite : Annotated[str, typer.Option(prompt = 'Enter the column letter in which you want to write')],
-                sheets : Annotated[Optional[List[str]], typer.Option()] = None,
-                words : Annotated[Optional[List[str]], typer.Option()] = None):
+                sheets : Annotated[Optional[List[str]], typer.Option()] = None):
     
     """
     Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. 
@@ -611,9 +611,7 @@ def colcongruent(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
  
     """
     sheets = Ufc.askArgumentUntilNone(sheets,"If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
-    words = Ufc.askArgumentUntilNone(words, "Enter the words (like prime, probe), for which you want to write something in the new column")
-
-    apply_sheet_method_on_a_file(file, sheets, 'column_for_prime_probe_congruence', [firstcol, secondcol], colwrite, *words)  
+    apply_sheet_method_on_a_file(file, sheets, 'column_for_prime_probe_congruence', [firstcol, secondcol, thirdcol], colwrite)  
 
 
 @app.command()

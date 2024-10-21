@@ -857,22 +857,28 @@ class Sheet(File,UtilsForSheet,Other):
             self.sheet.cell(i, column_insertion).value = re.sub(fr'([A-Za-z\d]+){separator}.*', r'\1', self.sheet.cell(i, column_read).value)
              
     @act_on_columns
-    def column_for_prime_probe_congruence(self, columns_read, column_insertion, *words,  line_beginning=2):
+    def column_for_prime_probe_congruence(self, columns_read, column_insertion, line_beginning=2):
         """
-        Vous avez deux colonnes l'une contient des chaines de caractères particulières. L'autre contient des chaines de la forme MOTnb_.jpg où MOT peut 
-        être congruent, neutre, incongruent et nb est un nombre. Vous souhaitez insérer une colonne contenant soit rien soit la chaine de la première colonne
-        suivi de MOT si la chaîne de la première colonne fait partie de words
+        Vous avez trois colonnes l'une contient des chaines de caractères particulières qui sont prime, probe, croix de fixation ...
+          Les deux autres contiennent des chaines de la forme MOTnb_.jpg où MOT peut 
+        être congruent, neutre, incongruent et nb est un nombre. Vous souhaitez insérer une colonne contenant soit rien, soit prime
+        suivi du MOT de la deuxième colonne si la chaîne de la première colonne est prime, soit probe suivi du MOT de la troisième 
+        colonne si la chaîne de la première colonne est probe.
 
         Inputs:
-            - columns_read (list[str]): the two columns to read, the second contains MOTnb_.jpg
-            - column_insertion (str): lettre de la colonne où l'insertion doit avoir lieu.
-            - words (list[str]): les mots auxquels doit correspondre la première colonne à lire
+            - columns_read (list[str]): the three columns, the two lasts contains MOTnb_.jpg and the first contains prime, probe.
+            - column_insertion (str): lettre de la colonne où l'insertion doit avoir lieu. 
             - line_beggining (int) : ligne où débute la recherche.
         """ 
         for i in range(line_beginning,self.sheet.max_row + 1):
+
             # Adjonction de la chaine de first_column à MOT
-            if self.sheet.cell(i, columns_read[0]).value in words:
+            if self.sheet.cell(i, columns_read[0]).value == "prime":
                 mot = re.sub(r'([A-Z-a-z]+)\d+_[A-Z-a-z].jpg', r'\1', self.sheet.cell(i, columns_read[1]).value)
+                self.sheet.cell(i,column_insertion).value = self.sheet.cell(i, columns_read[0]).value + "_" + mot 
+
+            elif self.sheet.cell(i, columns_read[0]).value == "probe":
+                mot = re.sub(r'([A-Z-a-z]+)\d+_[A-Z-a-z].jpg', r'\1', self.sheet.cell(i, columns_read[2]).value)
                 self.sheet.cell(i,column_insertion).value = self.sheet.cell(i, columns_read[0]).value + "_" + mot 
 
     @act_on_columns

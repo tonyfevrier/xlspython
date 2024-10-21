@@ -141,7 +141,7 @@ Performance :
     - si possible faire un descripteur également lorsqu'on agit sur des lignes et éventuellement accepter le cas où on supprime au lieu d'insérer.
 - `écrire une fonction globale pour appliquer une même fonction sheet sur tous les onglets d'un fichier.`
 - `faire disparaitre l'objet Sheet des commandes qui ne modifient que leur propre feuille (qui ne créent pas d'onglet)`
-- changer la documentation des fonctions concernées
+- changer la documentation des fonctions concernées (peuvent s'exécuter sur plusieurs onglets)
 - `écrire une fonction de pourcentage d'avancée comme je l'ai fait dans applymethodonallsheets.`
 
 - `vérifier que les commandes contenant apply_sheet_method_on_a_file marchent bien toujours : arrivé ligne 321`
