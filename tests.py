@@ -304,10 +304,10 @@ class TestSheet(TestCase, Other):
 
         verify_sheets_identical(sheet, Sheet('test_keep_only_columns.xlsx','Feuille2')) """
 
-    def test_column_get_begin_of_str(self):
+    def test_column_get_part_of_str(self):
         sheet = Sheet('test_colgetpartofstr.xlsx','Feuille2')
-        sheet.column_get_begin_of_str('C','D','_')
-        sheet.column_get_begin_of_str('F','G',';')
+        sheet.column_get_part_of_str('C','D','_',0)
+        sheet.column_get_part_of_str('F','G',';',1)
         verify_sheets_identical(sheet, Sheet('test_colgetpartofstr.xlsx','expected'))
         sheet.sheet.delete_cols(7)
         sheet.sheet.delete_cols(4)

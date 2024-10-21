@@ -615,14 +615,15 @@ def colcongruent(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
 
 
 @app.command()
-def colgetbegin(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
+def colgetpart(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
                 colread : Annotated[str, typer.Option(prompt = 'Enter the column letter to read ')],
                 colwrite : Annotated[str, typer.Option(prompt = 'Enter the column letter where to write')],
                 separator : Annotated[str, typer.Option(prompt = 'Enter the separator')],
+                piece : Annotated[int, typer.Option(prompt = 'Enter the number of the part you want to get. For example, tap 1 to get the begin of the word')],
                 sheets : Annotated[Optional[List[str]], typer.Option()] = None,
                 line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
     """
-    Vous avez une colonne qui contient une chaîne dont vous voulez prendre le début jusqu'à un certain séparateur. 
+    Vous avez une colonne qui contient une chaîne qui contient un séparateur dont vous voulez prendre une partie. 
     Ce mot est inséré dans une nouvelle colonne. 
 
     Commande : 
@@ -630,7 +631,7 @@ def colgetbegin(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file
         Version guidée : python xlspython.py colgetbegin
     """
     sheets = Ufc.askArgumentUntilNone(sheets,"If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
-    apply_sheet_method_on_a_file(file, sheets, 'column_get_begin_of_str', colread, colwrite, separator, line_beginning=line)  
+    apply_sheet_method_on_a_file(file, sheets, 'column_get_part_of_str', colread, colwrite, separator, piece - 1, line_beginning=line)  
 
 
 @app.command()

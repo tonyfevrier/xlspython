@@ -841,7 +841,7 @@ class Sheet(File,UtilsForSheet,Other):
                     break
     
     @act_on_columns
-    def column_get_begin_of_str(self, column_read, column_insertion, separator, line_beginning=2):
+    def column_get_part_of_str(self, column_read, column_insertion, separator, piece_number, line_beginning=2):
         """
         Vous avez une colonne qui contient une chaîne dont vous voulez prendre le début jusqu'à un certain séparateur.
         Ce mot est inséré dans une nouvelle colonne.
@@ -850,11 +850,12 @@ class Sheet(File,UtilsForSheet,Other):
             - column_read (str): lettre de la colonne de lecture.
             - column_insertion (str): lettre de la colonne où l'insertion doit avoir lieu.
             - separator (str): le symbole délimitant le début du mot
+            - piece_number (int): l'index du morceau à prendre (début : 0)
             - line_beggining (int) : ligne où débute la recherche.
         """
         # Fill cells of the new columns 
         for i in range(line_beginning,self.sheet.max_row + 1): 
-            self.sheet.cell(i, column_insertion).value = re.sub(fr'([A-Za-z\d]+){separator}.*', r'\1', self.sheet.cell(i, column_read).value)
+            self.sheet.cell(i, column_insertion).value = self.sheet.cell(i, column_read).value.split(separator)[piece_number] #re.sub(fr'([A-Za-z\d]+){separator}.*', r'\1', self.sheet.cell(i, column_read).value)
              
     @act_on_columns
     def column_for_prime_probe_congruence(self, columns_read, column_insertion, line_beginning=2):
