@@ -146,8 +146,8 @@ Performance :
 
 - `vérifier que les commandes contenant apply_sheet_method_on_a_file marchent bien toujours : arrivé ligne 321`
     `bug pour colorcasestab`
-- fonction qui prend prime probe dans col 1 ajoute à prime le début ds la 2è et probe le début dans la 3è
-- fonction qui prend une colonne et qui prend un morceau de ce qui est écrit : modifier colgetbegin
+- `fonction qui prend prime probe dans col 1 ajoute à prime le début ds la 2è et probe le début dans la 3è`
+- `fonction qui prend une colonne et qui prend un morceau de ce qui est écrit : modifier colgetbegin`
 - display ajouter au pourcentage le temps passé et du coup une estimation du temps restant.
 
 - `écrire une fonction qui contrôle si tous les onglets d'un fichier a bien un nombre de lignes préchoisi.` 

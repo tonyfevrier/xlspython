@@ -9,7 +9,7 @@ app = typer.Typer()
 
 def apply_sheet_method_on_a_file(file_name, sheets, method_name, *args, **kwargs):
         """
-        Create a file object and apply a given method on some or all sheets
+        Create a file object and apply a given method on some or all sheets of this file.
 
         Inputs : 
             - file_name(str)
@@ -52,7 +52,7 @@ def gatherfiles(directory : Annotated[str, typer.Option(prompt = 'Enter the name
 def multidelcols(directory : Annotated[str, typer.Option(prompt = 'Enter the name of the directory containing all directories')],
                  file : Annotated[str, typer.Option(prompt = 'Enter the name of the file. This name must be present in each directory')],
                  sheet : Annotated[str, typer.Option(prompt = 'Enter the name of the sheet')],
-                 columns : Annotated[str, typer.Option(prompt = "Enter the group of column you want to KEEP. Respect the form A-D,E,G,H-J,Z")]):
+                 columns : Annotated[str, typer.Option(prompt = "Enter the group of column you want to KEEP. Respect the form A-D,E,G,H-J,Z without introducing any space.")]):
     """
     Fonction agissant sur un dossier. Fonction qui prend plusieurs fichiers de structures identiques et qui ne garde qu'un ensemble
     de colonnes prédéfinies. 
@@ -91,7 +91,8 @@ def multipletabs(file : Annotated[str, typer.Option(prompt = 'Enter the name of 
                  newfilepath : Annotated[Optional[str], typer.Option(prompt = 'If you want to divide a single file in tabs, press enter, otherwise your files must be included in folders themselves included in a bigger folder whose name must be written now.')] = '',
                  line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
     """
-    Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
+    Fonction agissant sur un fichier ou sur un même fichier dans plusieurs dossiers différents. Si vous souhaitez l'utiliser sur un
+     seul fichier, pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Vous avez un ou plusieurs fichiers xlsx dont une colonne (colread) contient des participants qui ont pu répondre plusieurs fois à un questionnaire. 
     Vous souhaitez créer un onglet par participant avec toutes les lignes qui correspondent. 
 
@@ -192,6 +193,7 @@ def gathercolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
 def extractcellsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
                  cells : Annotated[Optional[List[str]], typer.Option()] = None):
     """
+    Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Vous avez un fichier avec des onglets de structure identique avec un onglet par participant. Vous souhaitez
     récupérer des cellules identiques dans tous les onglets et créer un onglet avec une ligne par participant,
     qui contient les valeurs de ces cellules. Fonction analogue à gather_multiple_answers mais ne portant pas sur une
@@ -214,7 +216,7 @@ def stringinbinary(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
                    sheets : Annotated[Optional[List[str]], typer.Option()] = None,
                    answers : Annotated[Optional[List[str]], typer.Option()] = None):
     """
-    Fonction agissant sur un ou plusieurs onglets. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
+    Fonction agissant sur un ou plusieurs onglets d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Cette fonction lit les cellules d'une colonne (colread) et crée une nouvelle colonne (colwrite) contenant 1 si la valeur de la cellule est dans les bonnes réponses (answers)
     0 sinon.
 
@@ -304,7 +306,7 @@ def convertminutes(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
                    sheets : Annotated[Optional[List[str]], typer.Option()] = None,
                    line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
     """
-    Fonction agissant sur un ou plusieurs onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. Vous avez une colonne (colread) contenant des temps de la forme xx jours 5 heures 10 min 5 s.
+    Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. Vous avez une colonne (colread) contenant des temps de la forme xx jours 5 heures 10 min 5 s.
      Vous souhaitez convertir dans une colonne (colwrite) les temps en minutes.
 
     Commande : 
@@ -325,7 +327,7 @@ def groupofanswers(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
                    sheets : Annotated[Optional[List[str]], typer.Option()] = None,
                    line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
     """
-    Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. Vous avez une colonne (colread) contenant des réponses. Chacune de ses réponses appartient à un groupe.
+    Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. Vous avez une colonne (colread) contenant des réponses. Chacune de ses réponses appartient à un groupe.
     Vous souhaitez afficher dans une colonne (colwrite) le groupe d'appartenance de la réponse. On vous demandera d'entrer des noms de groupes et dans la foulée, les réponses qui appartiennent au groupe.
 
     Commande : 
@@ -347,7 +349,7 @@ def colorcasescolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx
                      column : Annotated[str, typer.Option(prompt = 'Enter the column')],
                      sheets : Annotated[Optional[List[str]], typer.Option()] = None):
     """
-    Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
+    Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Vous souhaitez parcourir une colonne (column) et colorer certaines chaînes de caractères dans cette colonne. Ces chaînes et les couleurs associées vous seront demandées
     durant l'exécution de la commande.
 
@@ -369,7 +371,7 @@ def colorcasescolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx
 def colorcasestab(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
                   sheets : Annotated[Optional[List[str]], typer.Option()] = None):
     """
-    Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
+    Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Vous souhaitez parcourir un onglet (sheet) et colorer certaines chaînes de caractères. Ces chaînes et les couleurs associées vous seront demandées
     durant l'exécution de la commande.
 
@@ -397,7 +399,7 @@ def addcolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file i
             colread2 : Annotated[str, typer.Option(prompt = 'Enter the column of this sheet containing the identifiers')],
             colimport : Annotated[Optional[List[str]], typer.Option()] = None):                    
     """
-    Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
+    Fonction agissant sur un onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
       Vous souhaitez importer des colonnes (colimport) d'un fichier (file2, sheet2) dans un autre fichier (file,sheet).
     La mise en correspondance entre les deux onglets s'effectue via une colonne d'identifiants dans chaque fichier (colread, colread2). L'important s'effectue 
     dans file à partir de la colonne colwrite.    
@@ -420,7 +422,7 @@ def colorlines(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file 
                strings : Annotated[Optional[List[str]], typer.Option()] = None):                    
 
     """
-    Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
+    Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Vous souhaitez parcourir un onglet (sheet) et colorer (color) les lignes contenant certaines chaînes de caractères (strings).
 
     Commande : 
@@ -442,7 +444,7 @@ def cutstring(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file '
               sheets : Annotated[Optional[List[str]], typer.Option()] = None,
               separator : Annotated[Optional[str], typer.Option(prompt = '(Optional) Enter the separator or press enter')] = ','):
     """
-    Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. 
+    Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. 
     Une colonne (colcut) contient des chaînes de caractères séparées par un symbole (separator). Vous souhaitez les couper en morceaux 
     et créer des colonnes (à partir de colwrite) pour chacun de ces morceaux.
 
@@ -462,7 +464,7 @@ def deletecols(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file 
                sheets : Annotated[Optional[List[str]], typer.Option()] = None):
 
     """
-    Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
+    Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Prend une séquence de colonnes et les supprime.
 
     Commande : 
@@ -481,7 +483,7 @@ def deletelinesstr(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
                 sheets : Annotated[Optional[List[str]], typer.Option()] = None,
                 strings : Annotated[Optional[List[str]], typer.Option()] = None):                    
     """
-    Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
+    Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Vous souhaitez parcourir une colonne (colread) et si une chaîne (strings) apparaît dans cette colonne, supprimer la ligne associée.
 
     Commande : 
@@ -503,7 +505,7 @@ def deletetwins(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file
                 sheets : Annotated[Optional[List[str]], typer.Option()] = None,
                 line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
     """
-    Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
+    Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
       Certains participants à un questionnaire répondent plusieurs fois. Vous souhaitez parcourir une colonne (colread)
      qui les identifie et ne garder que leur dernière réponse à ce questionnaire.
 
@@ -529,7 +531,7 @@ def columnbyqcmanswer(file : Annotated[str, typer.Option(prompt = 'Enter the xls
                    
 
     """
-    Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. 
+    Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. 
     Une colonne (colread) contient toutes les réponses d'un participant à une question de QCM. Vous souhaitez créer autant de colonnes que
     de réponses (answers) à la question et mettre dans chaque colonne (à partir de colwrite) si les participants l'ont coché ou non (list).
 
@@ -553,7 +555,7 @@ def gathermultianswers(file : Annotated[str, typer.Option(prompt = 'Enter the xl
                        colstore : Annotated[str, typer.Option(prompt = 'Enter the column letter containing the data to store ')],
                        line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
     """
-    Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
+    Fonction agissant sur un onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
       Certains participants à un questionnaire répondent plusieurs fois. Vous souhaitez parcourir une colonne (colread)
      qui les identifie et créer, dans un autre onglet, une ligne par participant ayant répondu plusieurs fois. Cette ligne contient les différentes
      réponses de ce participant contenues dans une colonne (colstore) donnée.
@@ -576,6 +578,7 @@ def maxnames(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')
              line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
     
     """
+    Fonction agissant sur un onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Vous avez une liste de colonnes avec des chiffres, chaque colonne a un nom dans sa première cellule.
       Cette fonction crée une colonne dans laquelle on entre pour chaque ligne le nom de la colonne ou des colonnes qui contient le max.
 
@@ -601,7 +604,7 @@ def colcongruent(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
                 sheets : Annotated[Optional[List[str]], typer.Option()] = None):
     
     """
-    Fonction agissant sur un onglet. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. 
+    Fonction agissant sur un onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     On a deux colonnes, une contenant des mots, l'autre contenant une chaine de la forme motnb_o.jpg (congruent1_o.jpg), on veut créer
     une colonne qui contient le mot de la première colonne + mot (congruent) si le mot de la première colonne fait partie d'une liste de mots prédéfinie.
 
@@ -623,6 +626,7 @@ def colgetpart(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file 
                 sheets : Annotated[Optional[List[str]], typer.Option()] = None,
                 line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
     """
+    Fonction agissant sur un onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Vous avez une colonne qui contient une chaîne qui contient un séparateur dont vous voulez prendre une partie. 
     Ce mot est inséré dans une nouvelle colonne. 
 
@@ -641,6 +645,7 @@ def maptwocols(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file 
                sheets : Annotated[Optional[List[str]], typer.Option()] = None,
                line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
     """
+    Fonction agissant sur un onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Vous avez deux colonnes de lecture, suivant ce qui est écrit sur une ligne, vous voulez ou non insérer quelque chose 
     dans une nouvelle colonne.
 
