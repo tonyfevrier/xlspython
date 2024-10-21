@@ -8,8 +8,8 @@ from openpyxl.styles import PatternFill
 from openpyxl.utils import column_index_from_string, coordinate_to_tuple, get_column_letter
 from copy import copy
 from datetime import datetime
-from utils import UtilsForFile, UtilsForSheet, Str, Other
-from pycel import ExcelCompiler 
+from utils import UtilsForFile, UtilsForSheet, Str, Other, time
+from pycel import ExcelCompiler   
 
 
 class Path(UtilsForFile):
@@ -27,12 +27,14 @@ class Path(UtilsForFile):
             - method_name (str): the name of the method to execute 
             - *args, **kwargs : arguments of the method associated with method_name
         """
+        start = time()
+
         # Récupérer tous les dossiers d'un dossier  
         for directory in self.directories:
-            Other.display_running_infos(directory, self.directories)
             file = File(filename, self.pathname + directory + '/')
             method = getattr(file, method_name)
             method(*args, **kwargs) 
+            Other.display_running_infos(method_name, directory, self.directories, start)
 
     def apply_method_on_homononymous_sheets(self, filename, sheetname, method_name, *args, **kwargs):
         """ 
@@ -44,12 +46,15 @@ class Path(UtilsForFile):
             - method_name (str): the name of the method to execute 
             - *args, **kwargs : arguments of the method associated with method_name
         """
+        start = time()
+
         # Récupérer tous les dossiers d'un dossier  
-        for directory in self.directories:
-            Other.display_running_infos(directory, self.directories)
+        for directory in self.directories: 
             sheet = Sheet(filename, sheetname, self.pathname + directory + '/')
             method = getattr(sheet, method_name)
             method(*args, **kwargs) 
+            Other.display_running_infos(method_name, directory, self.directories, start)
+
            
     def gather_files_in_different_directories(self, name_file, name_sheet, values_only=False):
         """
@@ -68,9 +73,10 @@ class Path(UtilsForFile):
         new_file = openpyxl.Workbook() 
         new_sheet = new_file.worksheets[0] 
 
+        start = time()
+
         # Récupérer le fichier dans chacun des dossiers
-        for directory in directories:
-            Other.display_running_infos(directory, self.directories)
+        for directory in directories: 
             sheet_to_copy = Sheet(name_file, name_sheet, self.pathname + directory + '/')
 
             # Copier une fois la première ligne
@@ -85,6 +91,8 @@ class Path(UtilsForFile):
 
             # save at the end of each directory not to use too much memory
             new_file.save(self.pathname  + "gathered_" + name_file)
+            Other.display_running_infos('gather_files_in_different_directories', directory, directories, start)
+
 
 
 class File(UtilsForFile): 
@@ -116,8 +124,9 @@ class File(UtilsForFile):
         file_copy = openpyxl.Workbook()
         del file_copy[file_copy.active.title] #supprimer l'onglet créé
 
-        for onglet in self.sheets_name:
-            Other.display_running_infos(onglet, self.sheets_name)
+        start = time()
+
+        for onglet in self.sheets_name: 
             new_sheet = file_copy.create_sheet(onglet)
             initial_sheet = self.writebook[onglet] 
 
@@ -126,6 +135,9 @@ class File(UtilsForFile):
                     new_sheet.cell(i,j).value = initial_sheet.cell(i,j).value  
                     new_sheet.cell(i,j).fill = copy(initial_sheet.cell(i,j).fill)
                     new_sheet.cell(i,j).font = copy(initial_sheet.cell(i,j).font) 
+            
+            Other.display_running_infos('sauvegarde', onglet, self.sheets_name, start)
+            
                     
         name_file_no_extension = Str(self.name_file).del_extension() 
         
@@ -206,12 +218,15 @@ class File(UtilsForFile):
          
         new_sheet = self.writebook.create_sheet(f"gather_{column}")
         column_to = 1
-        for name_onglet in self.sheets_name:
-            Other.display_running_infos(name_onglet, self.sheets_name)
+
+        start = time()
+        for name_onglet in self.sheets_name: 
             onglet = self.writebook[name_onglet] 
             self.copy_paste_column(onglet,column,new_sheet,column_to)
             column_to = new_sheet.max_column + 1
             new_sheet.cell(1,new_sheet.max_column).value = name_onglet 
+            Other.display_running_infos('extract_column_from_all_sheets', name_onglet, self.sheets_name, start)
+
             
         self.writebook.save(self.path + self.name_file) 
         self.sheets_name = self.writebook.sheetnames 
@@ -236,9 +251,10 @@ class File(UtilsForFile):
         gathered_sheet = self.writebook.create_sheet('gathered_data')
         current_line = 2
 
+        start = time()
+
         # Fill one line by tab
-        for name_onglet in self.sheets_name:  
-            Other.display_running_infos(name_onglet, self.sheets_name)
+        for name_onglet in self.sheets_name:   
             current_onglet = self.writebook[name_onglet]
             gathered_sheet.cell(current_line, 1).value = name_onglet
             current_column = 2
@@ -248,6 +264,8 @@ class File(UtilsForFile):
                 gathered_sheet.cell(current_line, current_column).value = current_onglet.cell(tuple[0],tuple[1]).value
                 current_column += 1
             current_line += 1
+            Other.display_running_infos('extract_cells_from_all_sheets', name_onglet, self.sheets_name, start)
+
 
         self.sheets_name = self.writebook.sheetnames 
         self.writebook.save(self.path + self.name_file)
@@ -284,11 +302,14 @@ class File(UtilsForFile):
         for column in column_list: 
             column_int_list.append(column_index_from_string(column))  
 
+        start = time()
+
         #on applique les copies dans tous les onglets sauf le premier
         for name_onglet in self.sheets_name[1:]:
-            Other.display_running_infos(name_onglet, self.sheets_name[1:])
             for column in column_int_list:
                 self.copy_paste_column(self.writebook[self.sheets_name[0]],column,self.writebook[name_onglet],column)
+            Other.display_running_infos('apply_column_formula_on_all_sheets', name_onglet, self.sheets_name[1:], start)
+            
 
         self.writebook.save(self.path + self.name_file)
 
@@ -316,15 +337,17 @@ class File(UtilsForFile):
         for cell in cells: 
             cell_list.append(coordinate_to_tuple(cell)) 
 
+        start = time()
+
         #on applique les copies dans tous les onglets sauf le premier
-        for name_onglet in self.sheets_name[1:]:  
-            Other.display_running_infos(name_onglet, self.sheets_name[1:])
+        for name_onglet in self.sheets_name[1:]:   
             for tuple in cell_list: 
                 self.writebook[name_onglet].cell(tuple[0],tuple[1]).value = self.writebook[self.sheets_name[0]].cell(tuple[0],tuple[1]).value  
                 self.writebook[name_onglet].cell(tuple[0],tuple[1]).fill = copy(self.writebook[self.sheets_name[0]].cell(tuple[0],tuple[1]).fill)  
                 self.writebook[name_onglet].cell(tuple[0],tuple[1]).font = copy(self.writebook[self.sheets_name[0]].cell(tuple[0],tuple[1]).font)  
                 self.writebook[name_onglet].cell(tuple[0],tuple[1]).border = copy(self.writebook[self.sheets_name[0]].cell(tuple[0],tuple[1]).border)  
                 self.writebook[name_onglet].cell(tuple[0],tuple[1]).alignment = copy(self.writebook[self.sheets_name[0]].cell(tuple[0],tuple[1]).alignment)    
+            Other.display_running_infos('apply_cells_formula_on_all_sheets', name_onglet, self.sheets_name[1:], start)
 
         self.writebook.save(self.path + self.name_file)
 
@@ -384,8 +407,9 @@ class File(UtilsForFile):
             mailinglist = json.load(file)
             file.close()
 
+        start = time()
+
         for tab in self.sheets_name: 
-            Other.display_running_infos(tab, self.sheets_name)
 
             file_to_send = self.build_file_from_tab(tab)
             if send:
@@ -394,7 +418,9 @@ class File(UtilsForFile):
                     nom = tab.split(" ")[1]
                     self.envoi_mail(prenom + "." + nom + "@universite-paris-saclay.fr", file_to_send, "tony.fevrier62@gmail.com", "qkxqzhlvsgdssboh", objet, message)
                 else: 
-                    self.envoi_mail(mailinglist[tab], file_to_send, "tony.fevrier62@gmail.com", "qkxqzhlvsgdssboh", objet, message)  
+                    self.envoi_mail(mailinglist[tab], file_to_send, "tony.fevrier62@gmail.com", "qkxqzhlvsgdssboh", objet, message) 
+            Other.display_running_infos('one_file_by_tab_sendmail', tab, self.sheets_name, start)
+             
 
     def merge_cells_on_all_tabs(self,start_column, end_column, start_row, end_row):
         """
@@ -411,10 +437,12 @@ class File(UtilsForFile):
         start_column = column_index_from_string(start_column)
         end_column = column_index_from_string(end_column)
 
-        for tab in self.sheets_name:
-            Other.display_running_infos(tab, self.sheets_name)
+        start = time()
+
+        for tab in self.sheets_name: 
             sheet = self.writebook[tab] 
             sheet.merge_cells(start_row=start_row, start_column=start_column, end_row=end_row, end_column=end_column)
+            Other.display_running_infos('merge_cells_on_all_tabs', tab, self.sheets_name, start)
 
         self.writebook.save(self.path + self.name_file)
 
@@ -438,13 +466,14 @@ class File(UtilsForFile):
             - method_name (str): the name of the method to execute 
             - *args, **kwargs : arguments of the method associated with method_name
         """  
-        for sheetname in onglets:
-            Other.display_running_infos(sheetname, onglets) 
+        start = time()
+        for sheetname in onglets:  
             sheet = Sheet(self.name_file, sheetname, self.path)
 
             # Get the method and apply it
             method = getattr(sheet, method_name)
-            method(*args, **kwargs) 
+            method(*args, **kwargs)  
+            Other.display_running_infos(method_name, sheetname, onglets, start) 
 
 
 class Sheet(File,UtilsForSheet,Other): 

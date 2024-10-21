@@ -141,17 +141,33 @@ Performance :
     - si possible faire un descripteur également lorsqu'on agit sur des lignes et éventuellement accepter le cas où on supprime au lieu d'insérer.
 - `écrire une fonction globale pour appliquer une même fonction sheet sur tous les onglets d'un fichier.`
 - `faire disparaitre l'objet Sheet des commandes qui ne modifient que leur propre feuille (qui ne créent pas d'onglet)`
-- changer la documentation des fonctions concernées (peuvent s'exécuter sur plusieurs onglets)
+- `changer la documentation des fonctions concernées (peuvent s'exécuter sur plusieurs onglets)`
 - `écrire une fonction de pourcentage d'avancée comme je l'ai fait dans applymethodonallsheets.`
 
 - `vérifier que les commandes contenant apply_sheet_method_on_a_file marchent bien toujours : arrivé ligne 321`
     `bug pour colorcasestab`
 - `fonction qui prend prime probe dans col 1 ajoute à prime le début ds la 2è et probe le début dans la 3è`
 - `fonction qui prend une colonne et qui prend un morceau de ce qui est écrit : modifier colgetbegin`
-- display ajouter au pourcentage le temps passé et du coup une estimation du temps restant.
+- `display ajouter au pourcentage le temps passé et du coup une estimation du temps restant.`
 
 - `écrire une fonction qui contrôle si tous les onglets d'un fichier a bien un nombre de lignes préchoisi.` 
+
+- Performance : pour la fonction multi onglets, la récrire en supprimant la création des objets Sheet, voir si n'ouvrir qu'un fichier et naviguer dans ses onglets permet d'accélérer le code sur le fichier de Marine pour colcongruent. Actuellement c'est 28h (Je pense que de générer un objet par onglet avec toutes les méthodes qu'il contient coûte bcp en performance)
+    - observation 3 onglets ont 400 lignes : 5min puis 10 puis 13 d'exécution pour ces onglets donc je pense que le stockage des Sheet en mémoire sature la mémoire.
+    - demander le fichier avec tonnes d'onglets à Marine
+    - passer en MVC (voir ci-dessous)
+    - réfléchir à paralléliser le travail sur les onglets.
+
+
 - possibilité de faire une macro?
+    voir avec marine s'il y a possibilité d'avoir un modèle de fichier uniforme (serait l'intérêt d'une macro d'éviter de donner des arguments mais d'avoir toujours les mêmes col à enlever sinon l'utilisateur aura bcp d'arguments à mettre).
+    macro1: prend fichiers du même nom et supprime les colonnes (multidelcols)
+            réunit ces fichiers dans un seul fichier avec un onglet par participant ()
+            à partir des col prime probe crée une colonne avec prime_mot et une colonne avec mot (colgetpartofstr et colcongruent)
+            Là l'utilisateur doit copier les formules dans un onglet.
+    macro2: copie dans tous les onglets les colonnes données par l'utilisateur
+            envoie les moyennes et SD dans un onglet récapitulatif
+            
 
 - Tester si gather files conserve les formules si values only = False
 - Faire les modifs nécessaires dans les fonctions utilisant copy paste ou add line to bottom avec le paramètre values_only.
@@ -179,9 +195,7 @@ Performance :
     voir pour essayer d'utiliser au max ws.values ou iter_rows iter_cols
     `fonctions copyline qui existent dans openpyxl?`
     modifier mes copies en allant chercher ws.iterrows pour éviter trop d'accès cellules et voir la différence de temps.
-
-
-- Faire un indicateur d'avancement dans l'exécution des colonnes, peut-on écrire un estimateur de temps restant d'exécution de programme
+ 
 
 - si j'adoptais MVC pour le projet, est-ce que ce que j'ai programmé le respecterait?
     voir ma feuille volante 

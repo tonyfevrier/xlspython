@@ -1,8 +1,10 @@
 from openpyxl.styles import PatternFill
 from openpyxl.utils import get_column_interval, column_index_from_string, get_column_letter
+from copy import copy 
+from time import time 
+
 import typer 
-import yagmail
-from copy import copy   
+import yagmail 
 import re
 
 
@@ -561,16 +563,40 @@ class Other():
             value = formula
         return value
     
-    @staticmethod
-    def display_running_infos(name, list_name):
+    @classmethod
+    def display_running_infos(cls, method, name, list_name, start):
         """ 
         Print the percentage of completion of a method 
         
         Inputs:
             - name (str): represents the current run (could be a tab if we run on multiple tabs)
             - list_name (list[str]) : list of names the program must run
+            - start (float): the time at the beginning of the running process
         """
-        print(f'Percentage of completion : {round(list_name.index(name)/len(list_name) * 100,2)}%')
+        completion_percentage = round((list_name.index(name) + 1)/len(list_name) * 100,2)
+        time_elapsed = time() - start
+        remaining_time = (100 - completion_percentage) * time_elapsed / completion_percentage
+        print(f'\n---------------Currently running method {method}---------------\n')
+        print(f'Percentage of completion : {completion_percentage}%')
+        cls.display_time_in_adapted_unit(time_elapsed, 'Elapsed time')
+        cls.display_time_in_adapted_unit(remaining_time, 'Estimated remaining time') 
 
+    @staticmethod
+    def display_time_in_adapted_unit(duration, time_type):
+        """
+        Print a duration in sec if it is less than 60s, in minutes if it is between 60s and 3600s, in hours otherwise.
+        
+        Inputs:
+            - duration (float)
+            - time_type(str): the kinf of time to print in the string
+        """
+        if duration < 60:
+            print(f'{time_type} : {round(duration, 1)} sec')
+        elif 60 <= duration < 3600: 
+            duration /= 60 
+            print(f'{time_type} : {round(duration, 1)} min')
+        else: 
+            duration /= 3600 
+            print(f'{time_type} : {round(duration, 1)} h')
 
     
