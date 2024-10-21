@@ -2,7 +2,7 @@ from openpyxl.styles import PatternFill
 from openpyxl.utils import get_column_interval, column_index_from_string, get_column_letter
 import typer 
 import yagmail
-from copy import copy  
+from copy import copy   
 import re
 
 
@@ -570,4 +570,7 @@ class Other():
             - name (str): represents the current run (could be a tab if we run on multiple tabs)
             - list_name (list[str]) : list of names the program must run
         """
-        print(f'Percentage of advancement in the method : {round(list_name.index(name)/len(list_name) * 100,2)}%')
+        print(f'Percentage of completion : {round(list_name.index(name)/len(list_name) * 100,2)}%')
+
+
+    

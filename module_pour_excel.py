@@ -29,6 +29,7 @@ class Path(UtilsForFile):
         """
         # Récupérer tous les dossiers d'un dossier  
         for directory in self.directories:
+            Other.display_running_infos(directory, self.directories)
             file = File(filename, self.pathname + directory + '/')
             method = getattr(file, method_name)
             method(*args, **kwargs) 
@@ -45,6 +46,7 @@ class Path(UtilsForFile):
         """
         # Récupérer tous les dossiers d'un dossier  
         for directory in self.directories:
+            Other.display_running_infos(directory, self.directories)
             sheet = Sheet(filename, sheetname, self.pathname + directory + '/')
             method = getattr(sheet, method_name)
             method(*args, **kwargs) 
@@ -68,7 +70,7 @@ class Path(UtilsForFile):
 
         # Récupérer le fichier dans chacun des dossiers
         for directory in directories:
-            print(directory, len(directories))
+            Other.display_running_infos(directory, self.directories)
             sheet_to_copy = Sheet(name_file, name_sheet, self.pathname + directory + '/')
 
             # Copier une fois la première ligne
@@ -115,6 +117,7 @@ class File(UtilsForFile):
         del file_copy[file_copy.active.title] #supprimer l'onglet créé
 
         for onglet in self.sheets_name:
+            Other.display_running_infos(onglet, self.sheets_name)
             new_sheet = file_copy.create_sheet(onglet)
             initial_sheet = self.writebook[onglet] 
 
@@ -204,6 +207,7 @@ class File(UtilsForFile):
         new_sheet = self.writebook.create_sheet(f"gather_{column}")
         column_to = 1
         for name_onglet in self.sheets_name:
+            Other.display_running_infos(name_onglet, self.sheets_name)
             onglet = self.writebook[name_onglet] 
             self.copy_paste_column(onglet,column,new_sheet,column_to)
             column_to = new_sheet.max_column + 1
@@ -234,6 +238,7 @@ class File(UtilsForFile):
 
         # Fill one line by tab
         for name_onglet in self.sheets_name:  
+            Other.display_running_infos(name_onglet, self.sheets_name)
             current_onglet = self.writebook[name_onglet]
             gathered_sheet.cell(current_line, 1).value = name_onglet
             current_column = 2
@@ -281,6 +286,7 @@ class File(UtilsForFile):
 
         #on applique les copies dans tous les onglets sauf le premier
         for name_onglet in self.sheets_name[1:]:
+            Other.display_running_infos(name_onglet, self.sheets_name[1:])
             for column in column_int_list:
                 self.copy_paste_column(self.writebook[self.sheets_name[0]],column,self.writebook[name_onglet],column)
 
@@ -312,6 +318,7 @@ class File(UtilsForFile):
 
         #on applique les copies dans tous les onglets sauf le premier
         for name_onglet in self.sheets_name[1:]:  
+            Other.display_running_infos(name_onglet, self.sheets_name[1:])
             for tuple in cell_list: 
                 self.writebook[name_onglet].cell(tuple[0],tuple[1]).value = self.writebook[self.sheets_name[0]].cell(tuple[0],tuple[1]).value  
                 self.writebook[name_onglet].cell(tuple[0],tuple[1]).fill = copy(self.writebook[self.sheets_name[0]].cell(tuple[0],tuple[1]).fill)  
@@ -321,7 +328,7 @@ class File(UtilsForFile):
 
         self.writebook.save(self.path + self.name_file)
 
-    def gather_columns_in_one(self,onglet, *column_lists):
+    def gather_columns_in_one(self, onglet, *column_lists):
         """
         Vous avez des groupes de colonnes de valeurs avec une étiquette en première cellule. Pour chaque groupe, vous souhaitez former deux colonnes de valeurs : l'une qui contient
         les valeurs rassemblées en une colonne, l'autre, à sa gauche, qui indique l'étiquette de la colonne dans laquelle elle a été prise.
@@ -378,6 +385,8 @@ class File(UtilsForFile):
             file.close()
 
         for tab in self.sheets_name: 
+            Other.display_running_infos(tab, self.sheets_name)
+
             file_to_send = self.build_file_from_tab(tab)
             if send:
                 if adressjson == "":
@@ -403,6 +412,7 @@ class File(UtilsForFile):
         end_column = column_index_from_string(end_column)
 
         for tab in self.sheets_name:
+            Other.display_running_infos(tab, self.sheets_name)
             sheet = self.writebook[tab] 
             sheet.merge_cells(start_row=start_row, start_column=start_column, end_row=end_row, end_column=end_column)
 
@@ -444,7 +454,7 @@ class Sheet(File,UtilsForSheet,Other):
         self.sheet = self.writebook[self.name_onglet]
         del self.sheets_name
         
-    def color_special_cases_in_column(self,column,chainecolor):
+    def color_special_cases_in_column(self, column, chainecolor):
         """
         Fonction qui regarde pour une colonne donnée colore les cases correspondant à certaines chaînes de caractères.
 
@@ -458,9 +468,9 @@ class Sheet(File,UtilsForSheet,Other):
             sheet = Sheet('dataset.xlsx','onglet1')
             sheet.color_special_cases_in_column('L', {'vrai': '#FF0000','faux': '#00FF00'}) 
 
-        """
-        column = column_index_from_string(column)
-
+        """ 
+        column = column_index_from_string(column) 
+        
         for i in range(1,self.sheet.max_row + 1):
             cellule = self.sheet.cell(i,column) 
 
@@ -491,7 +501,7 @@ class Sheet(File,UtilsForSheet,Other):
         """
 
         for j in range(1, self.sheet.max_column + 1):
-            self.color_special_cases_in_column(j,chainecolor)
+            self.color_special_cases_in_column(get_column_letter(j),chainecolor)
 
     def add_column_in_sheet_differently_sorted(self,column_identifiant, column_insertion, other_sheet):
         """
@@ -695,6 +705,7 @@ class Sheet(File,UtilsForSheet,Other):
 
         participants = {} 
         modifications = []
+
         #On parcourt dans le sens inverse afin d'éviter que la suppression progressive impacte la position des lignes étudiées ensuite.
         i = self.sheet.max_row 
         while i != line_beginning:  

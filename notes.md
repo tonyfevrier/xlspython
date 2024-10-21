@@ -140,9 +140,15 @@ Performance :
     - `factoriser le maximum de fonctions`
     - si possible faire un descripteur également lorsqu'on agit sur des lignes et éventuellement accepter le cas où on supprime au lieu d'insérer.
 - `écrire une fonction globale pour appliquer une même fonction sheet sur tous les onglets d'un fichier.`
-- faire disparaitre l'objet Sheet des commandes qui ne modifient que leur propre feuille (qui ne créent pas d'onglet)
+- `faire disparaitre l'objet Sheet des commandes qui ne modifient que leur propre feuille (qui ne créent pas d'onglet)`
 - changer la documentation des fonctions concernées
 - `écrire une fonction de pourcentage d'avancée comme je l'ai fait dans applymethodonallsheets.`
+
+- `vérifier que les commandes contenant apply_sheet_method_on_a_file marchent bien toujours : arrivé ligne 321`
+    `bug pour colorcasestab`
+- fonction qui prend prime probe dans col 1 ajoute à prime le début ds la 2è et probe le début dans la 3è
+- fonction qui prend une colonne et qui prend un morceau de ce qui est écrit : modifier colgetbegin
+- display ajouter au pourcentage le temps passé et du coup une estimation du temps restant.
 
 - `écrire une fonction qui contrôle si tous les onglets d'un fichier a bien un nombre de lignes préchoisi.` 
 - possibilité de faire une macro?
@@ -179,6 +185,9 @@ Performance :
 
 - si j'adoptais MVC pour le projet, est-ce que ce que j'ai programmé le respecterait?
     voir ma feuille volante 
+
+- Factorisation :
+    - faire un fichier des messages de xlspython s'affichant en console plutôt que de les copier 15 fois
 
 
 - pb xls A REGLER : ouvrir en data only =true pour créer un nouvel onglet scratche toutes les formules des onglets initiaux.
