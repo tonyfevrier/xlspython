@@ -154,7 +154,7 @@ Performance :
 
 - Performance : pour la fonction multi onglets, la récrire en supprimant la création des objets Sheet, voir si n'ouvrir qu'un fichier et naviguer dans ses onglets permet d'accélérer le code sur le fichier de Marine pour colcongruent. Actuellement c'est 28h (Je pense que de générer un objet par onglet avec toutes les méthodes qu'il contient coûte bcp en performance)
     - observation 3 onglets ont 400 lignes : 5min puis 10 puis 13 d'exécution pour ces onglets donc je pense que le stockage des Sheet en mémoire sature la mémoire.
-    - demander le fichier avec tonnes d'onglets à Marine
+    - `demander le fichier avec tonnes d'onglets à Marine`
     - passer en MVC (voir ci-dessous)
     - commencer à faire passer les tests avant de modifier xlspython
     - doc du controller obsolète à changer

@@ -1,5 +1,9 @@
 from unittest import TestCase, main
-from module_pour_excel import * 
+#from module_pour_excel import * 
+from model import File
+from controller import FileControler
+from utils import Other
+
 import openpyxl
 import os
  
@@ -30,8 +34,7 @@ class TestFile(TestCase):
     
     def test_open_and_copy(self): 
         file = File('test_copie.xlsx') 
-        self.assertNotEqual(file.writebook,None)  
-        print(datetime.now().strftime("%Y-%m-%d %Hh%M"))
+        self.assertNotEqual(file.writebook,None)   
         del file
 
     def test_files_identical(self):
@@ -43,7 +46,8 @@ class TestFile(TestCase):
 
     def test_create_one_onglet_by_participant(self): 
         file = File('test_create_one_onglet_by_participant.xlsx') 
-        file.create_one_onglet_by_participant('Stroops_test (7)', 'A', "divided_test_create_one_onglet_by_participant.xlsx", 'fichiers_xls/')  
+        controler = FileControler(file)
+        controler.create_one_onglet_by_participant('Stroops_test (7)', 'A', "divided_test_create_one_onglet_by_participant.xlsx", 'fichiers_xls/')  
         file2 = File('divided_test_create_one_onglet_by_participant.xlsx')
         verify_files_identical(File('test_create_one_onglet_by_participant_before.xlsx'),
                                file2)
@@ -53,7 +57,8 @@ class TestFile(TestCase):
 
     def test_extract_column_from_all_sheets(self):
         file = File('test_extract_column.xlsx')
-        file.extract_column_from_all_sheets('B') 
+        controler = FileControler(file)
+        controler.extract_column_from_all_sheets('B') 
         verify_files_identical(File('test_extract_column_ref.xlsx'),file)
 
         del file.writebook[file.sheets_name[-1]]
@@ -78,7 +83,8 @@ class TestFile(TestCase):
 
     def test_gather_columns_in_one(self):
         file = File("test_gather_columns_in_one.xlsx")
-        file.gather_columns_in_one("test", ['C','D','E'], ['G','H','I'])
+        controler = FileControler(file)
+        controler.gather_columns_in_one("test", ['C','D','E'], ['G','H','I'])
 
         verify_files_identical(File("test_gather_columns_in_one - ref.xlsx"), File("test_gather_columns_in_one.xlsx"))
 
@@ -90,20 +96,22 @@ class TestFile(TestCase):
 
     def test_one_file_by_tab_sendmail(self):
         file = File("test_onefile_sendmail.xlsx")
-        file.one_file_by_tab_sendmail()
+        controler = FileControler(file)
+        controler.one_file_by_tab_sendmail()
  
-        sheet1 = Sheet("tony fevrier.xlsx","Sheet", path = "multifiles/")
-        sheet2 = Sheet("Marine Moyon.xlsx","Sheet", path = "multifiles/")
+        sheet1 = File("tony fevrier.xlsx", "multifiles/").writebook["Sheet"]
+        sheet2 = File("Marine Moyon.xlsx", "multifiles/").writebook["Sheet"] 
 
-        sheet1o = Sheet("test_onefile_sendmail.xlsx","tony fevrier")
-        sheet2o = Sheet("test_onefile_sendmail.xlsx","Marine Moyon")
+        sheet1o = File("test_onefile_sendmail.xlsx").writebook["tony fevrier"] 
+        sheet2o = File("test_onefile_sendmail.xlsx").writebook["Marine Moyon"]
 
         verify_sheets_identical(sheet1, sheet1o)
         verify_sheets_identical(sheet2, sheet2o) 
 
     def test_merge_cells_on_all_tabs(self): 
-        file1 = File("test_merging.xlsx") 
-        file1.merge_cells_on_all_tabs('C', 'D', 5, 7)
+        file = File("test_merging.xlsx")
+        controler = FileControler(file)
+        controler.merge_cells_on_all_tabs('C', 'D', 5, 7)
 
         #voir comment tester le fait qu'une cellule est mergée : comprendre l'objet mergedcells
         """ for tab in file1.sheets_name:
@@ -118,7 +126,8 @@ class TestFile(TestCase):
         
     def test_apply_cell_formula_on_all_sheets(self):
         file = File("test_merging.xlsx")
-        file.apply_cells_formula_on_all_sheets('A10','B10','C10')
+        controler = FileControler(file)
+        controler.apply_cells_formula_on_all_sheets('A10','B10','C10')
 
         for tab in file.sheets_name[1:]:
             sheet = file.writebook[tab]
@@ -128,27 +137,30 @@ class TestFile(TestCase):
     
     def test_check_linenumber_of_tabs(self):
         file = File('test.xlsx')
-        tabs = file.check_linenumber_of_tabs(14)
+        controler = FileControler(file)
+        tabs = controler.check_linenumber_of_tabs(14)
         self.assertListEqual(tabs, ['cutinparts', 'cutinpartsbis', 'delete_lines', 'delete_lines_bis'])
 
     def test_extract_cells_from_all_sheets(self):
         file = File('test_extract_cells_from_all_sheets.xlsx')
-        file.extract_cells_from_all_sheets('C7','D7','C8','D8') 
+        controler = FileControler(file)
+        controler.extract_cells_from_all_sheets('C7','D7','C8','D8') 
         verify_files_identical(file, File('test_extract_cells_from_all_sheets - after.xlsx'))
         del file.writebook['gathered_data']
         file.writebook.save(file.path + 'test_extract_cells_from_all_sheets.xlsx')
 
     def test_apply_same_method_on_all_sheets(self):
         file = File("test_method_on_all_sheets.xlsx")
-        file.apply_method_on_some_sheets(file.sheets_name, 'column_transform_string_in_binary', 'C', 'D', "partie 7 : Faux")
-        ref_sheet = Sheet('test_method_on_all_sheets - ref.xlsx', 'Feuille5')
+        controler = FileControler(file)
+        controler.apply_method_on_some_sheets(file.sheets_name, 'column_transform_string_in_binary', 'C', 'D', "partie 7 : Faux")
+        ref_sheet = File('test_method_on_all_sheets - ref.xlsx').writebook['Feuille5']
         for sheet in file.sheets_name:
-            actual_sheet = Sheet("test_method_on_all_sheets.xlsx", sheet)
+            actual_sheet = file.writebook[sheet]
             verify_sheets_identical(actual_sheet, ref_sheet)
-            actual_sheet.sheet.delete_cols(4)
-            actual_sheet.writebook.save(actual_sheet.path + 'test_method_on_all_sheets.xlsx') 
+            actual_sheet.delete_cols(4)
+            file.writebook.save(file.path + 'test_method_on_all_sheets.xlsx') 
 
-
+# ARRIVE ICI
 class TestSheet(TestCase, Other):
     def test_sheet_correctly_opened(self):
         """Ici je teste que l'attribut sheet de la classe sheet contient bien la bonne page correspondant à l'onglet.
