@@ -47,7 +47,7 @@ class UtilsForFile():
         #    onglet_to.cell(row_to,j).value = onglet_from.cell(row_from, j).value 
  
 
-    def copy_paste_column(self, onglet_from ,column_from , onglet_to, column_to ):
+    def copy_paste_column(self, onglet_from, column_from, onglet_to, column_to):
         """
         Fonction qui prend une colonne de la feuille et qui la copie dans un autre onglet.
         """
