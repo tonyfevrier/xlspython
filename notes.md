@@ -156,6 +156,8 @@ Performance :
     - observation 3 onglets ont 400 lignes : 5min puis 10 puis 13 d'exécution pour ces onglets donc je pense que le stockage des Sheet en mémoire sature la mémoire.
     - demander le fichier avec tonnes d'onglets à Marine
     - passer en MVC (voir ci-dessous)
+    - commencer à faire passer les tests avant de modifier xlspython
+    - doc du controller obsolète à changer
     - réfléchir à paralléliser le travail sur les onglets.
 
 

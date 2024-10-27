@@ -131,7 +131,8 @@ class UtilsForSheet():
                 break
         return bool 
     
-    def color_line(self, color, row_number):
+    @staticmethod
+    def color_line(sheet, color, row_number):
         """
         Fonction qui colore une ligne spécifique
 
@@ -146,8 +147,8 @@ class UtilsForSheet():
         
         """
 
-        for j in range(1, self.sheet.max_column + 1):
-            self.sheet.cell(row_number,j).fill = PatternFill(fill_type = 'solid', start_color = color)
+        for j in range(1, sheet.max_column + 1):
+            sheet.cell(row_number,j).fill = PatternFill(fill_type = 'solid', start_color = color)
 
     def create_dico_from_columns(self, column_keys:int, column_values:int, first_line, last_line):
         """
@@ -171,7 +172,7 @@ class UtilsForSheet():
                 dico[key] = self.sheet.cell(i,column_values).value
         return dico
     
-    def create_dico_to_store_multiple_answers_of_participants(self,column_read, column_store, line_beggining):
+    def create_dico_to_store_multiple_answers_of_participants(self, sheet, column_read, column_store, line_beggining):
         """
         Fonction qui parcourt les identifiants d'un fichier et qui crée un dictionnaire contenant le nombre de réponses de chaque participant
         et les valeurs d'une même donnée lors des différentes réponses.
@@ -182,9 +183,9 @@ class UtilsForSheet():
             - line_beggining (int) : ligne où débute la recherche. 
         """
         dico = {}
-        for line in range(line_beggining,self.sheet.max_row + 1):
-            identifier = self.sheet.cell(line,column_read).value
-            value_to_store = self.sheet.cell(line,column_store).value 
+        for line in range(line_beggining,sheet.max_row + 1):
+            identifier = sheet.cell(line,column_read).value
+            value_to_store = sheet.cell(line,column_store).value 
             if identifier in dico.keys():
                 dico[identifier][0] += 1
                 dico[identifier][1].append(value_to_store)
