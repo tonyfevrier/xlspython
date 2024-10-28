@@ -156,9 +156,12 @@ Performance :
     - observation 3 onglets ont 400 lignes : 5min puis 10 puis 13 d'exécution pour ces onglets donc je pense que le stockage des Sheet en mémoire sature la mémoire.
     - `demander le fichier avec tonnes d'onglets à Marine`
     - passer en MVC (voir ci-dessous)
-    - commencer à faire passer les tests avant de modifier xlspython
-    - utils : self.sheet à changer 
+    - `commencer à faire passer les tests avant de modifier xlspython`
+    - `utils : self.sheet à changer` 
     - doc du controller obsolète à changer
+    - `changer les commandes et Ufc.utilsforcommands`
+    - tester les commandes et notamment prime probe :  fini mais cpcolumnonsheets semble avoir un pb.
+    - tester colcongruent sur le fichier de marine pour voir le temps mis
     - propreté : transformer toutes les méthodes qui n'utilisent pas self en méthodes statiques
     - réfléchir à paralléliser le travail sur les onglets.
 

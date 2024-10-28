@@ -574,6 +574,7 @@ class Other():
         remaining_time = (100 - completion_percentage) * time_elapsed / completion_percentage
         print(f'\n---------------Currently running method {method}---------------\n')
         print(f'Percentage of completion : {completion_percentage}%')
+        print(f'{name} is finished')
         cls.display_time_in_adapted_unit(time_elapsed, 'Elapsed time')
         cls.display_time_in_adapted_unit(remaining_time, 'Estimated remaining time') 
 

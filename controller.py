@@ -399,8 +399,9 @@ class FileControler(UtilsForFile):
             sheet.color_special_cases_in_sheet({'vrai': '#FF0000','faux': '#00FF00'}) 
                 
         """ 
+        sheet = self.file.writebook[sheet_name]
 
-        for j in range(1, self.sheet.max_column + 1):
+        for j in range(1, sheet.max_column + 1):
             self.color_special_cases_in_column(sheet_name, get_column_letter(j),chainecolor)
 
     def add_column_in_sheet_differently_sorted(self, sheet_name, column_identifiant, column_insertion, other_sheet):

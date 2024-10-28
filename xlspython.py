@@ -1,6 +1,7 @@
 import typer
-from typing import Optional, List, Tuple
-from module_pour_excel import Path, File, Sheet, Str
+from typing import Optional, List, Tuple 
+from model import File, Path, Str
+from controller import PathControler, FileControler
 from typing_extensions import Annotated
 from utils import UtilsForcommands as Ufc
 
@@ -17,12 +18,14 @@ def apply_sheet_method_on_a_file(file_name, sheets, method_name, *args, **kwargs
             - method_name(str)
             - *args, **kwargs: arguments associated with the method
         """
-        file_object = File(file_name)
+        fileobject = File(file_name)
+        controler = FileControler(fileobject)
+
         if sheets:
-            file_object.apply_method_on_some_sheets(sheets, method_name, *args, **kwargs)
+            controler.apply_method_on_some_sheets(sheets, method_name, *args, **kwargs)
         else:
             # when sheets is empty, the method applies on all sheets
-            file_object.apply_method_on_some_sheets(file_object.sheets_name, method_name, *args, **kwargs)
+            controler.apply_method_on_some_sheets(fileobject.sheets_name, method_name, *args, **kwargs)
 
 
 # Path commands
@@ -45,7 +48,8 @@ def gatherfiles(directory : Annotated[str, typer.Option(prompt = 'Enter the name
     
     """ 
     pathobject = Path(directory + '/')
-    pathobject.gather_files_in_different_directories(file, sheet, values_only=values)
+    controler = PathControler(pathobject)
+    controler.gather_files_in_different_directories(file, sheet, values_only=values)
 
 
 @app.command()
@@ -62,7 +66,8 @@ def multidelcols(directory : Annotated[str, typer.Option(prompt = 'Enter the nam
         Version guidée : python xlspython.py multidelcols 
     """  
     pathobject = Path(directory + '/') 
-    pathobject.apply_method_on_homononymous_sheets(file, sheet, 'delete_other_columns', columns)
+    controler = PathControler(pathobject)
+    controler.apply_method_on_homononymous_sheets(file, sheet, 'delete_other_columns', columns)
 
 
 # File commands
@@ -80,7 +85,7 @@ def filesave(file : Annotated[str, typer.Option(prompt = 'Enter the file you wan
         Version complète : python xlspython.py filesave --file name.xlsx
     
     """
-    fileobject = File(file)
+    fileobject = File(file) 
     fileobject.sauvegarde()
 
 
@@ -106,19 +111,21 @@ def multipletabs(file : Annotated[str, typer.Option(prompt = 'Enter the name of 
     # Apply command to same name files contained in folders
     if newfilepath:
         pathobject = Path(newfilepath + '/')
-        pathobject.apply_method_on_homononymous_files(file, 'create_one_onglet_by_participant', sheet, colread, f'divided_{file}', newfilepath + '/', first_line=line)
+        controler = PathControler(pathobject)
+        controler.apply_method_on_homononymous_files(file, 'create_one_onglet_by_participant', sheet, colread, f'divided_{file}', newfilepath + '/', first_line=line)
         path = pathobject.pathname
 
     # Apply command to a single file
     else:
-        fileobject = File(file) 
-        fileobject.create_one_onglet_by_participant(sheet, colread, f'divided_{file}', 'fichiers_xls/', first_line=line)
+        fileobject = File(file)
+        controler = FileControler(fileobject)
+        controler.create_one_onglet_by_participant(sheet, colread, f'divided_{file}', 'fichiers_xls/', first_line=line)
         path = fileobject.path
     
     # Eventually verify if each tab has the same number of lines
     check = typer.prompt('Do you want to check if all tabs have the same number of lines? If yes, write the number of lines else press enter', default="")
     if check:
-        wrong_tabs = File(f'divided_{file}', path).check_linenumber_of_tabs(int(check))
+        wrong_tabs = FileControler(File(f'divided_{file}', path)).check_linenumber_of_tabs(int(check))
         if wrong_tabs:
             print('The following tabs have a different number of lines :' + ",".join(wrong_tabs))
 
@@ -139,7 +146,8 @@ def extractcolsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx
     
     """
     fileobject = File(file) 
-    fileobject.extract_column_from_all_sheets(colread)
+    controler = FileControler(fileobject)
+    controler.extract_column_from_all_sheets(colread)
 
 @app.command()
 def cutsendmail(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
@@ -156,14 +164,16 @@ def cutsendmail(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file
         Version complète : python xlspython.py cutsendmail 
     """
     fileobject = File(file, dataonly=True)
+    controler = FileControler(fileobject)
+
 
     if sendmail ==  'n':
-        fileobject.one_file_by_tab_sendmail()
+        controler.one_file_by_tab_sendmail()
     else:
         objet = typer.prompt('Please enter the object of your email',default="")
         message = typer.prompt('Please enter the message of your email',default="") 
         jsonfile = typer.prompt('Please enter the name of the json file containing mail adresses. If you want to send to the mail paris-saclay, just press enter',default="") 
-        fileobject.one_file_by_tab_sendmail(send = True, adressjson = jsonfile, objet = objet, message = message)
+        controler.one_file_by_tab_sendmail(send = True, adressjson = jsonfile, objet = objet, message = message)
 
 
 @app.command()
@@ -186,7 +196,8 @@ def gathercolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
     column_lists = Str.listFromColumnsStrings(*group) 
 
     fileobject = File(file)
-    fileobject.gather_columns_in_one(sheet,*column_lists)
+    controler = FileControler(fileobject)
+    controler.gather_columns_in_one(sheet,*column_lists)
 
 
 @app.command()
@@ -206,7 +217,8 @@ def extractcellsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xls
     
     cells = Ufc.askArgumentUntilNone(cells, "Entrez une cellule que vous souhaitez copier : ")
     fileobject = File(file)
-    fileobject.extract_cells_from_all_sheets(*cells)
+    controler = FileControler(fileobject)
+    controler.extract_cells_from_all_sheets(*cells)
 
 
 @app.command()
@@ -252,7 +264,8 @@ def cpcolumnonsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx
     columns = Ufc.askArgumentUntilNone(column,'Enter one column whose you want to reproduce the formula')
 
     fileobject = File(file, dataonly = False)
-    fileobject.apply_column_formula_on_all_sheets(*columns) 
+    controler = FileControler(fileobject)
+    controler.apply_column_formula_on_all_sheets(*columns) 
 
 @app.command()
 def cpcellonsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
@@ -274,7 +287,8 @@ def cpcellonsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
     cells = Ufc.askArgumentUntilNone(cell,'Enter one cell whose you want to reproduce the formula')
 
     fileobject = File(file)
-    fileobject.apply_cells_formula_on_all_sheets(*cells) 
+    controler = FileControler(fileobject)
+    controler.apply_cells_formula_on_all_sheets(*cells) 
     
 @app.command()
 def mergecells(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
@@ -296,7 +310,8 @@ def mergecells(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file 
     """
     
     fileobject = File(file)
-    fileobject.merge_cells_on_all_tabs(start_column,end_column,start_row,end_row)
+    controler = FileControler(fileobject)
+    controler.merge_cells_on_all_tabs(start_column,end_column,start_row,end_row)
 
  
 @app.command()
@@ -412,8 +427,10 @@ def addcolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file i
     
     """ 
     colimport = Ufc.askArgumentUntilNone(colimport,"Enter one column to import and then press enter. Press directly enter if you have entered all the columns to import.")
-    sheetobject = Sheet(file,sheet)
-    sheetobject.add_column_in_sheet_differently_sorted(colread,colwrite,[file2,sheet2,colread2,colimport])
+    fileobject = File(file)
+    controler = FileControler(fileobject)
+
+    controler.add_column_in_sheet_differently_sorted(sheet,colread,colwrite,[file2,sheet2,colread2,colimport])
 
 @app.command()
 def colorlines(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
@@ -567,8 +584,9 @@ def gathermultianswers(file : Annotated[str, typer.Option(prompt = 'Enter the xl
         Version complète : python xlspython.py gathermultianswers --file name.xlsx --sheet nametab --colread columnletter --colstore columnletter --line linenumber
     
     """
-    sheetobject = Sheet(file,sheet)
-    sheetobject.gather_multiple_answers(colread,colstore,line_beggining=line)
+    fileobject = File(file)
+    controler = FileControler(fileobject)
+    controler.gather_multiple_answers(sheet,colread,colstore,line_beggining=line)
 
 @app.command()
 def maxnames(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
