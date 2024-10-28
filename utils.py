@@ -115,18 +115,18 @@ class UtilsForFile():
         piece_jointe = file
 
         yag.send(to=adresse, subject=object, contents=message, attachments = piece_jointe)
+ 
 
 
-class UtilsForSheet():
-    def column_security(self,column):
+    def column_security(self, sheet, column):
         """
         Fonction qui prend une colonne et regarde si la colonne est vide.
         Input : column
         Output : True si elle ne contient rien, False sinon
         """
         bool = True
-        for i in range(1,self.sheet.max_row+1): 
-            if self.sheet.cell(i,column).value is not None:
+        for i in range(1,sheet.max_row+1): 
+            if sheet.cell(i,column).value is not None:
                 bool = False
                 break
         return bool 
@@ -150,7 +150,7 @@ class UtilsForSheet():
         for j in range(1, sheet.max_column + 1):
             sheet.cell(row_number,j).fill = PatternFill(fill_type = 'solid', start_color = color)
 
-    def create_dico_from_columns(self, column_keys:int, column_values:int, first_line, last_line):
+    def create_dico_from_columns(self, sheet, column_keys:int, column_values:int, first_line, last_line):
         """
         Function returning a dictionnary whose keys are elements of a column
           if they are not empty and values are elements of an other column
@@ -166,10 +166,10 @@ class UtilsForSheet():
 
         dico = {}
         for i in range(first_line,last_line):
-            key = self.sheet.cell(i,column_keys).value 
+            key = sheet.cell(i,column_keys).value 
             
             if key != "":
-                dico[key] = self.sheet.cell(i,column_values).value
+                dico[key] = sheet.cell(i,column_values).value
         return dico
     
     def create_dico_to_store_multiple_answers_of_participants(self, sheet, column_read, column_store, line_beggining):
@@ -369,14 +369,7 @@ class Str():
         """
         Liste = []
         
-        for string in strings:
-            # substrings = string.split(',')
-            # listechaine = []
-            # for substring in substrings:
-            #     if '-' in substring:
-            #         listechaine += cls.rangeLetter(substring)
-            #     else:
-            #         listechaine.append(substring) 
+        for string in strings: 
             Liste.append(cls.columns_from_strings(string)) 
         
         return Liste
@@ -539,7 +532,8 @@ class UtilsForcommands():
         return bool
     
 class Other():
-    def reverse_dico_for_set_answer_in_group(self,dictionary):
+    @staticmethod
+    def reverse_dico_for_set_answer_in_group(dictionary):
         """
         Function taking a dictionary of the form {'group1':['a','b'],'group2':['c','d','e']} and returning the dictionary
         {'a':'group1','b':'group1','c':'group2','d':'group2','e':'group2'}
@@ -550,7 +544,8 @@ class Other():
                 reverse_dico[reponse] = key
         return reverse_dico
 
-    def getCellNumericalValue(self,compiler,tab,cell):
+    @staticmethod
+    def getCellNumericalValue(compiler,tab,cell):
         """
         Fonction qui prend la valeur d'une cellule et qui, si c'est une formule, retourne sa valeur numérique
         """ 

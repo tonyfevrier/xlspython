@@ -8,8 +8,7 @@ from openpyxl.utils import column_index_from_string, coordinate_to_tuple, get_co
 from time import time
 from utils import Other, UtilsForFile, Str 
 from copy import copy
-
-
+from model import File
 
 
 class FileControler(UtilsForFile):
@@ -33,16 +32,12 @@ class FileControler(UtilsForFile):
             - *args, **kwargs : arguments of the method associated with method_name
         """  
         start = time()
-        for sheetname in onglets:   
-            # Add the sheetname to the args of the method
-            args.insert(0, sheetname)
-
+        for sheetname in onglets:    
             # Get the method and apply it
             method = getattr(self, method_name)
-            method(*args, **kwargs)  
+            method(sheetname, *args, **kwargs)  
             Other.display_running_infos(method_name, sheetname, onglets, start) 
 
-            del args[0]
 
     def create_one_onglet_by_participant(self, onglet_from, column_read, newfile_name, newfile_path, first_line=2):
         """
@@ -115,16 +110,16 @@ class FileControler(UtilsForFile):
         """ 
         column = column_index_from_string(column)
          
-        new_sheet = self.writebook.create_sheet(f"gather_{column}")
+        new_sheet = self.file.writebook.create_sheet(f"gather_{column}")
         column_to = 1
 
         start = time()
-        for name_onglet in self.sheets_name: 
+        for name_onglet in self.file.sheets_name: 
             onglet = self.file.writebook[name_onglet] 
             self.copy_paste_column(onglet,column,new_sheet,column_to)
             column_to = new_sheet.max_column + 1
             new_sheet.cell(1,new_sheet.max_column).value = name_onglet 
-            Other.display_running_infos('extract_column_from_all_sheets', name_onglet, self.sheets_name, start)
+            Other.display_running_infos('extract_column_from_all_sheets', name_onglet, self.file.sheets_name, start)
 
             
         self.file.writebook.save(self.file.path + self.file.name_file) 
@@ -239,13 +234,13 @@ class FileControler(UtilsForFile):
         start = time()
 
         #on applique les copies dans tous les onglets sauf le premier
-        for name_onglet in self.sheets_name[1:]:   
+        for name_onglet in self.file.sheets_name[1:]:   
             for tuple in cell_list: 
                 self.file.writebook[name_onglet].cell(tuple[0],tuple[1]).value = self.file.writebook[self.file.sheets_name[0]].cell(tuple[0],tuple[1]).value  
                 self.file.writebook[name_onglet].cell(tuple[0],tuple[1]).fill = copy(self.file.writebook[self.file.sheets_name[0]].cell(tuple[0],tuple[1]).fill)  
                 self.file.writebook[name_onglet].cell(tuple[0],tuple[1]).font = copy(self.file.writebook[self.file.sheets_name[0]].cell(tuple[0],tuple[1]).font)  
-                self.file.writebook[name_onglet].cell(tuple[0],tuple[1]).border = copy(self.file.writebook[self.sheets_name[0]].cell(tuple[0],tuple[1]).border)  
-                self.writebook[name_onglet].cell(tuple[0],tuple[1]).alignment = copy(self.writebook[self.file.sheets_name[0]].cell(tuple[0],tuple[1]).alignment)    
+                self.file.writebook[name_onglet].cell(tuple[0],tuple[1]).border = copy(self.file.writebook[self.file.sheets_name[0]].cell(tuple[0],tuple[1]).border)  
+                self.file.writebook[name_onglet].cell(tuple[0],tuple[1]).alignment = copy(self.file.writebook[self.file.sheets_name[0]].cell(tuple[0],tuple[1]).alignment)    
             Other.display_running_infos('apply_cells_formula_on_all_sheets', name_onglet, self.file.sheets_name[1:], start)
 
         self.file.writebook.save(self.file.path + self.file.name_file)
@@ -258,13 +253,13 @@ class FileControler(UtilsForFile):
         Inputs : 
             - onglet (str) : nom de l'onglet d'où on importe les colonnes.
             - column_lists (list[list[str]]) : liste de groupes de colonnes. Chaque groupe est une liste de colonnes.
-        """
-         
-        for list in column_lists:
-            tab_number = len(self.file.sheets_name)
-            self.file.writebook.create_sheet(f"onglet {tab_number}")
-            target_sheet = self.file.writebook[f"onglet {tab_number}"]
-            for column in list: 
+        """ 
+
+        for liste in column_lists:
+            tab_number = column_lists.index(liste)
+            self.file.writebook.create_sheet(f"tab_column_gathered_{tab_number}")
+            target_sheet = self.file.writebook[f"tab_column_gathered_{tab_number}"]
+            for column in liste: 
                 self.copy_column_tags_and_values_at_bottom(self.file.writebook[onglet], column_index_from_string(column), target_sheet)
 
         self.file.writebook.save(self.file.path + self.file.name_file) 
@@ -452,7 +447,7 @@ class FileControler(UtilsForFile):
 
         #Passage en revue des identifiants du second fichier et insertion des valeurs si les identifiants sont dans les clés du dico
         #. 
-        for i in range(1,self.sheet.max_row+1):
+        for i in range(1, sheet.max_row+1):
             key = sheet.cell(i,column_identifiant).value
             if key in dico.keys():
                 for j in range(len(columns_to_copy)):
@@ -587,7 +582,7 @@ class FileControler(UtilsForFile):
         
         modifications = []
         for i in range(sheet.max_row,0,-1):
-            value = self.getCellNumericalValue(self.file.create_excel_compiler(), sheet_name, sheet.cell(i,column)) 
+            value = Other.getCellNumericalValue(self.file.create_excel_compiler(), sheet_name, sheet.cell(i,column)) 
             if str(value) in chaines:  
                 sheet.delete_rows(i) 
                 modifications.append(str(i))
@@ -710,17 +705,6 @@ class FileControler(UtilsForFile):
 
         self.file.writebook.save(self.file.path + self.file.name_file) 
     
-
-
-
-
-
-
-
-
-
-
-    
     def act_on_columns(function):
         """
         Décorateur qui en plus d'appliquer la fonction, transforme les lettres de colonnes en index, met à jour les formules 
@@ -728,8 +712,9 @@ class FileControler(UtilsForFile):
         """
         def wrapper(self, *args, **kwargs):
             """
-            - args[0] (list[str] or str): letters of columns to read
-            - args[1] (str): letter of column in which to write
+            - args[0] (str): sheet name
+            - args[1] (list[str] or str): letters of columns to read
+            - args[2] (str): letter of column in which to write
             """
             # Transform all args corresponding to columns in indexes 
             modifications = [args[2]]
@@ -789,8 +774,8 @@ class FileControler(UtilsForFile):
         sheet = self.file.writebook[sheet_name] 
 
         # Fill cells of the new columns 
-        for i in range(line_beginning,sheet.max_row + 1): 
-            sheet.cell(i, column_insertion).value = sheet.cell(i, column_read).value.split(separator)[piece_number] #re.sub(fr'([A-Za-z\d]+){separator}.*', r'\1', self.sheet.cell(i, column_read).value)
+        for i in range(line_beginning,sheet.max_row + 1):  
+            sheet.cell(i, column_insertion).value = sheet.cell(i, column_read).value.split(separator)[piece_number]  
              
     @act_on_columns
     def column_for_prime_probe_congruence(self, sheet_name, columns_read, column_insertion, line_beginning=2):
@@ -927,9 +912,93 @@ class FileControler(UtilsForFile):
 
         """ 
         sheet = self.file.writebook[sheet_name] 
-        reversed_group_of_responses = self.reverse_dico_for_set_answer_in_group(groups_of_responses)
+        reversed_group_of_responses = Other.reverse_dico_for_set_answer_in_group(groups_of_responses)
 
         for i in range(line_beginning,sheet.max_row + 1): 
             chaine_object = Str(sheet.cell(i,column_read).value)  
             group = chaine_object.clean_string().set_answer_in_group(reversed_group_of_responses) 
             sheet.cell(i,column_write).value = group 
+
+
+class PathControler(FileControler):
+    def __init__(self, path):
+        """Input : path (object of the class Path)"""
+        self.path = path
+
+    def apply_method_on_homononymous_files(self, filename, method_name, *args, **kwargs):
+        """ 
+        Vous avez plusieurs dossiers contenant un fichier ayant le même nom.
+        Fonction qui prend tous les fichiers d'un même nom et qui lui applique une même méthode.  
+
+        Inputs:
+            - filename (str)
+            - method_name (str): the name of the method to execute 
+            - *args, **kwargs : arguments of the method associated with method_name
+        """
+        start = time()
+
+        # Récupérer tous les dossiers d'un dossier  
+        for directory in self.path.directories:
+            file = File(filename, self.path.pathname + directory + '/')
+            controler = FileControler(file)
+            method = getattr(controler, method_name)
+            method(*args, **kwargs) 
+            Other.display_running_infos(method_name, directory, self.path.directories, start)
+
+    def apply_method_on_homononymous_sheets(self, filename, sheetname, method_name, *args, **kwargs):
+        """ 
+        Vous avez plusieurs dossiers contenant un fichier ayant le même nom.
+        Fonction qui prend tous les fichiers d'un même nom et qui lui applique une même méthode.  
+
+        Inputs:
+            - filename (str)
+            - method_name (str): the name of the method to execute 
+            - *args, **kwargs : arguments of the method associated with method_name
+        """
+        start = time()
+
+        # Récupérer tous les dossiers d'un dossier  
+        for directory in self.path.directories: 
+            file = File(filename, self.path.pathname + directory + '/')
+            controler = FileControler(file) 
+            method = getattr(controler, method_name)
+            method(sheetname, *args, **kwargs) 
+            Other.display_running_infos(method_name, directory, self.path.directories, start)
+
+           
+    def gather_files_in_different_directories(self, name_file, name_sheet, values_only=False):
+        """
+        Vous avez plusieurs dossiers contenant un fichier ayant le même nom. Vous souhaitez créer un seul fichier regroupant 
+        toutes les lignes de ces fichiers.
+
+        Inputs:
+            - name_file(str)
+            - name_sheet(str)
+            - values_only(bool): to decide whether or not copying only the values and not formulas
+        """
+        # Récupérer tous les dossiers d'un dossier
+        directories = [f for f in os.listdir(self.path.pathname) if os.path.isdir(os.path.join(self.path.pathname, f))]
+
+        # Créer un nouveau fichier
+        new_file = openpyxl.Workbook() 
+        new_sheet = new_file.worksheets[0] 
+
+        start = time()
+
+        # Récupérer le fichier dans chacun des dossiers
+        for directory in directories: 
+            sheet_to_copy = File(name_file, self.path.pathname + directory + '/').writebook[name_sheet]
+
+            # Copier une fois la première ligne
+            if directory == directories[0]:
+                self.copy_paste_line(sheet_to_copy, 1, new_sheet, 1, values_only=values_only)
+
+            # Copier son contenu à la suite du fichier
+            for line in range(2, sheet_to_copy.max_row + 1): 
+                if line % 200 == 0:
+                    print(line, sheet_to_copy.max_row + 1)
+                self.add_line_at_bottom(sheet_to_copy, line, new_sheet, values_only=values_only)
+
+            # save at the end of each directory not to use too much memory
+            new_file.save(self.path.pathname  + "gathered_" + name_file)
+            Other.display_running_infos('gather_files_in_different_directories', directory, directories, start)

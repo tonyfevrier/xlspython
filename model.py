@@ -1,10 +1,16 @@
-import openpyxl 
+import openpyxl
+import os 
 from utils import UtilsForFile, Other, Str 
 from pycel import ExcelCompiler  
 from time import time
 from datetime import datetime 
 from copy import copy
 
+class Path():
+    def __init__(self,pathname = 'fichiers_xls/'):
+        self.pathname = pathname
+        self.directories = [f for f in os.listdir(self.pathname) if os.path.isdir(os.path.join(self.pathname, f))]
+        
 
 class File(UtilsForFile): 
     def __init__(self, name_file, path = 'fichiers_xls/', dataonly = False):

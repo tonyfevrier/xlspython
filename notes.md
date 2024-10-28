@@ -157,7 +157,9 @@ Performance :
     - `demander le fichier avec tonnes d'onglets à Marine`
     - passer en MVC (voir ci-dessous)
     - commencer à faire passer les tests avant de modifier xlspython
+    - utils : self.sheet à changer 
     - doc du controller obsolète à changer
+    - propreté : transformer toutes les méthodes qui n'utilisent pas self en méthodes statiques
     - réfléchir à paralléliser le travail sur les onglets.
 
 

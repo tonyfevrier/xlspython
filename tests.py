@@ -1,8 +1,7 @@
-from unittest import TestCase, main
-#from module_pour_excel import * 
-from model import File
-from controller import FileControler
-from utils import Other
+from unittest import TestCase, main 
+from model import File, Path
+from controller import FileControler, PathControler
+from utils import Other, Str
 
 import openpyxl
 import os
@@ -22,7 +21,8 @@ class TestPath(TestCase):
     
     def test_create_one_onglet_by_participant(self):
         path = Path('fichiers_xls/gathertests/')
-        path.apply_method_on_homononymous_files('test_cmd_ongletbyparticipant.xlsx', 'create_one_onglet_by_participant', 'test', 'A', 'divided_test_cmd_ongletbyparticipant.xlsx','fichiers_xls/gathertests/')
+        controler = PathControler(path)
+        controler.apply_method_on_homononymous_files('test_cmd_ongletbyparticipant.xlsx', 'create_one_onglet_by_participant', 'test', 'A', 'divided_test_cmd_ongletbyparticipant.xlsx','fichiers_xls/gathertests/')
         file = File('divided_test_cmd_ongletbyparticipant_before.xlsx', path.pathname)
         file2 = File('divided_test_cmd_ongletbyparticipant.xlsx', path.pathname)
         
@@ -88,8 +88,8 @@ class TestFile(TestCase):
 
         verify_files_identical(File("test_gather_columns_in_one - ref.xlsx"), File("test_gather_columns_in_one.xlsx"))
 
-        del file.writebook['onglet 1']
-        del file.writebook['onglet 2']
+        del file.writebook['tab_column_gathered_0']
+        del file.writebook['tab_column_gathered_1']
         file.writebook.save(file.path + 'test_gather_columns_in_one.xlsx')
         del file
 
@@ -160,17 +160,17 @@ class TestFile(TestCase):
             actual_sheet.delete_cols(4)
             file.writebook.save(file.path + 'test_method_on_all_sheets.xlsx') 
 
-# ARRIVE ICI
+
 class TestSheet(TestCase, Other):
     def test_sheet_correctly_opened(self):
         """Ici je teste que l'attribut sheet de la classe sheet contient bien la bonne page correspondant à l'onglet.
         Pour cela, je génère la feuille via mes classes et par la préocédure habituelle et je regarde si la première colonne des deux fichiers se correspondent.""" 
-        feuille = Sheet('test.xlsx','sheet1')
+        feuille = File('test.xlsx').writebook['sheet1']
 
         readbook = openpyxl.load_workbook('fichiers_xls/test.xlsx', data_only=True)
         feuille2 = readbook.worksheets[0] 
         for i in range(1,feuille2.max_row):
-            self.assertEqual(feuille.sheet.cell(i,1).value,feuille2.cell(i,1).value)
+            self.assertEqual(feuille.cell(i,1).value,feuille2.cell(i,1).value)
          
     def column_identical(self,name_file1, name_file2, index_onglet1, index_onglet2, column1,column2):
         """
@@ -182,37 +182,43 @@ class TestSheet(TestCase, Other):
         sheet2 = file2.writebook.worksheets[index_onglet2] 
         self.assertEqual(sheet1.max_row,sheet2.max_row) 
         
-        for i in range(2,sheet1.max_row+1 ): 
+        for i in range(2,sheet1.max_row + 1): 
             self.assertEqual(sheet1.cell(i,column1).value,sheet2.cell(i,column2).value)
 
     def test_column_transform_string_in_binary(self): 
-        sheet2 = Sheet('test.xlsx', 'Feuille2')
+        file = File('test.xlsx')
+        controler = FileControler(file)
+        sheet2 = file.writebook['Feuille2']
          
-        sheet2.column_transform_string_in_binary('F','G','partie 12 : Faux',1)
+        controler.column_transform_string_in_binary('Feuille2','F','G','partie 12 : Faux',1)
         self.column_identical('test.xlsx','test.xlsx', 1, 1, 7,8)
-        sheet2.sheet.delete_cols(7) #sinon à chaque lancement de test.py il insère une colonne en plus.
-        sheet2.writebook.save(sheet2.path + 'test.xlsx') 
+        sheet2.delete_cols(7) #sinon à chaque lancement de test.py il insère une colonne en plus.
+        file.writebook.save(file.path + 'test.xlsx') 
 
     def test_column_set_answer_in_group(self):
-        sheet = Sheet('test_column_set_answer.xlsx','sheet1')  
+        file = File('test_column_set_answer.xlsx')
+        sheet = file.writebook['sheet1']
+        controler = FileControler(file)  
         
         groups_of_response = {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']}  
 
-        sheet.column_set_answer_in_group('B','C',groups_of_response)
+        controler.column_set_answer_in_group('sheet1','B','C',groups_of_response)
  
         self.column_identical('test_column_set_answer.xlsx','test_column_set_answer.xlsx',0,1,3,3)
         self.column_identical('test_column_set_answer.xlsx','test_column_set_answer.xlsx',0,1,4,4)
 
-        sheet.sheet.delete_cols(3)
-        sheet.updateCellFormulas(sheet.sheet,False,'column',['C'])
-        sheet.writebook.save(sheet.path + 'test_column_set_answer.xlsx') 
+        sheet.delete_cols(3)
+        file.updateCellFormulas(sheet,False,'column',['C'])
+        file.writebook.save(file.path + 'test_column_set_answer.xlsx') 
         
 
     def test_column_security(self):
-        sheet = Sheet('test.xlsx','sheet1')
+        file = File('test.xlsx')
+        controler = FileControler(file)
+        sheet = file.writebook['sheet1'] 
         
-        self.assertEqual(sheet.column_security(1), False)
-        self.assertEqual(sheet.column_security(123), True)
+        self.assertEqual(controler.column_security(sheet, 1), False)
+        self.assertEqual(controler.column_security(sheet, 123), True)
     
     """
     def test_color_special_cases_in_sheet(self):
@@ -227,32 +233,38 @@ class TestSheet(TestCase, Other):
     """
     
     def test_add_column_in_sheet_differently_sorted(self):
-        sheet1 = Sheet('test.xlsx','Feuille5') 
-        sheet1.add_column_in_sheet_differently_sorted('C','E',['test.xlsx','sheet1','C',['B','F']]) 
+        file = File('test.xlsx')
+        controler = FileControler(file)
+        sheet1 = file.writebook['Feuille5'] 
+        controler.add_column_in_sheet_differently_sorted('Feuille5','C','E',['test.xlsx','sheet1','C',['B','F']]) 
         self.column_identical('test.xlsx','test.xlsx',4,5,5,5)
         self.column_identical('test.xlsx','test.xlsx',4,5,6,6)
-        sheet1.sheet.delete_cols(5,2)
+        sheet1.delete_cols(5,2)
 
-        sheet1.writebook.save(sheet1.path + 'test.xlsx')
+        file.writebook.save(file.path + 'test.xlsx')
         
     def test_color_line_containing_chaines(self):
-        sheet = Sheet('test.xlsx','color_line')
-        sheet.color_lines_containing_chaines('0000a933','-','+')
+        file = File('test.xlsx')
+        controler = FileControler(file) 
+        controler.color_lines_containing_chaines('color_line','0000a933','-','+')
         
     def test_column_cut_string_in_parts(self):
-        sheet = Sheet('test.xlsx','cutinparts')
-        sheet.column_cut_string_in_parts('B','C',';') 
+        file = File('test.xlsx')
+        controler = FileControler(file)
+        sheet = file.writebook['cutinparts']  
+        controler.column_cut_string_in_parts('cutinparts','B','C',';') 
         self.column_identical('test.xlsx','test.xlsx',7,8, 3, 3)
         self.column_identical('test.xlsx','test.xlsx',7,8, 4, 4)
         self.column_identical('test.xlsx','test.xlsx',7,8, 5, 5)
         self.column_identical('test.xlsx','test.xlsx',7,8, 6, 6)
-        sheet.sheet.delete_cols(3,3)
-        sheet.writebook.save(sheet.path + 'test.xlsx') 
+        sheet.delete_cols(3,3)
+        file.writebook.save(file.path + 'test.xlsx') 
 
     def test_delete_lines(self):
-        sheet = Sheet('test.xlsx','delete_lines') 
-        sheet.delete_lines_containing_str('D', '0')
-        sheet.delete_lines_containing_str('D','p a')
+        file = File('test.xlsx')
+        controler = FileControler(file)  
+        controler.delete_lines_containing_str('delete_lines', 'D', '0')
+        controler.delete_lines_containing_str('delete_lines', 'D','p a')
         self.column_identical('test.xlsx','test.xlsx',9,10, 1, 1)
         self.column_identical('test.xlsx','test.xlsx',9,10, 2, 2)
         self.column_identical('test.xlsx','test.xlsx',9,10, 3, 3)
@@ -261,53 +273,60 @@ class TestSheet(TestCase, Other):
         self.column_identical('test.xlsx','test.xlsx',9,10, 6, 6)
 
     def test_delete_lines_with_formulas(self):
-        sheet = Sheet('listing_par_etape - Copie.xlsx','Feuil1') 
-        sheet.delete_lines_containing_str('B', 'pas consenti') 
+        file = File('listing_par_etape - Copie.xlsx')
+        controler = FileControler(file) 
+        controler.delete_lines_containing_str('Feuil1', 'B', 'pas consenti') 
         self.column_identical('listing_par_etape - Copie.xlsx','listing_par_etape - Copie.xlsx',0, 1, 2, 2)
         self.column_identical('listing_par_etape - Copie.xlsx','listing_par_etape - Copie.xlsx',0, 1, 10, 10) 
 
     def test_delete_doublons(self): 
-        sheet1 = Sheet('test_doublons.xlsx','sheet1')
-        sheet2 = Sheet('test_doublons.xlsx','Feuille2')
-        sheet1.delete_doublons('C', color = True)
+        file = File('test_doublons.xlsx')
+        controler = FileControler(file)
+        sheet1 = file.writebook['sheet1']  
+        sheet2 = file.writebook['Feuille2']  
+        controler.delete_doublons('sheet1', 'C', color = True)
         verify_sheets_identical(sheet1,sheet2)
 
     def test_create_one_column_by_QCM_answer(self):
-        sheet = Sheet('test_create_one_column.xlsx','sheet1')  
+        file = File('test_create_one_column.xlsx')
+        controler = FileControler(file)
+        sheet = file.writebook['sheet1']  
 
-        sheet.create_one_column_by_QCM_answer('D','E',['OUI', 'NON'], 'Alain', 'Henri', 'Tony', 'Dulcinée') 
+        controler.create_one_column_by_QCM_answer('sheet1','D','E',['OUI', 'NON'], 'Alain', 'Henri', 'Tony', 'Dulcinée') 
         
         self.column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 5, 5)
         self.column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 6, 6) 
         self.column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 7, 7) 
         self.column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 8, 8) 
 
-        sheet.sheet.delete_cols(4,4)
+        sheet.delete_cols(4,4)
 
     def test_gather_multiple_answers(self):
-        sheet = Sheet('testongletbyparticipant.xlsx','test')  
-        sheet.gather_multiple_answers('A','B')
-        del sheet
+        file = File('testongletbyparticipant.xlsx')
+        controler = FileControler(file)
+        #sheet = file.writebook['test']    
+        controler.gather_multiple_answers('test','A','B')
+        #del sheet
 
-        sheet1, sheet2 = Sheet('testongletbyparticipant.xlsx','severalAnswers'),Sheet('testongletbyparticipant-result.xlsx','Feuille2') 
+        file2 = File('testongletbyparticipant-result.xlsx')
+        sheet1, sheet2 = file.writebook['severalAnswers'], file2.writebook['Feuille2'] 
         verify_sheets_identical(sheet1, sheet2)
         del sheet1, sheet2
         
-        file = File('testongletbyparticipant.xlsx')
-        
-        del file.writebook[file.sheets_name[-1]]
+        #del file.writebook[file.sheets_name[-1]]
         file.writebook.save(file.path + 'testongletbyparticipant.xlsx')
         del file
 
     def test_give_names_of_maximum(self):
-        sheet = Sheet('test_give_names.xlsx','sheet1')
-        #sheet.give_names_of_maximum('D', 'A', 'B', 'C') 
-        sheet.give_names_of_maximum(['A', 'B', 'C'], 'D') 
+        file = File('test_give_names.xlsx')
+        controler = FileControler(file)
+        sheet = file.writebook['sheet1']  
+        controler.give_names_of_maximum('sheet1', ['A', 'B', 'C'], 'D') 
 
-        verify_sheets_identical(sheet, Sheet('test_give_names.xlsx','Feuille2'))
+        verify_sheets_identical(sheet, file.writebook['Feuille2'])
 
-        sheet.sheet.delete_cols(4)
-        sheet.writebook.save(sheet.path + 'test_give_names.xlsx') 
+        sheet.delete_cols(4)
+        file.writebook.save(file.path + 'test_give_names.xlsx') 
         
     """ def test_delete_other_columns(self):
         # Fonctionnel une fois
@@ -317,20 +336,24 @@ class TestSheet(TestCase, Other):
         verify_sheets_identical(sheet, Sheet('test_keep_only_columns.xlsx','Feuille2')) """
 
     def test_column_get_part_of_str(self):
-        sheet = Sheet('test_colgetpartofstr.xlsx','Feuille2')
-        sheet.column_get_part_of_str('C','D','_',0)
-        sheet.column_get_part_of_str('F','G',';',1)
-        verify_sheets_identical(sheet, Sheet('test_colgetpartofstr.xlsx','expected'))
-        sheet.sheet.delete_cols(7)
-        sheet.sheet.delete_cols(4)
-        sheet.writebook.save(sheet.path + 'test_colgetpartofstr.xlsx') 
+        file = File('test_colgetpartofstr.xlsx')
+        controler = FileControler(file)
+        sheet = file.writebook['Feuille2'] 
+        controler.column_get_part_of_str('Feuille2','C','D','_',0)
+        controler.column_get_part_of_str('Feuille2','F','G',';',1)
+        verify_sheets_identical(sheet, file.writebook['expected'])
+        sheet.delete_cols(7)
+        sheet.delete_cols(4)
+        file.writebook.save(file.path + 'test_colgetpartofstr.xlsx') 
 
     def test_map_two_columns_to_a_third_column(self):
-        sheet = Sheet('test_maptwocolumns.xlsx','Feuille2')
-        sheet.map_two_columns_to_a_third_column(['B', 'C'], 'D', {'cat1':['prime','1'], 'cat2':['probe','2']})
-        verify_sheets_identical(sheet, Sheet('test_maptwocolumns.xlsx','expected'))
-        sheet.sheet.delete_cols(4)
-        sheet.writebook.save(sheet.path + 'test_maptwocolumns.xlsx')        
+        file = File('test_maptwocolumns.xlsx')
+        controler = FileControler(file)
+        sheet = file.writebook['Feuille2']  
+        controler.map_two_columns_to_a_third_column('Feuille2', ['B', 'C'], 'D', {'cat1':['prime','1'], 'cat2':['probe','2']})
+        verify_sheets_identical(sheet, file.writebook['expected'])
+        sheet.delete_cols(4)
+        file.writebook.save(file.path + 'test_maptwocolumns.xlsx')        
 
 
 class TestStr(TestCase, Other):
@@ -436,12 +459,12 @@ def verify_files_identical(file1, file2):
 
 def verify_sheets_identical(sheet1, sheet2):  
     testcase = TestCase()
-    testcase.assertEqual(sheet1.sheet.max_row,sheet2.sheet.max_row)
-    testcase.assertEqual(sheet1.sheet.max_column,sheet2.sheet.max_column)
+    testcase.assertEqual(sheet1.max_row,sheet2.max_row)
+    testcase.assertEqual(sheet1.max_column,sheet2.max_column)
 
-    for i in range(1,sheet1.sheet.max_row+1):
-        for j in range(1,sheet1.sheet.max_column+1):
-            testcase.assertEqual(sheet1.sheet.cell(i,j).value,sheet2.sheet.cell(i,j).value)
+    for i in range(1,sheet1.max_row+1):
+        for j in range(1,sheet1.max_column+1):
+            testcase.assertEqual(sheet1.cell(i,j).value,sheet2.cell(i,j).value)
 
 if __name__== "__main__":
     main()
