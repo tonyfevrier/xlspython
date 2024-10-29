@@ -153,15 +153,19 @@ Performance :
 - `écrire une fonction qui contrôle si tous les onglets d'un fichier a bien un nombre de lignes préchoisi.` 
 
 - Performance : pour la fonction multi onglets, la récrire en supprimant la création des objets Sheet, voir si n'ouvrir qu'un fichier et naviguer dans ses onglets permet d'accélérer le code sur le fichier de Marine pour colcongruent. Actuellement c'est 28h (Je pense que de générer un objet par onglet avec toutes les méthodes qu'il contient coûte bcp en performance)
-    - observation 3 onglets ont 400 lignes : 5min puis 10 puis 13 d'exécution pour ces onglets donc je pense que le stockage des Sheet en mémoire sature la mémoire.
+    - `observation 3 onglets ont 400 lignes : 5min puis 10 puis 13 d'exécution pour ces onglets donc je pense que le stockage des Sheet en mémoire sature la mémoire.`
     - `demander le fichier avec tonnes d'onglets à Marine`
-    - passer en MVC (voir ci-dessous)
+    - `passer en MVC (voir ci-dessous)`
     - `commencer à faire passer les tests avant de modifier xlspython`
     - `utils : self.sheet à changer` 
     - doc du controller obsolète à changer
     - `changer les commandes et Ufc.utilsforcommands`
     - tester les commandes et notamment prime probe :  fini mais cpcolumnonsheets semble avoir un pb.
-    - tester colcongruent sur le fichier de marine pour voir le temps mis
+    - `tester colcongruent sur le fichier de marine pour voir le temps mis`
+    - `enlever la sauvegarde à chaque onglet pour toutes les fonctions liées à apply_sheet_method_on_a_fil`
+    - `adapter les tests à ce changement en utilisant apply_method_on_some_sheets dans les tests`
+    - faire de même avec les fonctions autres qui s'appliqueraient à plusieurs onglets comme deleteothercolumns
+    - commande avec apply_method_on_some_sheets pour deleteothercolumns à créer et enlever la sauvegarde dans deleteothercolumns
     - propreté : transformer toutes les méthodes qui n'utilisent pas self en méthodes statiques
     - réfléchir à paralléliser le travail sur les onglets.
 

@@ -189,8 +189,9 @@ class TestSheet(TestCase, Other):
         file = File('test.xlsx')
         controler = FileControler(file)
         sheet2 = file.writebook['Feuille2']
-         
-        controler.column_transform_string_in_binary('Feuille2','F','G','partie 12 : Faux',1)
+        
+        controler.apply_method_on_some_sheets(['Feuille2'], 'column_transform_string_in_binary', 'F','G','partie 12 : Faux',1) 
+        #controler.column_transform_string_in_binary('Feuille2','F','G','partie 12 : Faux',1)
         self.column_identical('test.xlsx','test.xlsx', 1, 1, 7,8)
         sheet2.delete_cols(7) #sinon à chaque lancement de test.py il insère une colonne en plus.
         file.writebook.save(file.path + 'test.xlsx') 
@@ -202,7 +203,8 @@ class TestSheet(TestCase, Other):
         
         groups_of_response = {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']}  
 
-        controler.column_set_answer_in_group('sheet1','B','C',groups_of_response)
+        controler.apply_method_on_some_sheets(['sheet1'], 'column_set_answer_in_group', 'B','C', groups_of_response) 
+        #controler.column_set_answer_in_group('sheet1','B','C',groups_of_response)
  
         self.column_identical('test_column_set_answer.xlsx','test_column_set_answer.xlsx',0,1,3,3)
         self.column_identical('test_column_set_answer.xlsx','test_column_set_answer.xlsx',0,1,4,4)
@@ -246,13 +248,15 @@ class TestSheet(TestCase, Other):
     def test_color_line_containing_chaines(self):
         file = File('test.xlsx')
         controler = FileControler(file) 
-        controler.color_lines_containing_chaines('color_line','0000a933','-','+')
+        controler.apply_method_on_some_sheets(['color_line'], 'color_lines_containing_chaines', '0000a933', '-', '+')
+        #controler.color_lines_containing_chaines('color_line','0000a933','-','+')
         
     def test_column_cut_string_in_parts(self):
         file = File('test.xlsx')
         controler = FileControler(file)
         sheet = file.writebook['cutinparts']  
-        controler.column_cut_string_in_parts('cutinparts','B','C',';') 
+        controler.apply_method_on_some_sheets(['cutinparts'], 'column_cut_string_in_parts', 'B','C',';')
+        #controler.column_cut_string_in_parts('cutinparts','B','C',';') 
         self.column_identical('test.xlsx','test.xlsx',7,8, 3, 3)
         self.column_identical('test.xlsx','test.xlsx',7,8, 4, 4)
         self.column_identical('test.xlsx','test.xlsx',7,8, 5, 5)
@@ -263,8 +267,10 @@ class TestSheet(TestCase, Other):
     def test_delete_lines(self):
         file = File('test.xlsx')
         controler = FileControler(file)  
-        controler.delete_lines_containing_str('delete_lines', 'D', '0')
-        controler.delete_lines_containing_str('delete_lines', 'D','p a')
+        controler.apply_method_on_some_sheets(['delete_lines'], 'delete_lines_containing_str', 'D', '0')
+        controler.apply_method_on_some_sheets(['delete_lines'], 'delete_lines_containing_str', 'D', 'p a')
+        #controler.delete_lines_containing_str('delete_lines', 'D', '0')
+        #controler.delete_lines_containing_str('delete_lines', 'D','p a')
         self.column_identical('test.xlsx','test.xlsx',9,10, 1, 1)
         self.column_identical('test.xlsx','test.xlsx',9,10, 2, 2)
         self.column_identical('test.xlsx','test.xlsx',9,10, 3, 3)
@@ -275,7 +281,8 @@ class TestSheet(TestCase, Other):
     def test_delete_lines_with_formulas(self):
         file = File('listing_par_etape - Copie.xlsx')
         controler = FileControler(file) 
-        controler.delete_lines_containing_str('Feuil1', 'B', 'pas consenti') 
+        controler.apply_method_on_some_sheets(['Feuil1'], 'delete_lines_containing_str', 'B', 'pas consenti')
+        #controler.delete_lines_containing_str('Feuil1', 'B', 'pas consenti') 
         self.column_identical('listing_par_etape - Copie.xlsx','listing_par_etape - Copie.xlsx',0, 1, 2, 2)
         self.column_identical('listing_par_etape - Copie.xlsx','listing_par_etape - Copie.xlsx',0, 1, 10, 10) 
 
@@ -284,7 +291,8 @@ class TestSheet(TestCase, Other):
         controler = FileControler(file)
         sheet1 = file.writebook['sheet1']  
         sheet2 = file.writebook['Feuille2']  
-        controler.delete_doublons('sheet1', 'C', color = True)
+        controler.apply_method_on_some_sheets(['sheet1'], 'delete_doublons', 'C', color = True)
+        #controler.delete_doublons('sheet1', 'C', color = True)
         verify_sheets_identical(sheet1,sheet2)
 
     def test_create_one_column_by_QCM_answer(self):
@@ -292,7 +300,8 @@ class TestSheet(TestCase, Other):
         controler = FileControler(file)
         sheet = file.writebook['sheet1']  
 
-        controler.create_one_column_by_QCM_answer('sheet1','D','E',['OUI', 'NON'], 'Alain', 'Henri', 'Tony', 'Dulcinée') 
+        controler.apply_method_on_some_sheets(['sheet1'], 'create_one_column_by_QCM_answer', 'D','E',['OUI', 'NON'], 'Alain', 'Henri', 'Tony', 'Dulcinée')
+        #controler.create_one_column_by_QCM_answer('sheet1','D','E',['OUI', 'NON'], 'Alain', 'Henri', 'Tony', 'Dulcinée') 
         
         self.column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 5, 5)
         self.column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 6, 6) 
@@ -321,7 +330,9 @@ class TestSheet(TestCase, Other):
         file = File('test_give_names.xlsx')
         controler = FileControler(file)
         sheet = file.writebook['sheet1']  
-        controler.give_names_of_maximum('sheet1', ['A', 'B', 'C'], 'D') 
+
+        controler.apply_method_on_some_sheets(['sheet1'], 'give_names_of_maximum',  ['A', 'B', 'C'], 'D')
+        #controler.give_names_of_maximum('sheet1', ['A', 'B', 'C'], 'D') 
 
         verify_sheets_identical(sheet, file.writebook['Feuille2'])
 
@@ -339,8 +350,11 @@ class TestSheet(TestCase, Other):
         file = File('test_colgetpartofstr.xlsx')
         controler = FileControler(file)
         sheet = file.writebook['Feuille2'] 
-        controler.column_get_part_of_str('Feuille2','C','D','_',0)
-        controler.column_get_part_of_str('Feuille2','F','G',';',1)
+        controler.apply_method_on_some_sheets(['Feuille2'], 'column_get_part_of_str', 'C','D','_',0)
+        controler.apply_method_on_some_sheets(['Feuille2'], 'column_get_part_of_str', 'F','G',';',1)
+        
+        #controler.column_get_part_of_str('Feuille2','C','D','_',0)
+        #controler.column_get_part_of_str('Feuille2','F','G',';',1)
         verify_sheets_identical(sheet, file.writebook['expected'])
         sheet.delete_cols(7)
         sheet.delete_cols(4)
@@ -350,7 +364,9 @@ class TestSheet(TestCase, Other):
         file = File('test_maptwocolumns.xlsx')
         controler = FileControler(file)
         sheet = file.writebook['Feuille2']  
-        controler.map_two_columns_to_a_third_column('Feuille2', ['B', 'C'], 'D', {'cat1':['prime','1'], 'cat2':['probe','2']})
+        controler.apply_method_on_some_sheets(['Feuille2'], 'map_two_columns_to_a_third_column',  ['B', 'C'], 'D', {'cat1':['prime','1'], 'cat2':['probe','2']})
+
+        #controler.map_two_columns_to_a_third_column('Feuille2', ['B', 'C'], 'D', {'cat1':['prime','1'], 'cat2':['probe','2']})
         verify_sheets_identical(sheet, file.writebook['expected'])
         sheet.delete_cols(4)
         file.writebook.save(file.path + 'test_maptwocolumns.xlsx')        

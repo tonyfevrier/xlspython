@@ -36,7 +36,10 @@ class FileControler(UtilsForFile):
             # Get the method and apply it
             method = getattr(self, method_name)
             method(sheetname, *args, **kwargs)  
-            Other.display_running_infos(method_name, sheetname, onglets, start) 
+            Other.display_running_infos(method_name, sheetname, onglets, start)
+
+        self.file.writebook.save(self.file.path + self.file.name_file)
+
 
 
     def create_one_onglet_by_participant(self, onglet_from, column_read, newfile_name, newfile_path, first_line=2):
@@ -382,7 +385,7 @@ class FileControler(UtilsForFile):
             if key in chainecolor.keys():
                 cellule.fill = PatternFill(fill_type = 'solid', start_color = chainecolor[key])
 
-        self.file.writebook.save(self.file.path + self.file.name_file)
+        #self.file.writebook.save(self.file.path + self.file.name_file)
 
     def color_special_cases_in_sheet(self, sheet_name, chainecolor): 
         """
@@ -486,7 +489,7 @@ class FileControler(UtilsForFile):
         for row in lines_to_color:
             self.color_line(sheet, color, row)
         
-        self.file.writebook.save(self.file.path + self.file.name_file)
+        #self.file.writebook.save(self.file.path + self.file.name_file)
 
     def column_cut_string_in_parts(self, sheet_name, column_to_cut,column_insertion,separator):
         """
@@ -521,7 +524,7 @@ class FileControler(UtilsForFile):
                 sheet.cell(i,column_insertion + j).value = parts[j]
 
         self.updateCellFormulas(sheet,True,'column', modifications)         
-        self.file.writebook.save(self.file.path + self.file.name_file) 
+        #self.file.writebook.save(self.file.path + self.file.name_file) 
 
     def delete_columns(self, sheet_name, columns):
         """
@@ -540,7 +543,7 @@ class FileControler(UtilsForFile):
             sheet.delete_cols(column_index_from_string(column)) 
 
         self.updateCellFormulas(sheet, False, 'column', columns_to_delete)
-        self.file.writebook.save(self.file.path + self.file.name_file) 
+        #self.file.writebook.save(self.file.path + self.file.name_file) 
 
     def delete_other_columns(self, sheet_name, columns):
         """
@@ -589,7 +592,7 @@ class FileControler(UtilsForFile):
                 modifications.append(str(i))
  
         self.updateCellFormulas(sheet,False,'row',modifications)        
-        self.file.writebook.save(self.file.path + self.file.name_file)
+        #self.file.writebook.save(self.file.path + self.file.name_file)
 
     def delete_doublons(self, sheet_name, column_identifiant, line_beginning = 2, color = False):
         """
@@ -633,7 +636,7 @@ class FileControler(UtilsForFile):
             i -= 1
 
         self.updateCellFormulas(sheet,False,'row',modifications)        
-        self.file.writebook.save(self.file.path + self.file.name_file)
+        #self.file.writebook.save(self.file.path + self.file.name_file)
     
     def create_one_column_by_QCM_answer(self, sheet_name, column, column_insertion, list_string, *reponses, line_beggining = 2):
         """
@@ -678,7 +681,7 @@ class FileControler(UtilsForFile):
                         sheet.cell(i,j + column_insertion).value = list_string[1]
 
         self.updateCellFormulas(sheet,True,'column',modifications)        
-        self.file.writebook.save(self.file.path + self.file.name_file)
+        #self.file.writebook.save(self.file.path + self.file.name_file)
         
     def gather_multiple_answers(self, sheet_name, column_read, column_store, line_beggining = 2):
         """
@@ -732,7 +735,7 @@ class FileControler(UtilsForFile):
 
             # Update eventual formulas and save
             self.updateCellFormulas(sheet, True, 'column', modifications)         
-            self.file.writebook.save(self.file.path + self.file.name_file)
+            #self.file.writebook.save(self.file.path + self.file.name_file)
         return wrapper
     
     @act_on_columns
@@ -797,11 +800,11 @@ class FileControler(UtilsForFile):
         for i in range(line_beginning, sheet.max_row + 1):
 
             # Adjonction de la chaine de first_column à MOT
-            if sheet.cell(i, columns_read[0]).value == "prime":
+            if sheet.cell(i, columns_read[0]).value in ["prime", "Prime"]:
                 mot = re.sub(r'([A-Z-a-z]+)\d+_[A-Z-a-z].jpg', r'\1', sheet.cell(i, columns_read[1]).value)
                 sheet.cell(i,column_insertion).value = sheet.cell(i, columns_read[0]).value + "_" + mot 
 
-            elif sheet.cell(i, columns_read[0]).value == "probe":
+            elif sheet.cell(i, columns_read[0]).value == ["probe", "Probe"]:
                 mot = re.sub(r'([A-Z-a-z]+)\d+_[A-Z-a-z].jpg', r'\1', sheet.cell(i, columns_read[2]).value)
                 sheet.cell(i,column_insertion).value = sheet.cell(i, columns_read[0]).value + "_" + mot 
 
