@@ -4,6 +4,7 @@ from model import File, Path, Str
 from controller import PathControler, FileControler
 from typing_extensions import Annotated
 from utils.utils import UtilsForcommands as Ufc
+from utils.prompts import *
 
 app = typer.Typer()
 
@@ -31,9 +32,9 @@ def apply_sheet_method_on_a_file(file_name, sheets, method_name, *args, **kwargs
 # Path commands
 
 @app.command()
-def gatherfiles(directory : Annotated[str, typer.Option(prompt = 'Enter the name of the directory containing all directories')],
-                file : Annotated[str, typer.Option(prompt = 'Enter the name of the file')],
-                sheet : Annotated[str, typer.Option(prompt = 'Enter the name of the sheet to copy')],
+def gatherfiles(directory : Annotated[str, typer.Option(prompt = directory_prompt)],
+                file : Annotated[str, typer.Option(prompt = multiple_file_prompt)],
+                sheet : Annotated[str, typer.Option(prompt = sheet_prompt)],
                 values : Annotated[bool, typer.Option(prompt = 'Do you want to copy only values (y) or to keep forumla (n)')],):
     
     """
@@ -53,9 +54,9 @@ def gatherfiles(directory : Annotated[str, typer.Option(prompt = 'Enter the name
 
 
 @app.command()
-def multidelcols(directory : Annotated[str, typer.Option(prompt = 'Enter the name of the directory containing all directories')],
-                 file : Annotated[str, typer.Option(prompt = 'Enter the name of the file. This name must be present in each directory')],
-                 sheet : Annotated[str, typer.Option(prompt = 'Enter the name of the sheet')],
+def multidelcols(directory : Annotated[str, typer.Option(prompt = directory_prompt)],
+                 file : Annotated[str, typer.Option(prompt = multiple_file_prompt)],
+                 sheet : Annotated[str, typer.Option(prompt = sheet_prompt)],
                  columns : Annotated[str, typer.Option(prompt = "Enter the group of column you want to KEEP. Respect the form A-D,E,G,H-J,Z without introducing any space.")]):
     """
     Fonction agissant sur un dossier. Fonction qui prend plusieurs fichiers de structures identiques et qui ne garde qu'un ensemble
@@ -73,7 +74,7 @@ def multidelcols(directory : Annotated[str, typer.Option(prompt = 'Enter the nam
 # File commands
 
 @app.command()
-def filesave(file : Annotated[str, typer.Option(prompt = 'Enter the file you want to save ')]):
+def filesave(file : Annotated[str, typer.Option(prompt = file_prompt)]):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. 
     Fonction qui crée une sauvegarde du fichier entré (file) et qui l'appelle name_file_time où time est le moment d'enregistrement.
@@ -90,11 +91,11 @@ def filesave(file : Annotated[str, typer.Option(prompt = 'Enter the file you wan
 
 
 @app.command()
-def multipletabs(file : Annotated[str, typer.Option(prompt = 'Enter the name of the xlsx file(s) you want to cut')],
-                 sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name ')],
-                 colread : Annotated[str, typer.Option(prompt = 'Enter the column letter containing strings ')],
+def multipletabs(file : Annotated[str, typer.Option(prompt = file_prompt)],
+                 sheet : Annotated[str, typer.Option(prompt = sheet_prompt)],
+                 colread : Annotated[str, typer.Option(prompt = column_read_prompt)],
                  newfilepath : Annotated[Optional[str], typer.Option(prompt = 'If you want to divide a single file in tabs, press enter, otherwise your files must be included in folders themselves included in a bigger folder whose name must be written now.')] = '',
-                 line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
+                 line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
     """
     Fonction agissant sur un fichier ou sur un même fichier dans plusieurs dossiers différents. Si vous souhaitez l'utiliser sur un
      seul fichier, pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -132,8 +133,8 @@ def multipletabs(file : Annotated[str, typer.Option(prompt = 'Enter the name of 
 
 
 @app.command()
-def extractcolsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
-                     colread : Annotated[str, typer.Option(prompt = 'Enter the column letter ')]):
+def extractcolsheets(file : Annotated[str, typer.Option(prompt = file_prompt)], 
+                     colread : Annotated[str, typer.Option(prompt = column_read_prompt)]):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Fonction qui récupère une même colonne (colread) dans chaque onglet pour former une nouvelle feuille contenant toutes les colonnes.
@@ -151,7 +152,7 @@ def extractcolsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx
     controler.extract_column_from_all_sheets(colread)
 
 @app.command()
-def cutsendmail(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
+def cutsendmail(file : Annotated[str, typer.Option(prompt = file_prompt)], 
                 sendmail : Annotated[Optional[str], typer.Option(prompt = '(Optional) Do you want to send files by mail? Press y (yes) or enter (no)')] = 'n'):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -178,8 +179,8 @@ def cutsendmail(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file
 
 
 @app.command()
-def gathercolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
-                 sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
+def gathercolumn(file : Annotated[str, typer.Option(prompt = file_prompt)],
+                 sheet : Annotated[str, typer.Option(prompt = sheet_prompt)],
                  columnlists : Annotated[Optional[List[str]], typer.Option()] = None):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -193,7 +194,7 @@ def gathercolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
         Version complète : python xlspython.py gathercolumn --file nom --sheet onglet --columnlists A-D,E,G,H-J,Z
     """
  
-    group = Ufc.askArgumentUntilNone(columnlists, "Enter a group of column of the form A-D,E,G,H-J,Z")
+    group = Ufc.askArgumentUntilNone(columnlists, group_column_prompt)
     column_lists = Str.listFromColumnsStrings(*group) 
 
     fileobject = File(file)
@@ -202,7 +203,7 @@ def gathercolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
 
 
 @app.command()
-def extractcellsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
+def extractcellsheets(file : Annotated[str, typer.Option(prompt = file_prompt)], 
                  cells : Annotated[Optional[List[str]], typer.Option()] = None):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -216,16 +217,16 @@ def extractcellsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xls
         Version guidée: python xlspython.py extractcellsheets
     """
     
-    cells = Ufc.askArgumentUntilNone(cells, "Entrez une cellule que vous souhaitez copier : ")
+    cells = Ufc.askArgumentUntilNone(cells, ask_argument_prompt('cell'))
     fileobject = File(file)
     controler = FileControler(fileobject)
     controler.extract_cells_from_all_sheets(*cells)
 
 
 @app.command()
-def stringinbinary(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
-                   colread : Annotated[str, typer.Option(prompt = 'Enter the column containing the answers')],
-                   colwrite : Annotated[str, typer.Option(prompt = 'Enter the column where you want to write')], 
+def stringinbinary(file : Annotated[str, typer.Option(prompt = file_prompt)], 
+                   colread : Annotated[str, typer.Option(prompt = column_read_prompt)],
+                   colwrite : Annotated[str, typer.Option(prompt = column_store_prompt)], 
                    sheets : Annotated[Optional[List[str]], typer.Option()] = None,
                    answers : Annotated[Optional[List[str]], typer.Option()] = None):
     """
@@ -240,15 +241,15 @@ def stringinbinary(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
         Version complète : python xlspython.py stringinbinary --file name.xlsx --sheet nametab --colread columnletter --colwrite columnletter --answers chaine1 --answers chaine2
     
     """ 
-    sheets = Ufc.askArgumentUntilNone(sheets,"If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
-    answers = Ufc.askArgumentUntilNone(answers,"Enter one good answer and then press enter. Press directly enter if you have entered all the good answers")
+    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
+    answers = Ufc.askArgumentUntilNone(answers, ask_argument_prompt('answer'))
      
     apply_sheet_method_on_a_file(file, sheets, 'column_transform_string_in_binary', colread, colwrite, *answers)
 
 
 # Créer un fichier test pour tester cette fonction.
 @app.command()
-def cpcolumnonsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
+def cpcolumnonsheets(file : Annotated[str, typer.Option(prompt = file_prompt)],
                      column : Annotated[List[str], typer.Option()] = None):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -262,14 +263,14 @@ def cpcolumnonsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx
         Version complète : python xlspython.py cpcolumnonsheets --file name.xlsx --column columnletter
     
     """
-    columns = Ufc.askArgumentUntilNone(column,'Enter one column whose you want to reproduce the formula')
+    columns = Ufc.askArgumentUntilNone(column, ask_argument_prompt('column'))
 
     fileobject = File(file, dataonly = False)
     controler = FileControler(fileobject)
     controler.apply_column_formula_on_all_sheets(*columns) 
 
 @app.command()
-def cpcellonsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
+def cpcellonsheets(file : Annotated[str, typer.Option(prompt = file_prompt)],
                    cell : Annotated[List[str], typer.Option()] = None):
     
     """
@@ -285,15 +286,15 @@ def cpcellonsheets(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
     
     """
 
-    cells = Ufc.askArgumentUntilNone(cell,'Enter one cell whose you want to reproduce the formula')
+    cells = Ufc.askArgumentUntilNone(cell, ask_argument_prompt('cell'))
 
     fileobject = File(file)
     controler = FileControler(fileobject)
     controler.apply_cells_formula_on_all_sheets(*cells) 
     
 @app.command()
-def mergecells(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
-               start_column : Annotated[str, typer.Option(prompt = 'Enter the first column of  cells to merge :')],
+def mergecells(file : Annotated[str, typer.Option(prompt = file_prompt)],
+               start_column : Annotated[str, typer.Option(prompt = 'Enter the first column of cells to merge :')],
                end_column : Annotated[str, typer.Option(prompt = 'Enter the last column of cells to merge :')],
                start_row : Annotated[str, typer.Option(prompt = 'Enter the first row of  cells to merge :')],
                end_row : Annotated[str, typer.Option(prompt = 'Enter the last row of cells to merge :')]):
@@ -316,11 +317,11 @@ def mergecells(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file 
 
  
 @app.command()
-def convertminutes(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
-                   colread : Annotated[str, typer.Option(prompt = 'Enter the column containing the answers')],
-                   colwrite : Annotated[str, typer.Option(prompt = 'Enter the column where you want to write')], 
+def convertminutes(file : Annotated[str, typer.Option(prompt = file_prompt)], 
+                   colread : Annotated[str, typer.Option(prompt = column_read_prompt)],
+                   colwrite : Annotated[str, typer.Option(prompt = column_store_prompt)], 
                    sheets : Annotated[Optional[List[str]], typer.Option()] = None,
-                   line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
+                   line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
     """
     Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. Vous avez une colonne (colread) contenant des temps de la forme xx jours 5 heures 10 min 5 s.
      Vous souhaitez convertir dans une colonne (colwrite) les temps en minutes.
@@ -332,16 +333,16 @@ def convertminutes(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
         Version complète : python xlspython.py convertminutes --file name.xlsx --sheet nametab --colread columnletter --colwrite columnletter --line linenumber
     
     """
-    sheets = Ufc.askArgumentUntilNone(sheets, "If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
+    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
     apply_sheet_method_on_a_file(file, sheets, 'column_convert_in_minutes', colread, colwrite, line_beginning=line)
 
 
 @app.command()
-def groupofanswers(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
-                   colread : Annotated[str, typer.Option(prompt = 'Enter the column containing the answers')],
-                   colwrite : Annotated[str, typer.Option(prompt = 'Enter the column where you want to write')], 
+def groupofanswers(file : Annotated[str, typer.Option(prompt = file_prompt)], 
+                   colread : Annotated[str, typer.Option(prompt = column_read_prompt)],
+                   colwrite : Annotated[str, typer.Option(prompt = column_store_prompt)], 
                    sheets : Annotated[Optional[List[str]], typer.Option()] = None,
-                   line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
+                   line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
     """
     Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. Vous avez une colonne (colread) contenant des réponses. Chacune de ses réponses appartient à un groupe.
     Vous souhaitez afficher dans une colonne (colwrite) le groupe d'appartenance de la réponse. On vous demandera d'entrer des noms de groupes et dans la foulée, les réponses qui appartiennent au groupe.
@@ -352,7 +353,7 @@ def groupofanswers(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
 
         Version complète : python xlspython.py groupofanswers --file name.xlsx --sheet nametab --colread columnletter --colwrite columnletter --line linenumber
     """
-    sheets = Ufc.askArgumentUntilNone(sheets,"If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
+    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
 
     #Creation of the groups of answers dictionary 
     groups_of_responses = Ufc.createDictListValueByCmd("Enter the name of one group of answers", "")
@@ -361,8 +362,8 @@ def groupofanswers(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
     
 
 @app.command()
-def colorcasescolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
-                     column : Annotated[str, typer.Option(prompt = 'Enter the column')],
+def colorcasescolumn(file : Annotated[str, typer.Option(prompt = file_prompt)], 
+                     column : Annotated[str, typer.Option(prompt = column_read_prompt)],
                      sheets : Annotated[Optional[List[str]], typer.Option()] = None):
     """
     Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -375,16 +376,16 @@ def colorcasescolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx
 
         Version complète : python xlspython.py colorcasescolumn --file name.xlsx --sheet nametab --column columnletter
     """
-    sheets = Ufc.askArgumentUntilNone(sheets,"If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
+    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
 
     #Creation of the dictionary with the strings to color and their color
-    color = Ufc.createDictByCmd("Please enter a string which will be colored", "Please enter the color in hexadecimal type")
+    color = Ufc.createDictByCmd("Please enter a string which will be colored", color_prompt)
     
     apply_sheet_method_on_a_file(file, sheets, 'color_special_cases_in_column', column, color)
     
 
 @app.command()
-def colorcasestab(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
+def colorcasestab(file : Annotated[str, typer.Option(prompt = file_prompt)], 
                   sheets : Annotated[Optional[List[str]], typer.Option()] = None):
     """
     Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -397,10 +398,10 @@ def colorcasestab(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fi
 
         Version complète : python xlspython.py colorcasestab --file name.xlsx --sheet nametab
     """
-    sheets = Ufc.askArgumentUntilNone(sheets,"If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
+    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
 
     #Creation of the dictionary with the strings to color and their color
-    color = Ufc.createDictByCmd("Please enter a string which will be colored", "Please enter the color in hexadecimal type")
+    color = Ufc.createDictByCmd("Please enter a string which will be colored", color_prompt)
 
     apply_sheet_method_on_a_file(file, sheets, 'color_special_cases_in_sheet', color)
 
@@ -427,14 +428,14 @@ def addcolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file i
         Version complète : python xlspython.py addcolumn --file name.xlsx --sheet nametab --colread columnletter --colwrite columnletter --file2 name.xlsx --sheet2 nametab --colread2 columnletter --colimport col1 --colimport col2
     
     """ 
-    colimport = Ufc.askArgumentUntilNone(colimport,"Enter one column to import and then press enter. Press directly enter if you have entered all the columns to import.")
+    colimport = Ufc.askArgumentUntilNone(colimport, group_column_prompt('column to import'))
     fileobject = File(file)
     controler = FileControler(fileobject)
 
     controler.add_column_in_sheet_differently_sorted(sheet,colread,colwrite,[file2,sheet2,colread2,colimport])
 
 @app.command()
-def colorlines(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
+def colorlines(file : Annotated[str, typer.Option(prompt = file_prompt)], 
                color : Annotated[str, typer.Option(prompt = 'Enter the color in a hexadecimal format')],
                sheets : Annotated[Optional[List[str]], typer.Option()] = None,
                strings : Annotated[Optional[List[str]], typer.Option()] = None):                    
@@ -449,18 +450,18 @@ def colorlines(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file 
 
         Version complète : python xlspython.py colorlines --file name.xlsx --sheet nametab --color colorinhexadecimal --strings chaine1 --strings chaine2
     """
-    sheets = Ufc.askArgumentUntilNone(sheets,"If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
-    strings = Ufc.askArgumentUntilNone(strings,"Enter one string leading to the coloration of the line and then press enter. Press directly enter if you have entered all the strings.")
+    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
+    strings = Ufc.askArgumentUntilNone(strings, ask_argument_prompt('string'))
     
     apply_sheet_method_on_a_file(file, sheets, 'color_lines_containing_chaines', color, *strings)
     
 
 @app.command()
-def cutstring(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
+def cutstring(file : Annotated[str, typer.Option(prompt = file_prompt)], 
               colcut : Annotated[str, typer.Option(prompt = 'Enter the column containing strings to cut')],
-              colwrite : Annotated[str, typer.Option(prompt = 'Enter the column where you want to write')], 
+              colwrite : Annotated[str, typer.Option(prompt = column_store_prompt)], 
               sheets : Annotated[Optional[List[str]], typer.Option()] = None,
-              separator : Annotated[Optional[str], typer.Option(prompt = '(Optional) Enter the separator or press enter')] = ','):
+              separator : Annotated[Optional[str], typer.Option(prompt = line_prompt)] = ','):
     """
     Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. 
     Une colonne (colcut) contient des chaînes de caractères séparées par un symbole (separator). Vous souhaitez les couper en morceaux 
@@ -472,13 +473,13 @@ def cutstring(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file '
 
         Version complète : python xlspython.py cutstring --file name.xlsx --sheet nametab --colcut columnletter --colwrite columnletter --separator symbol
     """
-    sheets = Ufc.askArgumentUntilNone(sheets,"If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
+    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
     apply_sheet_method_on_a_file(file, sheets, 'column_cut_string_in_parts', colcut,colwrite,separator)
     
 
 @app.command()
-def deletecols(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
-               columns : Annotated[str, typer.Option(prompt = 'Enter a group of column to delete of the form A-D,E,G,H-J,Z')],
+def deletecols(file : Annotated[str, typer.Option(prompt = file_prompt)], 
+               columns : Annotated[str, typer.Option(prompt = group_column_prompt)],
                sheets : Annotated[Optional[List[str]], typer.Option()] = None):
 
     """
@@ -492,13 +493,13 @@ def deletecols(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file 
         Version complète : python xlspython.py deletecols --file name.xlsx --sheet nametab --columns A --columns D 
     
     """ 
-    sheets = Ufc.askArgumentUntilNone(sheets,"If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
+    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
     apply_sheet_method_on_a_file(file, sheets, 'delete_columns', columns)
 
 
 @app.command()
-def keepcols(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
-               columns : Annotated[str, typer.Option(prompt = 'Enter a group of column to delete of the form A-D,E,G,H-J,Z')],
+def keepcols(file : Annotated[str, typer.Option(prompt = file_prompt)], 
+               columns : Annotated[str, typer.Option(prompt = group_column_prompt)],
                sheets : Annotated[Optional[List[str]], typer.Option()] = None):
 
     """
@@ -512,13 +513,13 @@ def keepcols(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')
         Version complète : python xlspython.py deletecols --file name.xlsx --sheet nametab --columns A --columns D 
     
     """ 
-    sheets = Ufc.askArgumentUntilNone(sheets,"If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
+    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
     apply_sheet_method_on_a_file(file, sheets, 'delete_other_columns', columns)
 
 
 @app.command()
-def deletelinesstr(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
-                colread : Annotated[str, typer.Option(prompt = 'Enter the column letter containing identifiers ')],
+def deletelinesstr(file : Annotated[str, typer.Option(prompt = file_prompt)], 
+                colread : Annotated[str, typer.Option(prompt = column_read_prompt)],
                 sheets : Annotated[Optional[List[str]], typer.Option()] = None,
                 strings : Annotated[Optional[List[str]], typer.Option()] = None):                    
     """
@@ -532,17 +533,17 @@ def deletelinesstr(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
         Version complète : python xlspython.py deletelines --file name.xlsx --sheet nametab --colread columnletter --strings chaine1 --strings chaine2
     
     """
-    sheets = Ufc.askArgumentUntilNone(sheets,"If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
-    strings = Ufc.askArgumentUntilNone(strings,"Enter one string leading to the delation of the line and then press enter. Press directly enter if you have entered all the strings.")
+    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
+    strings = Ufc.askArgumentUntilNone(strings, ask_argument_prompt('string'))
 
     apply_sheet_method_on_a_file(file, sheets, 'delete_lines_containing_str', colread,*strings) 
 
 
 @app.command()
-def deletetwins(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
-                colread : Annotated[str, typer.Option(prompt = 'Enter the column letter containing identifiers ')],
+def deletetwins(file : Annotated[str, typer.Option(prompt = file_prompt)], 
+                colread : Annotated[str, typer.Option(prompt = column_read_prompt)],
                 sheets : Annotated[Optional[List[str]], typer.Option()] = None,
-                line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
+                line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
     """
     Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
       Certains participants à un questionnaire répondent plusieurs fois. Vous souhaitez parcourir une colonne (colread)
@@ -554,19 +555,19 @@ def deletetwins(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file
 
         Version complète : python xlspython.py deletetwins --file name.xlsx --sheet nametab --colread columnletter --line linenumber
     """
-    sheets = Ufc.askArgumentUntilNone(sheets,"If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
+    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
 
     apply_sheet_method_on_a_file(file, sheets, 'delete_doublons', colread, line_beginning=line)  
 
 
 @app.command()
-def columnbyqcmanswer(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
+def columnbyqcmanswer(file : Annotated[str, typer.Option(prompt = file_prompt)],
                      colread : Annotated[str, typer.Option(prompt = 'Enter the column containing the answers')],
                      colwrite : Annotated[str, typer.Option(prompt = 'Enter the column from which you want to write')], 
                      sheets : Annotated[Optional[List[str]], typer.Option()] = None,
                      answers : Annotated[Optional[List[str]], typer.Option()] = None,
                      liste : Annotated[Tuple[str, str], typer.Option(prompt = 'Enter what you want to write in the cells or press enter')] = ('oui', 'non'),
-                     line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
+                     line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
                    
 
     """
@@ -581,18 +582,18 @@ def columnbyqcmanswer(file : Annotated[str, typer.Option(prompt = 'Enter the xls
         Version complète : python xlspython.py columnbyqcmanswer --file name.xlsx --sheet nametab --colread columnletter --colwrite columnletter --answers chaine1 --answers chaine2 --list oui non
     
     """
-    sheets = Ufc.askArgumentUntilNone(sheets,"If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
-    answers = Ufc.askArgumentUntilNone(answers,"Enter one QCM answer and then press enter. Press directly enter if you have entered all the answers.")
+    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
+    answers = Ufc.askArgumentUntilNone(answers, ask_argument_prompt('QCM answer'))
 
     apply_sheet_method_on_a_file(file, sheets, 'create_one_column_by_QCM_answer', colread, colwrite, liste, *answers, line_beggining=line)  
 
 
 @app.command()
-def gathermultianswers(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')],
-                       sheet : Annotated[str, typer.Option(prompt = 'Enter the sheet name')],
-                       colread : Annotated[str, typer.Option(prompt = 'Enter the column letter containing identifiers ')],
-                       colstore : Annotated[str, typer.Option(prompt = 'Enter the column letter containing the data to store ')],
-                       line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
+def gathermultianswers(file : Annotated[str, typer.Option(prompt = file_prompt)],
+                       sheet : Annotated[str, typer.Option(prompt = sheet_prompt)],
+                       colread : Annotated[str, typer.Option(prompt = column_read_prompt)],
+                       colstore : Annotated[str, typer.Option(prompt = column_store_prompt)],
+                       line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
     """
     Fonction agissant sur un onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
       Certains participants à un questionnaire répondent plusieurs fois. Vous souhaitez parcourir une colonne (colread)
@@ -611,11 +612,11 @@ def gathermultianswers(file : Annotated[str, typer.Option(prompt = 'Enter the xl
     controler.gather_multiple_answers(sheet,colread,colstore,line_beggining=line)
 
 @app.command()
-def maxnames(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
-             colstore : Annotated[str, typer.Option(prompt = 'Enter the column letter containing the data to store ')],
+def maxnames(file : Annotated[str, typer.Option(prompt = file_prompt)], 
+             colstore : Annotated[str, typer.Option(prompt = column_store_prompt)],
              sheets : Annotated[Optional[List[str]], typer.Option()] = None,
              columnlist : Annotated[Optional[List[str]], typer.Option()] = None,
-             line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
+             line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
     
     """
     Fonction agissant sur un onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -629,14 +630,14 @@ def maxnames(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')
         Version complète : python xlspython.py maxnames --file name.xlsx --sheet nametab --colstore columnletter --columnlist A --columnlist C
     
     """
-    sheets = Ufc.askArgumentUntilNone(sheets,"If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
+    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
     columnlist = Ufc.askArgumentUntilNone(columnlist, "Enter the letter of a column you want to read")
 
     apply_sheet_method_on_a_file(file, sheets, 'give_names_of_maximum', columnlist, colstore, line_beggining=line)  
 
 
 @app.command()
-def colcongruent(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
+def colcongruent(file : Annotated[str, typer.Option(prompt = file_prompt)], 
                 firstcol : Annotated[str, typer.Option(prompt = 'Enter the column letter containing the word (example: prime, probe)')],
                 secondcol : Annotated[str, typer.Option(prompt = 'Enter the column letter corresponding to prime')],
                 thirdcol : Annotated[str, typer.Option(prompt = 'Enter the column letter corresponding to probe')],
@@ -653,18 +654,18 @@ def colcongruent(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx fil
         Version guidée : python xlspython.py colcongruent
  
     """
-    sheets = Ufc.askArgumentUntilNone(sheets,"If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
+    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
     apply_sheet_method_on_a_file(file, sheets, 'column_for_prime_probe_congruence', [firstcol, secondcol, thirdcol], colwrite)  
 
 
 @app.command()
-def colgetpart(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
+def colgetpart(file : Annotated[str, typer.Option(prompt = file_prompt)], 
                 colread : Annotated[str, typer.Option(prompt = 'Enter the column letter to read ')],
                 colwrite : Annotated[str, typer.Option(prompt = 'Enter the column letter where to write')],
                 separator : Annotated[str, typer.Option(prompt = 'Enter the separator')],
                 piece : Annotated[int, typer.Option(prompt = 'Enter the number of the part you want to get. For example, tap 1 to get the begin of the word')],
                 sheets : Annotated[Optional[List[str]], typer.Option()] = None,
-                line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
+                line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
     """
     Fonction agissant sur un onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Vous avez une colonne qui contient une chaîne qui contient un séparateur dont vous voulez prendre une partie. 
@@ -674,16 +675,16 @@ def colgetpart(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file 
 
         Version guidée : python xlspython.py colgetbegin
     """
-    sheets = Ufc.askArgumentUntilNone(sheets,"If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
+    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
     apply_sheet_method_on_a_file(file, sheets, 'column_get_part_of_str', colread, colwrite, separator, piece - 1, line_beginning=line)  
 
 
 @app.command()
-def maptwocols(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
+def maptwocols(file : Annotated[str, typer.Option(prompt = file_prompt)], 
                colread : Annotated[str, typer.Option(prompt = 'Enter the column letters to read separated by a comma (C,E)')],
-               colwrite : Annotated[str, typer.Option(prompt = 'Enter the column letter where to write')],
+               colwrite : Annotated[str, typer.Option(prompt = column_store_prompt)],
                sheets : Annotated[Optional[List[str]], typer.Option()] = None,
-               line : Annotated[Optional[int], typer.Option(prompt = '(Optional) Enter the number of the line or press enter')] = '2'):
+               line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
     """
     Fonction agissant sur un onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Vous avez deux colonnes de lecture, suivant ce qui est écrit sur une ligne, vous voulez ou non insérer quelque chose 
@@ -693,7 +694,7 @@ def maptwocols(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file 
 
         Version guidée : python xlspython.py maptwocols
     """
-    sheets = Ufc.askArgumentUntilNone(sheets,"If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
+    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
     mapping = Ufc.createDictListValueByCmd("Enter a value you want to put in the new column", "Enter the two strings which should lead to this new value. You must enter it with the same order as the order you entered the columns to read")
     apply_sheet_method_on_a_file(file, sheets, 'map_two_columns_to_a_third_column', colread.split(","), colwrite, mapping, line_beginning=line)  
 

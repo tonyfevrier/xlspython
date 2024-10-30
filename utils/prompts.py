@@ -1,5 +1,6 @@
 directory_prompt = 'Enter the name of the directory containing all directories'
 multiple_tabs_prompt = "If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter"
+multiple_file_prompt = 'Enter the name of the file to work on. You must write its extension (.xlsx, .xlst). Each directory must contain this file name.'
 file_prompt = 'Enter the name of the file to work on. You must write its extension (.xlsx, .xlst)'  
 sheet_prompt = 'Enter the name of the sheet to work on'
 column_read_prompt = 'Enter the column letter to read'
