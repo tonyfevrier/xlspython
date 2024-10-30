@@ -164,7 +164,7 @@ Performance :
     - `tester colcongruent sur le fichier de marine pour voir le temps mis`
     - `enlever la sauvegarde à chaque onglet pour toutes les fonctions liées à apply_sheet_method_on_a_fil`
     - `adapter les tests à ce changement en utilisant apply_method_on_some_sheets dans les tests`
-    - faire de même avec les fonctions autres qui s'appliqueraient à plusieurs onglets comme deleteothercolumns
+    - faire de même avec les fonctions autres qui s'appliqueraient à plusieurs onglets comme deleteothercolumns, multipletabs
     - commande avec apply_method_on_some_sheets pour deleteothercolumns à créer et enlever la sauvegarde dans deleteothercolumns
     - propreté : transformer toutes les méthodes qui n'utilisent pas self en méthodes statiques
     - réfléchir à paralléliser le travail sur les onglets.

@@ -112,6 +112,7 @@ def multipletabs(file : Annotated[str, typer.Option(prompt = 'Enter the name of 
     if newfilepath:
         pathobject = Path(newfilepath + '/')
         controler = PathControler(pathobject)
+        #controler.create_one_onglet_by_participant(file, sheet, colread, first_line=line)
         controler.apply_method_on_homononymous_files(file, 'create_one_onglet_by_participant', sheet, colread, f'divided_{file}', newfilepath + '/', first_line=line)
         path = pathobject.pathname
 
@@ -493,6 +494,27 @@ def deletecols(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file 
     """ 
     sheets = Ufc.askArgumentUntilNone(sheets,"If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
     apply_sheet_method_on_a_file(file, sheets, 'delete_columns', columns)
+
+
+@app.command()
+def keepcols(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 
+               columns : Annotated[str, typer.Option(prompt = 'Enter a group of column to delete of the form A-D,E,G,H-J,Z')],
+               sheets : Annotated[Optional[List[str]], typer.Option()] = None):
+
+    """
+    Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
+    Vous entrez les colonnes que vous souhaitez garder. Toutes les autres seront supprimées.
+
+    Commande : 
+
+        Version guidée : python xlspython.py deletecols  
+
+        Version complète : python xlspython.py deletecols --file name.xlsx --sheet nametab --columns A --columns D 
+    
+    """ 
+    sheets = Ufc.askArgumentUntilNone(sheets,"If you want to execute the program on all sheets, press immediately enter. Otherwise write sheet names one by one and press enter each time. When you write all sheets, press enter")
+    apply_sheet_method_on_a_file(file, sheets, 'delete_other_columns', columns)
+
 
 @app.command()
 def deletelinesstr(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file ')], 

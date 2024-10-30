@@ -564,7 +564,7 @@ class FileControler(UtilsForFile):
                 sheet.delete_cols(column)
        
         self.updateCellFormulas(sheet, False, 'column', modifications)
-        self.file.writebook.save(self.file.path + self.file.name_file) 
+        #self.file.writebook.save(self.file.path + self.file.name_file) 
         
 
     def delete_lines_containing_str(self, sheet_name, column, *chaines):
@@ -968,7 +968,6 @@ class PathControler(FileControler):
             method = getattr(controler, method_name)
             method(sheetname, *args, **kwargs) 
             Other.display_running_infos(method_name, directory, self.path.directories, start)
-
            
     def gather_files_in_different_directories(self, name_file, name_sheet, values_only=False):
         """
@@ -1006,3 +1005,52 @@ class PathControler(FileControler):
             # save at the end of each directory not to use too much memory
             new_file.save(self.path.pathname  + "gathered_" + name_file)
             Other.display_running_infos('gather_files_in_different_directories', directory, directories, start)
+
+    def create_one_onglet_by_participant(self, name_file, onglet_from, column_read, first_line=2):
+        """
+        VERSION ALTERNATIVE A APPLYHOMOGENEOUSFILES DOC OBSOLETE
+        Fonction qui prend un onglet dont une colonne contient des chaînes de caractères comme par exemple un nom.
+        Chaque chaîne de caractères peut apparaître plusieurs fois dans cette colonne (exe : quand un participant répond plusieurs fois)
+        La fonction retourne un fichier contenant un onglet par chaîne de caractères.
+          Chaque onglet contient toutes les lignes correspondant à cette chaîne de caractères.
+
+        Input : 
+            name_file (str): name of the file to divide
+            onglet_from : onglet de référence.
+            column_read : l'étiquette de la colonne qui contient les chaînes de caractères.
+            first_line : ligne où commencer à parcourir.
+            last_line : ligne de fin de parcours 
+ 
+        Exemple d'utilisation : 
+    
+            file = File('dataset.xlsx')
+            file.create_one_onglet_by_participant('onglet1', 'A') 
+        """ 
+        directories = [f for f in os.listdir(self.path.pathname) if os.path.isdir(os.path.join(self.path.pathname, f))]
+
+        # Créer un nouveau fichier
+        new_file = openpyxl.Workbook()  
+        onglets = new_file.sheetnames
+        column_read = column_index_from_string(column_read)  
+        start = time()
+
+        for directory in directories:
+            file = File(name_file, self.path.pathname + directory + '/')
+            sheet = file.writebook[onglet_from] 
+
+            # Create one tab by identifiant containing all its lines
+            for i in range(first_line, sheet.max_row + 1):
+                onglet = str(sheet.cell(i,column_read).value)
+
+                # Prepare a new tab
+                if onglet not in onglets:
+                    new_file.create_sheet(onglet)
+                    self.copy_paste_line(sheet, 1,  new_file[onglet], 1)
+                    onglets.append(onglet) 
+
+                self.add_line_at_bottom(sheet, i, new_file[onglet]) 
+            Other.display_running_infos('create_one_onglet_by_participant', directory, directories, start)
+            
+        # Deletion of the first tab 
+        del new_file[new_file.sheetnames[0]]
+        new_file.save(self.path.pathname + f'divided_{name_file}')

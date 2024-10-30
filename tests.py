@@ -22,7 +22,8 @@ class TestPath(TestCase):
     def test_create_one_onglet_by_participant(self):
         path = Path('fichiers_xls/gathertests/')
         controler = PathControler(path)
-        controler.apply_method_on_homononymous_files('test_cmd_ongletbyparticipant.xlsx', 'create_one_onglet_by_participant', 'test', 'A', 'divided_test_cmd_ongletbyparticipant.xlsx','fichiers_xls/gathertests/')
+        #controler.apply_method_on_homononymous_files('test_cmd_ongletbyparticipant.xlsx', 'create_one_onglet_by_participant', 'test', 'A', 'divided_test_cmd_ongletbyparticipant.xlsx','fichiers_xls/gathertests/')
+        controler.create_one_onglet_by_participant('test_cmd_ongletbyparticipant.xlsx', 'test', 'A')
         file = File('divided_test_cmd_ongletbyparticipant_before.xlsx', path.pathname)
         file2 = File('divided_test_cmd_ongletbyparticipant.xlsx', path.pathname)
         
