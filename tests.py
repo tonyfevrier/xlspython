@@ -1,7 +1,7 @@
 from unittest import TestCase, main 
 from model import File, Path
 from controller import FileControler, PathControler
-from utils import Other, Str
+from utils.utils import Other, Str
 
 import openpyxl
 import os

@@ -1,6 +1,6 @@
 import openpyxl
 import os 
-from utils import UtilsForFile, Other, Str 
+from utils.utils import UtilsForFile, Other, Str 
 from pycel import ExcelCompiler  
 from time import time
 from datetime import datetime 

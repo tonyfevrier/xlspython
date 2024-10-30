@@ -3,7 +3,7 @@ from typing import Optional, List, Tuple
 from model import File, Path, Str
 from controller import PathControler, FileControler
 from typing_extensions import Annotated
-from utils import UtilsForcommands as Ufc
+from utils.utils import UtilsForcommands as Ufc
 
 app = typer.Typer()
 

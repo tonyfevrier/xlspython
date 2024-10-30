@@ -6,7 +6,7 @@ import re
 from openpyxl.styles import PatternFill
 from openpyxl.utils import column_index_from_string, coordinate_to_tuple, get_column_letter
 from time import time
-from utils import Other, UtilsForFile, Str 
+from utils.utils import Other, UtilsForFile, Str 
 from copy import copy
 from model import File
 
