@@ -144,8 +144,11 @@ class FileControler(UtilsForFile):
         for cell in cells: 
             cell_list.append(coordinate_to_tuple(cell)) 
         
-        # Create a new tab
-        gathered_sheet = self.file.writebook.create_sheet('gathered_data')
+        # Create a new file 
+        new_file = openpyxl.Workbook()
+        gathered_sheet = new_file[new_file.sheetnames[0]]
+
+        #gathered_sheet = self.file.writebook.create_sheet('gathered_data')
         current_line = 2
 
         start = time()
@@ -157,15 +160,16 @@ class FileControler(UtilsForFile):
             current_column = 2
 
             # Fill selected values one by one
-            for tuple in cell_list:  
+            for tuple in cell_list:   
                 gathered_sheet.cell(current_line, current_column).value = current_onglet.cell(tuple[0],tuple[1]).value
                 current_column += 1
             current_line += 1
             Other.display_running_infos('extract_cells_from_all_sheets', name_onglet, self.file.sheets_name, start)
 
 
-        self.file.sheets_name = self.file.writebook.sheetnames 
-        self.file.writebook.save(self.file.path + self.file.name_file)
+        #self.file.sheets_name = self.file.writebook.sheetnames 
+        #self.file.writebook.save(self.file.path + self.file.name_file)
+        new_file.save(self.file.path + 'gathered_data_' + self.file.name_file)
         
 
     def apply_column_formula_on_all_sheets(self, *column_list):
@@ -564,7 +568,7 @@ class FileControler(UtilsForFile):
                 sheet.delete_cols(column)
        
         self.updateCellFormulas(sheet, False, 'column', modifications)
-        #self.file.writebook.save(self.file.path + self.file.name_file) 
+        self.file.writebook.save(self.file.path + self.file.name_file) 
         
 
     def delete_lines_containing_str(self, sheet_name, column, *chaines):
@@ -778,8 +782,9 @@ class FileControler(UtilsForFile):
         sheet = self.file.writebook[sheet_name] 
 
         # Fill cells of the new columns 
-        for i in range(line_beginning,sheet.max_row + 1):  
-            sheet.cell(i, column_insertion).value = sheet.cell(i, column_read).value.split(separator)[piece_number]  
+        for i in range(line_beginning,sheet.max_row + 1): 
+            if sheet.cell(i, column_read).value is not None: 
+                sheet.cell(i, column_insertion).value = sheet.cell(i, column_read).value.split(separator)[piece_number]  
              
     @act_on_columns
     def column_for_prime_probe_congruence(self, sheet_name, columns_read, column_insertion, line_beginning=2):
@@ -804,7 +809,7 @@ class FileControler(UtilsForFile):
                 mot = re.sub(r'([A-Z-a-z]+)\d+_[A-Z-a-z].jpg', r'\1', sheet.cell(i, columns_read[1]).value)
                 sheet.cell(i,column_insertion).value = sheet.cell(i, columns_read[0]).value + "_" + mot 
 
-            elif sheet.cell(i, columns_read[0]).value == ["probe", "Probe"]:
+            elif sheet.cell(i, columns_read[0]).value in ["probe", "Probe"]:
                 mot = re.sub(r'([A-Z-a-z]+)\d+_[A-Z-a-z].jpg', r'\1', sheet.cell(i, columns_read[2]).value)
                 sheet.cell(i,column_insertion).value = sheet.cell(i, columns_read[0]).value + "_" + mot 
 

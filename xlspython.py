@@ -74,7 +74,8 @@ def multidelcols(directory : Annotated[str, typer.Option(prompt = directory_prom
 # File commands
 
 @app.command()
-def filesave(file : Annotated[str, typer.Option(prompt = file_prompt)]):
+def filesave(file : Annotated[str, typer.Option(prompt = file_prompt)],
+             dataonly: Annotated[bool, typer.Option(prompt = 'Do you want to save only values?')]):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. 
     Fonction qui crée une sauvegarde du fichier entré (file) et qui l'appelle name_file_time où time est le moment d'enregistrement.
@@ -86,7 +87,7 @@ def filesave(file : Annotated[str, typer.Option(prompt = file_prompt)]):
         Version complète : python xlspython.py filesave --file name.xlsx
     
     """
-    fileobject = File(file) 
+    fileobject = File(file, dataonly=dataonly) 
     fileobject.sauvegarde()
 
 
@@ -131,6 +132,26 @@ def multipletabs(file : Annotated[str, typer.Option(prompt = file_prompt)],
         if wrong_tabs:
             print('The following tabs have a different number of lines :' + ",".join(wrong_tabs))
 
+
+@app.command()
+def checklinenumber(file : Annotated[str, typer.Option(prompt = file_prompt)], 
+                    number : Annotated[int, typer.Option(prompt = 'Enter the expected number of lines in each tab')]):
+    """
+    Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
+    Fonction qui regarde si chaque onglet a un nombre de lignes égal au nombre attendu. Renvoie la liste des onglets qui n'ont pas le bon nombre
+    de lignes
+
+    Commande : 
+
+        Version guidée : python xlspython.py checklinenumber
+
+        Version complète : python xlspython.py checklinenumber --file name.xlsx --number 1
+    
+    """
+    fileobject = File(file) 
+    controler = FileControler(fileobject)
+    wrong_tabs = controler.check_linenumber_of_tabs(number)
+    print(f'The tabs {wrong_tabs} does not have the expected number of lines.')
 
 @app.command()
 def extractcolsheets(file : Annotated[str, typer.Option(prompt = file_prompt)], 
@@ -218,7 +239,7 @@ def extractcellsheets(file : Annotated[str, typer.Option(prompt = file_prompt)],
     """
     
     cells = Ufc.askArgumentUntilNone(cells, ask_argument_prompt('cell'))
-    fileobject = File(file)
+    fileobject = File(file, dataonly=True)
     controler = FileControler(fileobject)
     controler.extract_cells_from_all_sheets(*cells)
 
@@ -428,7 +449,7 @@ def addcolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file i
         Version complète : python xlspython.py addcolumn --file name.xlsx --sheet nametab --colread columnletter --colwrite columnletter --file2 name.xlsx --sheet2 nametab --colread2 columnletter --colimport col1 --colimport col2
     
     """ 
-    colimport = Ufc.askArgumentUntilNone(colimport, group_column_prompt('column to import'))
+    colimport = Ufc.askArgumentUntilNone(colimport, ask_argument_prompt('column to import'))
     fileobject = File(file)
     controler = FileControler(fileobject)
 
