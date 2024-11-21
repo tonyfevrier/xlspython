@@ -8,56 +8,175 @@ from openpyxl.utils import column_index_from_string, coordinate_to_tuple, get_co
 from time import time
 from utils.utils import Other, UtilsForFile, Str 
 from copy import copy
-from model_factorise import File, Tab
+from model_factorise import File, Line, Column, Cell
+from pycel import ExcelCompiler  
+from time import time
+from datetime import datetime 
+from copy import copy
+
+
+def create_empty_workbook():
+    workbook = openpyxl.Workbook()
+    del workbook[workbook.active.title]
+    return workbook
+
+# A METTRE PTET DANS UN LINE CONTROLLER
+def copy_paste_line(Line_from, Line_to):#, values_only=False):
+        """
+        Fonction qui prend une ligne de la feuille et qui la copie dans un autre onglet.
+
+        Inputs : 
+            - onglet_from : onglet d'où on copie
+            - row_from : ligne de l'onglet d'origine.
+            - onglet_to : onglet où coller.
+            - row_to : la ligne où il faut coller dans l'onglet à modifier.
+
+        Exemple d'utilisation : 
+      
+            file = File('dataset.xlsx')
+            file.copy_paste_line('onglet1', 1, 'onglet2', 1)
+        """
+
+        """ 
+        ON REPRENDRA CETTE VERSION QUAND J ATTAQUERAIS LES HISTOIRES DE VALUES ONLY
+
+        # Cas où on ne copie que les valeurs, cell est un str
+        if values_only:
+            column_index = 1 
+            for column in onglet_from.iter_cols(min_row=row_from, max_row=row_from, min_col=0, max_col=onglet_from.max_column, values_only=values_only):
+                for cell in column: 
+                    if cell:
+                        onglet_to.cell(row_to, column_index).value = cell
+                    column_index += 1
+                    
+        # Cas où on copie les formules, cell est un objet
+        else:
+            for column in onglet_from.iter_cols(min_row=row_from, max_row=row_from, min_col=0, max_col=onglet_from.max_column, values_only=values_only):
+                for cell in column: 
+                    if cell.value != "":
+                        onglet_to.cell(row_to, cell.column).value = cell.value """
+
+        tab_from = Line_from.tab
+        tab_to = Line_to.tab
+        for column_index in range(1, tab_from.max_column + 1): 
+            tab_to.cell(Line_to.line_index, column_index).value = tab_from.cell(Line_from.line_index, column_index).value 
+
+
+def copy_paste_column(Column_from, Column_to):
+        """
+        Fonction qui prend une colonne de la feuille et qui la copie dans un autre onglet.
+        """
+        tab_from = Column_from.tab
+        tab_to = Column_to.tab
+        for i in range(1, tab_from.max_row + 1): 
+            tab_to.cell(i, Column_to.letter).value = tab_from.cell(i, Column_from.letter).value 
+
+
+def add_line_at_bottom(Line_from, tab_to, values_only=False):
+        """
+        Fonction qui copie une ligne spécifique de la feuille à la fin d'un autre onglet.
+
+        Input : 
+            - row_origin : ligne de l'onglet d'origine.
+            - onglet : l'onglet à modifier où on copie la ligne.
+
+        Exemple d'utilisation : 
+     
+            file = File('dataset.xlsx')
+            file.copy_paste_line('onglet1', 1, 'onglet2')
+        """ 
+        copy_paste_line(Line_from, Line(tab_to, tab_to.max_row + 1))
 
 
 class TabController():
-    """Handle modifications of a tab of a file"""
-    def __init__(self, tab_object, columns_to_read=None, columns_to_modify=None, first_line=2):
+    """Handle methods reading and modifying a unique tab of a file."""
+    def __init__(self, file_object, tab_name, columns_to_read=None, columns_to_write=None, first_line=2):
         """
         Inputs:
-            - tab_object (Tab object)
+            - file_object (file object)
             - columns_to_read (optional str or list(str))
-            - columns_to_modify (optional str or list(str))
+            - columns_to_write (optional str or list(str))
             - first_line (optional int)
         """ 
-        self.tab_object = tab_object
-        self.first_line = first_line
+        self.file_object = file_object
+        self.tab_name = tab_name
+        self.tab = self.file_object.writebook[tab_name]
         self.columns_to_read = columns_to_read
-        self.columns_to_modify = columns_to_modify
+        self.columns_to_write = columns_to_write
+        self.first_line = first_line
+    
 
-    def _create_or_complete_a_tab_regarding_identifier(self, line_index):
-        #SUREMENT A DEPLACER COMME METHODE DE TABCONTROLLER
-        tab_names = self.new_writebook.sheetnames 
-        identifier = str(self.tab_object.tab.cell(line_index, self.columns_to_read).value)
-        # Prepare a new tab
-        if identifier not in tab_names:
-            self.new_writebook.create_sheet(identifier)
-            self.copy_paste_line(self.tab_object.tab, 1,  self.new_writebook[identifier], 1)
-            tab_names.append(identifier) 
-
-        self.add_line_at_bottom(self.tab_object.tab, line_index, self.new_writebook[identifier])
-
-
-class FileControler(UtilsForFile):
+class MultipleFilesController():
     """
-    Handle modifications of a file.
+    Handle methods involving multiple files
+
+    Il faudra y placer les sauvegardes ainsi que split_one_tab_...
+    On pourra y mettre newwritebook et enlever cet attribut de MultipleTabsController
     """
-    def __init__(self, file_object, names_of_tabs_to_read=None, names_of_tabs_to_modify=None):
+    pass
+
+
+class MultipleTabsControler():
+    """
+    Handle methods involving multiple tabs of a file.
+    """
+    def __init__(self, file_object, names_of_tabs_to_read=None,
+                names_of_tabs_to_modify=None, columns_to_read=None,
+                columns_to_write=None, first_line=2):
         """
         Inputs: 
             - file_object (object of class File)
             - names_of_tabs_to_read (optional str or list(str))
             - names_of_tabs_to_modify (optional str or list(str))
             - new_writebook (openpyxl.WorkBook) : eventual workbook to complete
+            - new_tab (openpyxl.WorkBook) : eventual new tab to complete
+            - current_tab (openpyxl.Workbook[tab]) : variable to store tab we are working on
         """
         self.file_object = file_object
         self.name_of_tabs_to_read = names_of_tabs_to_read
         self.names_of_tabs_to_modify = names_of_tabs_to_modify 
+        self.columns_to_read = columns_to_read
+        self.columns_to_write = columns_to_write
+        self.first_line = first_line
         self.new_writebook = None
+        self.new_tab = None 
+        self.current_tab = None
 
 
     ## Multiple tabs methods
+
+    def create_excel_compiler(self):
+        return ExcelCompiler(self.file_object.path + self.file_object.name_file) 
+    
+    def make_horodated_copy_of_a_file(self):
+        self.writebook_copy = create_empty_workbook()
+        self._copy_tabs_in_new_workbook()
+        self._save_file()            
+                    
+    #@display_run
+    def _copy_tabs_in_new_workbook(self): 
+        start = time()
+        for tab_name in self.file_object.sheets_name:
+            self.current_tab = self.file_object.writebook[tab_name]
+            self.writebook_copy.create_sheet(tab_name)
+            self._copy_old_file_tab_in_new_file_tab()
+            Other.display_running_infos('sauvegarde', tab_name, self.file_object.sheets_name, start) 
+
+    def _copy_old_file_tab_in_new_file_tab(self): 
+        for i in range(1, self.current_tab.max_row + 1):
+            for j in range(1, self.current_tab.max_column + 1):  
+                self._copy_old_file_cell_in_new_file_cell(Cell(i,j))
+
+    def _copy_old_file_cell_in_new_file_cell(self, cell):   
+        new_tab = self.writebook_copy[self.current_tab.tab_name] 
+        new_tab.cell(cell.i, cell.j).value = self.current_tab.cell(cell.i, cell.j).value  
+        new_tab.cell(cell.i, cell.j).fill = copy(self.current_tab.cell(cell.i, cell.j).fill)
+        new_tab.cell(cell.i, cell.j).font = copy(self.current_tab.cell(cell.i, cell.j).font) 
+
+    def _save_file(self):
+        name_file_no_extension = Str(self.file_object.name_file).del_extension() 
+        self.writebook_copy.save(self.file_object.path  + name_file_no_extension + '_date_' + datetime.now().strftime("%Y-%m-%d_%Hh%M") + '.xlsx') 
+
 
     def apply_method_on_some_tabs(self, method_name, *args, **kwargs):
         """ 
@@ -76,6 +195,7 @@ class FileControler(UtilsForFile):
             Other.display_running_infos(method_name, tab_name, self.names_of_tabs_to_modify, start)
 
         self.file_object.writebook.save(self.file_object.path + self.file_object.name_file)
+
 
     def split_one_tab_in_multiple_tabs(self):
         """
@@ -97,13 +217,18 @@ class FileControler(UtilsForFile):
             file = File('dataset.xlsx')
             file.create_one_onglet_by_participant('onglet1', 'A') 
         """ 
-        new_file_name = f'divided_{self.file_object.filename}'
+        # Create a new workbook or load it if exists
+        new_file_name = f'divided_{self.file_object.name_file}'
         self._create_or_load_workbook(new_file_name)
-        tab_controller = self._import_the_tab_controller_object()
         
-        for line_index in range(tab_controller.first_line, tab_controller.tab_object.tab.max_row + 1):
-            tab_controller._create_or_complete_a_tab_regarding_identifier(line_index)
+        # Get tab to read
+        self.current_tab = self.file_object.get_tab_by_name(self.name_of_tabs_to_read)
 
+        # Create a tab by identifier
+        for line_index in range(self.first_line, self.current_tab.max_row + 1):
+            self._create_or_complete_a_tab_regarding_identifier(line_index)
+
+        # Keep only new tabs and save the new workbook
         self._delete_first_tab_of_new_workbook(new_file_name)
         self.new_writebook.save(self.file_object.path + new_file_name)
 
@@ -112,21 +237,31 @@ class FileControler(UtilsForFile):
             self.new_writebook = openpyxl.load_workbook(self.file_object.path + new_file_name)
         except OSError:
             self.new_writebook = openpyxl.Workbook()
+    
+    def _create_or_complete_a_tab_regarding_identifier(self, line_index): 
+        tab_names = self.new_writebook.sheetnames 
+        column_to_read_by_index = column_index_from_string(self.columns_to_read)
+        identifier = str(self.current_tab.cell(line_index, column_to_read_by_index).value)
 
-    def _import_the_tab_controller_object(self):
-        columns_to_read_by_index = column_index_from_string(self.columns_to_read)
-        return TabController(Tab(self.file_object, self.name_of_tabs_to_read), columns_to_read_by_index)
+        # Prepare a new tab
+        if identifier not in tab_names:
+            self._create_and_prepare_a_new_tab_called_identifier(identifier)
+            tab_names.append(identifier) 
+
+        tab_to = self.new_writebook[identifier]
+        add_line_at_bottom(Line(self.current_tab, line_index), tab_to)
+
+    def _create_and_prepare_a_new_tab_called_identifier(self, identifier):
+        self.new_writebook.create_sheet(identifier)
+        tab_to = self.new_writebook[identifier]
+        copy_paste_line(Line(self.current_tab, 1), Line(tab_to, 1))
+         
     
     def _delete_first_tab_of_new_workbook(self, new_file_name):
         if new_file_name not in os.listdir(self.file_object.path):
             del self.new_writebook[self.new_writebook.sheetnames[0]]
 
-
-
-
-        
-
-    def extract_column_from_all_sheets(self, column):
+    def extract_a_column_from_all_tabs(self):
         """
         Fonction qui récupère une colonne dans chaque onglet pour former une nouvelle feuille
         contenant toutes les colonnes. La première cellule de chaque colonne correspond alors 
@@ -145,22 +280,32 @@ class FileControler(UtilsForFile):
             file = File('dataset.xlsx',dataonly = False)
             file.extract_column_from_all_sheets('B') 
         """ 
-        column = column_index_from_string(column)
-         
-        new_sheet = self.file.writebook.create_sheet(f"gather_{column}")
-        column_to = 1
+        self.columns_to_read = column_index_from_string(self.columns_to_read)
+        self.new_tab = self.file_object.writebook.create_sheet(f"gather_{self.columns_to_read}")
+        self.columns_to_write = 1
 
         start = time()
-        for name_onglet in self.file.sheets_name: 
-            onglet = self.file.writebook[name_onglet] 
-            self.copy_paste_column(onglet,column,new_sheet,column_to)
-            column_to = new_sheet.max_column + 1
-            new_sheet.cell(1,new_sheet.max_column).value = name_onglet 
-            Other.display_running_infos('extract_column_from_all_sheets', name_onglet, self.file.sheets_name, start)
+        for tab_name in self.file_object.sheets_name: 
+            self.current_tab = self.file_object.get_tab_by_name(tab_name)
+            self._copy_column_from_a_tab_in_the_next_new_tab_column(tab_name)
+            Other.display_running_infos('extract_column_from_all_sheets', tab_name, self.file_object.sheets_name, start)
 
-            
-        self.file.writebook.save(self.file.path + self.file.name_file) 
-        self.file.sheets_name = self.file.writebook.sheetnames 
+        self.file_object.writebook.save(self.file_object.path + self.file_object.name_file) 
+        self.file_object.sheets_name = self.file_object.writebook.sheetnames 
+    
+    def _copy_column_from_a_tab_in_the_next_new_tab_column(self, tab_name): 
+        copy_paste_column(Column(self.current_tab, self.columns_to_read), Column(self.new_tab, self.columns_to_write))
+
+        self.columns_to_write = self.new_tab.max_column + 1
+        self.new_tab.cell(1, self.new_tab.max_column).value = tab_name  
+    
+
+
+
+
+
+    # ARRIVE ICI
+    
 
     def extract_cells_from_all_sheets(self, *cells):
         """
@@ -963,133 +1108,133 @@ class FileControler(UtilsForFile):
             sheet.cell(i,column_write).value = group 
 
 
-class PathControler(FileControler):
-    def __init__(self, path):
-        """Input : path (object of the class Path)"""
-        self.path = path
+# class PathControler(FileControler):
+#     def __init__(self, path):
+#         """Input : path (object of the class Path)"""
+#         self.path = path
 
-    def apply_method_on_homononymous_files(self, filename, method_name, *args, **kwargs):
-        """ 
-        Vous avez plusieurs dossiers contenant un fichier ayant le même nom.
-        Fonction qui prend tous les fichiers d'un même nom et qui lui applique une même méthode.  
+#     def apply_method_on_homononymous_files(self, filename, method_name, *args, **kwargs):
+#         """ 
+#         Vous avez plusieurs dossiers contenant un fichier ayant le même nom.
+#         Fonction qui prend tous les fichiers d'un même nom et qui lui applique une même méthode.  
 
-        Inputs:
-            - filename (str)
-            - method_name (str): the name of the method to execute 
-            - *args, **kwargs : arguments of the method associated with method_name
-        """
-        start = time()
+#         Inputs:
+#             - filename (str)
+#             - method_name (str): the name of the method to execute 
+#             - *args, **kwargs : arguments of the method associated with method_name
+#         """
+#         start = time()
 
-        # Récupérer tous les dossiers d'un dossier  
-        for directory in self.path.directories:
-            file = File(filename, self.path.pathname + directory + '/')
-            controler = FileControler(file)
-            method = getattr(controler, method_name)
-            method(*args, **kwargs) 
-            Other.display_running_infos(method_name, directory, self.path.directories, start)
+#         # Récupérer tous les dossiers d'un dossier  
+#         for directory in self.path.directories:
+#             file = File(filename, self.path.pathname + directory + '/')
+#             controler = FileControler(file)
+#             method = getattr(controler, method_name)
+#             method(*args, **kwargs) 
+#             Other.display_running_infos(method_name, directory, self.path.directories, start)
 
-    def apply_method_on_homononymous_sheets(self, filename, sheetname, method_name, *args, **kwargs):
-        """ 
-        Vous avez plusieurs dossiers contenant un fichier ayant le même nom.
-        Fonction qui prend tous les fichiers d'un même nom et qui lui applique une même méthode.  
+#     def apply_method_on_homononymous_sheets(self, filename, sheetname, method_name, *args, **kwargs):
+#         """ 
+#         Vous avez plusieurs dossiers contenant un fichier ayant le même nom.
+#         Fonction qui prend tous les fichiers d'un même nom et qui lui applique une même méthode.  
 
-        Inputs:
-            - filename (str)
-            - method_name (str): the name of the method to execute 
-            - *args, **kwargs : arguments of the method associated with method_name
-        """
-        start = time()
+#         Inputs:
+#             - filename (str)
+#             - method_name (str): the name of the method to execute 
+#             - *args, **kwargs : arguments of the method associated with method_name
+#         """
+#         start = time()
 
-        # Récupérer tous les dossiers d'un dossier  
-        for directory in self.path.directories: 
-            file = File(filename, self.path.pathname + directory + '/')
-            controler = FileControler(file) 
-            method = getattr(controler, method_name)
-            method(sheetname, *args, **kwargs) 
-            Other.display_running_infos(method_name, directory, self.path.directories, start)
+#         # Récupérer tous les dossiers d'un dossier  
+#         for directory in self.path.directories: 
+#             file = File(filename, self.path.pathname + directory + '/')
+#             controler = FileControler(file) 
+#             method = getattr(controler, method_name)
+#             method(sheetname, *args, **kwargs) 
+#             Other.display_running_infos(method_name, directory, self.path.directories, start)
            
-    def gather_files_in_different_directories(self, name_file, name_sheet, values_only=False):
-        """
-        Vous avez plusieurs dossiers contenant un fichier ayant le même nom. Vous souhaitez créer un seul fichier regroupant 
-        toutes les lignes de ces fichiers.
+#     def gather_files_in_different_directories(self, name_file, name_sheet, values_only=False):
+#         """
+#         Vous avez plusieurs dossiers contenant un fichier ayant le même nom. Vous souhaitez créer un seul fichier regroupant 
+#         toutes les lignes de ces fichiers.
 
-        Inputs:
-            - name_file(str)
-            - name_sheet(str)
-            - values_only(bool): to decide whether or not copying only the values and not formulas
-        """
-        # Récupérer tous les dossiers d'un dossier
-        directories = [f for f in os.listdir(self.path.pathname) if os.path.isdir(os.path.join(self.path.pathname, f))]
+#         Inputs:
+#             - name_file(str)
+#             - name_sheet(str)
+#             - values_only(bool): to decide whether or not copying only the values and not formulas
+#         """
+#         # Récupérer tous les dossiers d'un dossier
+#         directories = [f for f in os.listdir(self.path.pathname) if os.path.isdir(os.path.join(self.path.pathname, f))]
 
-        # Créer un nouveau fichier
-        new_file = openpyxl.Workbook() 
-        new_sheet = new_file.worksheets[0] 
+#         # Créer un nouveau fichier
+#         new_file = openpyxl.Workbook() 
+#         new_sheet = new_file.worksheets[0] 
 
-        start = time()
+#         start = time()
 
-        # Récupérer le fichier dans chacun des dossiers
-        for directory in directories: 
-            sheet_to_copy = File(name_file, self.path.pathname + directory + '/').writebook[name_sheet]
+#         # Récupérer le fichier dans chacun des dossiers
+#         for directory in directories: 
+#             sheet_to_copy = File(name_file, self.path.pathname + directory + '/').writebook[name_sheet]
 
-            # Copier une fois la première ligne
-            if directory == directories[0]:
-                self.copy_paste_line(sheet_to_copy, 1, new_sheet, 1, values_only=values_only)
+#             # Copier une fois la première ligne
+#             if directory == directories[0]:
+#                 self.copy_paste_line(sheet_to_copy, 1, new_sheet, 1, values_only=values_only)
 
-            # Copier son contenu à la suite du fichier
-            for line in range(2, sheet_to_copy.max_row + 1): 
-                if line % 200 == 0:
-                    print(line, sheet_to_copy.max_row + 1)
-                self.add_line_at_bottom(sheet_to_copy, line, new_sheet, values_only=values_only)
+#             # Copier son contenu à la suite du fichier
+#             for line in range(2, sheet_to_copy.max_row + 1): 
+#                 if line % 200 == 0:
+#                     print(line, sheet_to_copy.max_row + 1)
+#                 self.add_line_at_bottom(sheet_to_copy, line, new_sheet, values_only=values_only)
 
-            # save at the end of each directory not to use too much memory
-            new_file.save(self.path.pathname  + "gathered_" + name_file)
-            Other.display_running_infos('gather_files_in_different_directories', directory, directories, start)
+#             # save at the end of each directory not to use too much memory
+#             new_file.save(self.path.pathname  + "gathered_" + name_file)
+#             Other.display_running_infos('gather_files_in_different_directories', directory, directories, start)
 
-    def create_one_onglet_by_participant(self, name_file, onglet_from, column_read, first_line=2):
-        """
-        VERSION ALTERNATIVE A APPLYHOMOGENEOUSFILES DOC OBSOLETE
-        Fonction qui prend un onglet dont une colonne contient des chaînes de caractères comme par exemple un nom.
-        Chaque chaîne de caractères peut apparaître plusieurs fois dans cette colonne (exe : quand un participant répond plusieurs fois)
-        La fonction retourne un fichier contenant un onglet par chaîne de caractères.
-          Chaque onglet contient toutes les lignes correspondant à cette chaîne de caractères.
+#     def create_one_onglet_by_participant(self, name_file, onglet_from, column_read, first_line=2):
+#         """
+#         VERSION ALTERNATIVE A APPLYHOMOGENEOUSFILES DOC OBSOLETE
+#         Fonction qui prend un onglet dont une colonne contient des chaînes de caractères comme par exemple un nom.
+#         Chaque chaîne de caractères peut apparaître plusieurs fois dans cette colonne (exe : quand un participant répond plusieurs fois)
+#         La fonction retourne un fichier contenant un onglet par chaîne de caractères.
+#           Chaque onglet contient toutes les lignes correspondant à cette chaîne de caractères.
 
-        Input : 
-            name_file (str): name of the file to divide
-            onglet_from : onglet de référence.
-            column_read : l'étiquette de la colonne qui contient les chaînes de caractères.
-            first_line : ligne où commencer à parcourir.
-            last_line : ligne de fin de parcours 
+#         Input : 
+#             name_file (str): name of the file to divide
+#             onglet_from : onglet de référence.
+#             column_read : l'étiquette de la colonne qui contient les chaînes de caractères.
+#             first_line : ligne où commencer à parcourir.
+#             last_line : ligne de fin de parcours 
  
-        Exemple d'utilisation : 
+#         Exemple d'utilisation : 
     
-            file = File('dataset.xlsx')
-            file.create_one_onglet_by_participant('onglet1', 'A') 
-        """ 
-        directories = [f for f in os.listdir(self.path.pathname) if os.path.isdir(os.path.join(self.path.pathname, f))]
+#             file = File('dataset.xlsx')
+#             file.create_one_onglet_by_participant('onglet1', 'A') 
+#         """ 
+#         directories = [f for f in os.listdir(self.path.pathname) if os.path.isdir(os.path.join(self.path.pathname, f))]
 
-        # Créer un nouveau fichier
-        new_file = openpyxl.Workbook()  
-        onglets = new_file.sheetnames
-        column_read = column_index_from_string(column_read)  
-        start = time()
+#         # Créer un nouveau fichier
+#         new_file = openpyxl.Workbook()  
+#         onglets = new_file.sheetnames
+#         column_read = column_index_from_string(column_read)  
+#         start = time()
 
-        for directory in directories:
-            file = File(name_file, self.path.pathname + directory + '/')
-            sheet = file.writebook[onglet_from] 
+#         for directory in directories:
+#             file = File(name_file, self.path.pathname + directory + '/')
+#             sheet = file.writebook[onglet_from] 
 
-            # Create one tab by identifiant containing all its lines
-            for i in range(first_line, sheet.max_row + 1):
-                onglet = str(sheet.cell(i,column_read).value)
+#             # Create one tab by identifiant containing all its lines
+#             for i in range(first_line, sheet.max_row + 1):
+#                 onglet = str(sheet.cell(i,column_read).value)
 
-                # Prepare a new tab
-                if onglet not in onglets:
-                    new_file.create_sheet(onglet)
-                    self.copy_paste_line(sheet, 1,  new_file[onglet], 1)
-                    onglets.append(onglet) 
+#                 # Prepare a new tab
+#                 if onglet not in onglets:
+#                     new_file.create_sheet(onglet)
+#                     self.copy_paste_line(sheet, 1,  new_file[onglet], 1)
+#                     onglets.append(onglet) 
 
-                self.add_line_at_bottom(sheet, i, new_file[onglet]) 
-            Other.display_running_infos('create_one_onglet_by_participant', directory, directories, start)
+#                 self.add_line_at_bottom(sheet, i, new_file[onglet]) 
+#             Other.display_running_infos('create_one_onglet_by_participant', directory, directories, start)
             
-        # Deletion of the first tab 
-        del new_file[new_file.sheetnames[0]]
-        new_file.save(self.path.pathname + f'divided_{name_file}')
+#         # Deletion of the first tab 
+#         del new_file[new_file.sheetnames[0]]
+#         new_file.save(self.path.pathname + f'divided_{name_file}')
