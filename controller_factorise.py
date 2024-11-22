@@ -113,13 +113,6 @@ class MultipleFilesController():
     Il faudra y placer les sauvegardes ainsi que split_one_tab_...
     On pourra y mettre newwritebook et enlever cet attribut de MultipleTabsController
     """
-    pass
-
-
-class MultipleTabsControler():
-    """
-    Handle methods involving multiple tabs of a file.
-    """
     def __init__(self, file_object, names_of_tabs_to_read=None,
                 names_of_tabs_to_modify=None, columns_to_read=None,
                 columns_to_write=None, first_line=2):
@@ -142,25 +135,23 @@ class MultipleTabsControler():
         self.new_tab = None 
         self.current_tab = None
 
-
-    ## Multiple tabs methods
-
-    def create_excel_compiler(self):
-        return ExcelCompiler(self.file_object.path + self.file_object.name_file) 
-    
     def make_horodated_copy_of_a_file(self):
-        self.writebook_copy = create_empty_workbook()
+        self.new_writebook = create_empty_workbook()
         self._copy_tabs_in_new_workbook()
         self._save_file()            
                     
     #@display_run
     def _copy_tabs_in_new_workbook(self): 
         start = time()
-        for tab_name in self.file_object.sheets_name:
-            self.current_tab = self.file_object.writebook[tab_name]
-            self.writebook_copy.create_sheet(tab_name)
+        for tab_name in self.file_object.sheets_name:            
+            self.new_writebook.create_sheet(tab_name)
+            self._get_old_file_tab_and_new_file_tab(tab_name)
             self._copy_old_file_tab_in_new_file_tab()
             Other.display_running_infos('sauvegarde', tab_name, self.file_object.sheets_name, start) 
+
+    def _get_old_file_tab_and_new_file_tab(self, tab_name):
+        self.current_tab = self.file_object.writebook[tab_name]
+        self.new_tab = self.new_writebook[tab_name] 
 
     def _copy_old_file_tab_in_new_file_tab(self): 
         for i in range(1, self.current_tab.max_row + 1):
@@ -168,34 +159,13 @@ class MultipleTabsControler():
                 self._copy_old_file_cell_in_new_file_cell(Cell(i,j))
 
     def _copy_old_file_cell_in_new_file_cell(self, cell):   
-        new_tab = self.writebook_copy[self.current_tab.tab_name] 
-        new_tab.cell(cell.i, cell.j).value = self.current_tab.cell(cell.i, cell.j).value  
-        new_tab.cell(cell.i, cell.j).fill = copy(self.current_tab.cell(cell.i, cell.j).fill)
-        new_tab.cell(cell.i, cell.j).font = copy(self.current_tab.cell(cell.i, cell.j).font) 
+        self.new_tab.cell(cell.i, cell.j).value = self.current_tab.cell(cell.i, cell.j).value  
+        self.new_tab.cell(cell.i, cell.j).fill = copy(self.current_tab.cell(cell.i, cell.j).fill)
+        self.new_tab.cell(cell.i, cell.j).font = copy(self.current_tab.cell(cell.i, cell.j).font) 
 
     def _save_file(self):
         name_file_no_extension = Str(self.file_object.name_file).del_extension() 
-        self.writebook_copy.save(self.file_object.path  + name_file_no_extension + '_date_' + datetime.now().strftime("%Y-%m-%d_%Hh%M") + '.xlsx') 
-
-
-    def apply_method_on_some_tabs(self, method_name, *args, **kwargs):
-        """ 
-        Vous avez un fichier contenant plusieurs onglets et vous souhaitez appliquer une même méthode de la 
-        classe Sheet sur une liste de ces onglets du fichier. On s'attend à ce que tous les onglets aient une structure identique.
-
-        Inputs:
-            - method_name (str): the name of the method to execute 
-            - *args, **kwargs : arguments of the method associated with method_name
-        """  
-        start = time()
-        for tab_name in self.names_of_tabs_to_modify:    
-            # Get the method and apply it
-            method = getattr(self, method_name)
-            method(tab_name, *args, **kwargs)  
-            Other.display_running_infos(method_name, tab_name, self.names_of_tabs_to_modify, start)
-
-        self.file_object.writebook.save(self.file_object.path + self.file_object.name_file)
-
+        self.new_writebook.save(self.file_object.path  + name_file_no_extension + '_date_' + datetime.now().strftime("%Y-%m-%d_%Hh%M") + '.xlsx') 
 
     def split_one_tab_in_multiple_tabs(self):
         """
@@ -256,10 +226,61 @@ class MultipleTabsControler():
         tab_to = self.new_writebook[identifier]
         copy_paste_line(Line(self.current_tab, 1), Line(tab_to, 1))
          
-    
     def _delete_first_tab_of_new_workbook(self, new_file_name):
         if new_file_name not in os.listdir(self.file_object.path):
             del self.new_writebook[self.new_writebook.sheetnames[0]]
+
+
+class MultipleTabsControler():
+    """
+    Handle methods involving multiple tabs of a file.
+    """
+    def __init__(self, file_object, names_of_tabs_to_read=None,
+                names_of_tabs_to_modify=None, columns_to_read=None,
+                columns_to_write=None, first_line=2):
+        """
+        Inputs: 
+            - file_object (object of class File)
+            - names_of_tabs_to_read (optional str or list(str))
+            - names_of_tabs_to_modify (optional str or list(str))
+            - new_writebook (openpyxl.WorkBook) : eventual workbook to complete
+            - new_tab (openpyxl.WorkBook) : eventual new tab to complete
+            - current_tab (openpyxl.Workbook[tab]) : variable to store tab we are working on
+        """
+        self.file_object = file_object
+        self.name_of_tabs_to_read = names_of_tabs_to_read
+        self.names_of_tabs_to_modify = names_of_tabs_to_modify 
+        self.columns_to_read = columns_to_read
+        self.columns_to_write = columns_to_write
+        self.first_line = first_line 
+        self.new_tab = None 
+        self.current_tab = None
+
+
+    ## Multiple tabs methods
+
+    def create_excel_compiler(self):
+        return ExcelCompiler(self.file_object.path + self.file_object.name_file) 
+
+
+    def apply_method_on_some_tabs(self, method_name, *args, **kwargs):
+        """ 
+        Vous avez un fichier contenant plusieurs onglets et vous souhaitez appliquer une même méthode de la 
+        classe Sheet sur une liste de ces onglets du fichier. On s'attend à ce que tous les onglets aient une structure identique.
+
+        Inputs:
+            - method_name (str): the name of the method to execute 
+            - *args, **kwargs : arguments of the method associated with method_name
+        """  
+        start = time()
+        for tab_name in self.names_of_tabs_to_modify:    
+            # Get the method and apply it
+            method = getattr(self, method_name)
+            method(tab_name, *args, **kwargs)  
+            Other.display_running_infos(method_name, tab_name, self.names_of_tabs_to_modify, start)
+
+        self.file_object.writebook.save(self.file_object.path + self.file_object.name_file)
+
 
     def extract_a_column_from_all_tabs(self):
         """

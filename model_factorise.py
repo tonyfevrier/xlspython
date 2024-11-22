@@ -64,7 +64,7 @@ class Column():
 
 class Cell():
     """Handle methods modifying a cell"""
-    def __init__(self, tab_object, i, j): 
+    def __init__(self, i, j): 
         #self.tab_object = tab_object 
         self.i = i
         self.j = j

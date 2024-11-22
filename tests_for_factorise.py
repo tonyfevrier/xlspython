@@ -1,6 +1,6 @@
 from unittest import TestCase, main 
 from model_factorise import File
-from controller_factorise import MultipleTabsControler
+from controller_factorise import MultipleTabsControler, MultipleFilesController
 from utils.utils import Other, Str
  
 import os
@@ -44,9 +44,10 @@ class TestFile(TestCase):
     #     verify_files_identical(file1, file2)
     #     del file1, file2
 
-    def test_create_one_onglet_by_participant(self): 
+    def test_split_one_tab_in_multiple_tabs(self): 
         file = File('test_create_one_onglet_by_participant.xlsx') 
-        controler = MultipleTabsControler(file, 'Stroops_test (7)', columns_to_read='A')
+        controler = MultipleFilesController(file, 'Stroops_test (7)', columns_to_read='A')
+        controler.make_horodated_copy_of_a_file()
         controler.split_one_tab_in_multiple_tabs()  
         file2 = File('divided_test_create_one_onglet_by_participant.xlsx')
         verify_files_identical(File('test_create_one_onglet_by_participant_before.xlsx'),
@@ -55,7 +56,7 @@ class TestFile(TestCase):
         os.remove("fichiers_xls/divided_test_create_one_onglet_by_participant.xlsx")
 
 
-    def test_extract_column_from_all_sheets(self):
+    def test_extract_a_column_from_all_tabs(self):
         file = File('test_extract_column.xlsx')
         controler = MultipleTabsControler(file, columns_to_read='B')
         controler.extract_a_column_from_all_tabs() 
