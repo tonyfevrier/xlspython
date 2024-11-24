@@ -151,7 +151,7 @@ class MultipleFilesController():
     def make_horodated_copy_of_a_file(self):
         self.new_writebook = create_empty_workbook()
         self._copy_tabs_in_new_workbook()
-        self._save_file()            
+        self._save_horodated_file()            
                     
     #@display_run
     def _copy_tabs_in_new_workbook(self): 
@@ -166,7 +166,7 @@ class MultipleFilesController():
         self.current_tab = self.file_object.writebook[tab_name]
         self.new_tab = self.new_writebook[tab_name] 
 
-    def _save_file(self):
+    def _save_horodated_file(self):
         name_file_no_extension = Str(self.file_object.name_file).del_extension() 
         self.new_writebook.save(self.file_object.path  + name_file_no_extension + '_date_' + datetime.now().strftime("%Y-%m-%d_%Hh%M") + '.xlsx') 
 
@@ -282,8 +282,7 @@ class MultipleTabsControler():
             method(tab_name, *args, **kwargs)  
             Other.display_running_infos(method_name, tab_name, self.names_of_tabs_to_modify, start)
 
-        self.file_object.writebook.save(self.file_object.path + self.file_object.name_file)
-
+        self.file_object.save_file() 
 
     def extract_a_column_from_all_tabs(self):
         """
@@ -314,13 +313,17 @@ class MultipleTabsControler():
             self._copy_column_from_a_tab_in_the_next_new_tab_column(tab_name)
             Other.display_running_infos('extract_column_from_all_sheets', tab_name, self.file_object.sheets_name, start)
 
-        self.file_object.writebook.save(self.file_object.path + self.file_object.name_file) 
-        self.file_object.sheets_name = self.file_object.writebook.sheetnames 
+        self.file_object.save_file()  
+        self.file_object.update_sheet_names()
     
     def _copy_column_from_a_tab_in_the_next_new_tab_column(self, tab_name): 
-        TabsCopy(self.current_tab, self.new_tab).copy_paste_column(self.columns_to_read, self.columns_to_write)
+        TabsCopy(self.current_tab, self.new_tab).copy_paste_column(self.columns_to_read, self.columns_to_write) 
+        self._choose_the_new_column_title(tab_name)  
         self.columns_to_write = self.new_tab.max_column + 1
-        self.new_tab.cell(1, self.new_tab.max_column).value = tab_name  
+
+    def _choose_the_new_column_title(self, title):
+        self.new_tab.cell(1, self.new_tab.max_column).value = title  
+
     
 
 

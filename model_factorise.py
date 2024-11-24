@@ -37,6 +37,12 @@ class File():
     def get_string_cell_value(self, tab, cell):
         return str(tab.cell(cell.line_index, cell.column_index).value)
     
+    def update_sheet_names(self):
+        self.sheets_name = self.writebook.sheetnames 
+
+    def save_file(self):
+        self.writebook.save(self.path + self.name_file) 
+
 
 class Tab():
     """Handle methods modifying a tab"""
