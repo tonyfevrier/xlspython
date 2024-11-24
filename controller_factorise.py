@@ -1,3 +1,6 @@
+# Ce que j'ai fait pr les classes. 
+# Attributs : initiaux, mais aussi transitoires pour éviter de créer des arguments dans les fonctions
+
 import os
 import openpyxl
 import json
@@ -20,72 +23,82 @@ def create_empty_workbook():
     del workbook[workbook.active.title]
     return workbook
 
-# A METTRE PTET DANS UN LINE CONTROLLER
-def copy_paste_line(Line_from, Line_to):#, values_only=False):
-        """
-        Fonction qui prend une ligne de la feuille et qui la copie dans un autre onglet.
+class TabsCopy():
+    """Y mettre LES METHODES COPY OLD TAB OU CELLS peut être"""
 
-        Inputs : 
-            - onglet_from : onglet d'où on copie
-            - row_from : ligne de l'onglet d'origine.
-            - onglet_to : onglet où coller.
-            - row_to : la ligne où il faut coller dans l'onglet à modifier.
+    def __init__(self, tab_from, tab_to):
+        self.tab_from = tab_from
+        self.tab_to = tab_to
+        
+    def copy_paste_line(self, line_from, line_to):#, values_only=False):
+            """
+            Fonction qui prend une ligne de la feuille et qui la copie dans un autre onglet.
 
-        Exemple d'utilisation : 
-      
-            file = File('dataset.xlsx')
-            file.copy_paste_line('onglet1', 1, 'onglet2', 1)
-        """
+            Inputs : 
+                - onglet_from : onglet d'où on copie
+                - row_from : ligne de l'onglet d'origine.
+                - onglet_to : onglet où coller.
+                - row_to : la ligne où il faut coller dans l'onglet à modifier.
 
-        """ 
-        ON REPRENDRA CETTE VERSION QUAND J ATTAQUERAIS LES HISTOIRES DE VALUES ONLY
+            Exemple d'utilisation : 
+        
+                file = File('dataset.xlsx')
+                file.copy_paste_line('onglet1', 1, 'onglet2', 1)
+            """
 
-        # Cas où on ne copie que les valeurs, cell est un str
-        if values_only:
-            column_index = 1 
-            for column in onglet_from.iter_cols(min_row=row_from, max_row=row_from, min_col=0, max_col=onglet_from.max_column, values_only=values_only):
-                for cell in column: 
-                    if cell:
-                        onglet_to.cell(row_to, column_index).value = cell
-                    column_index += 1
-                    
-        # Cas où on copie les formules, cell est un objet
-        else:
-            for column in onglet_from.iter_cols(min_row=row_from, max_row=row_from, min_col=0, max_col=onglet_from.max_column, values_only=values_only):
-                for cell in column: 
-                    if cell.value != "":
-                        onglet_to.cell(row_to, cell.column).value = cell.value """
+            """ 
+            ON REPRENDRA CETTE VERSION QUAND J ATTAQUERAIS LES HISTOIRES DE VALUES ONLY
 
-        tab_from = Line_from.tab
-        tab_to = Line_to.tab
-        for column_index in range(1, tab_from.max_column + 1): 
-            tab_to.cell(Line_to.line_index, column_index).value = tab_from.cell(Line_from.line_index, column_index).value 
+            # Cas où on ne copie que les valeurs, cell est un str
+            if values_only:
+                column_index = 1 
+                for column in onglet_from.iter_cols(min_row=row_from, max_row=row_from, min_col=0, max_col=onglet_from.max_column, values_only=values_only):
+                    for cell in column: 
+                        if cell:
+                            onglet_to.cell(row_to, column_index).value = cell
+                        column_index += 1
+                        
+            # Cas où on copie les formules, cell est un objet
+            else:
+                for column in onglet_from.iter_cols(min_row=row_from, max_row=row_from, min_col=0, max_col=onglet_from.max_column, values_only=values_only):
+                    for cell in column: 
+                        if cell.value != "":
+                            onglet_to.cell(row_to, cell.column).value = cell.value """
 
+            for column_index in range(1, self.tab_from.max_column + 1): 
+                self.tab_to.cell(line_to, column_index).value = self.tab_from.cell(line_from, column_index).value 
 
-def copy_paste_column(Column_from, Column_to):
-        """
-        Fonction qui prend une colonne de la feuille et qui la copie dans un autre onglet.
-        """
-        tab_from = Column_from.tab
-        tab_to = Column_to.tab
-        for i in range(1, tab_from.max_row + 1): 
-            tab_to.cell(i, Column_to.letter).value = tab_from.cell(i, Column_from.letter).value 
+    def copy_paste_column(self, column_from, column_to):
+            """
+            Fonction qui prend une colonne de la feuille et qui la copie dans un autre onglet.
+            """ 
+            for line_index in range(1, self.tab_from.max_row + 1): 
+                self.tab_to.cell(line_index, column_to).value = self.tab_from.cell(line_index, column_from).value 
 
+    def add_line_at_bottom(self, line_from):
+            """
+            Fonction qui copie une ligne spécifique de la feuille à la fin d'un autre onglet.
 
-def add_line_at_bottom(Line_from, tab_to, values_only=False):
-        """
-        Fonction qui copie une ligne spécifique de la feuille à la fin d'un autre onglet.
+            Input : 
+                - row_origin : ligne de l'onglet d'origine.
+                - onglet : l'onglet à modifier où on copie la ligne.
 
-        Input : 
-            - row_origin : ligne de l'onglet d'origine.
-            - onglet : l'onglet à modifier où on copie la ligne.
+            Exemple d'utilisation : 
+        
+                file = File('dataset.xlsx')
+                file.copy_paste_line('onglet1', 1, 'onglet2')
+            """ 
+            self.copy_paste_line(line_from, self.tab_to.max_row + 1) 
 
-        Exemple d'utilisation : 
-     
-            file = File('dataset.xlsx')
-            file.copy_paste_line('onglet1', 1, 'onglet2')
-        """ 
-        copy_paste_line(Line_from, Line(tab_to, tab_to.max_row + 1))
+    def copy_old_file_tab_in_new_file_tab(self): 
+        for i in range(1, self.current_tab.max_row + 1):
+            for j in range(1, self.current_tab.max_column + 1):  
+                self.deep_copy_of_a_cell(Cell(i,j), Cell(i,j))
+
+    def deep_copy_of_a_cell(self, cell_from, cell_to):   
+        self.tab_to.cell(cell_to.line_index, cell_to.column_index).value = self.tab_from.cell(cell_from.line_index, cell_from.column_index).value  
+        self.tab_to.cell(cell_to.line_index, cell_to.column_index).fill = copy(self.tab_from.cell(cell_from.line_index, cell_from.column_index).fill)
+        self.tab_to.cell(cell_to.line_index, cell_to.column_index).font = copy(self.tab_from.cell(cell_from.line_index, cell_from.column_index).font) 
 
 
 class TabController():
@@ -146,22 +159,12 @@ class MultipleFilesController():
         for tab_name in self.file_object.sheets_name:            
             self.new_writebook.create_sheet(tab_name)
             self._get_old_file_tab_and_new_file_tab(tab_name)
-            self._copy_old_file_tab_in_new_file_tab()
+            TabsCopy(self.current_tab, self.new_tab).copy_old_file_tab_in_new_file_tab()
             Other.display_running_infos('sauvegarde', tab_name, self.file_object.sheets_name, start) 
 
     def _get_old_file_tab_and_new_file_tab(self, tab_name):
         self.current_tab = self.file_object.writebook[tab_name]
         self.new_tab = self.new_writebook[tab_name] 
-
-    def _copy_old_file_tab_in_new_file_tab(self): 
-        for i in range(1, self.current_tab.max_row + 1):
-            for j in range(1, self.current_tab.max_column + 1):  
-                self._copy_old_file_cell_in_new_file_cell(Cell(i,j))
-
-    def _copy_old_file_cell_in_new_file_cell(self, cell):   
-        self.new_tab.cell(cell.i, cell.j).value = self.current_tab.cell(cell.i, cell.j).value  
-        self.new_tab.cell(cell.i, cell.j).fill = copy(self.current_tab.cell(cell.i, cell.j).fill)
-        self.new_tab.cell(cell.i, cell.j).font = copy(self.current_tab.cell(cell.i, cell.j).font) 
 
     def _save_file(self):
         name_file_no_extension = Str(self.file_object.name_file).del_extension() 
@@ -211,7 +214,7 @@ class MultipleFilesController():
     def _create_or_complete_a_tab_regarding_identifier(self, line_index): 
         tab_names = self.new_writebook.sheetnames 
         column_to_read_by_index = column_index_from_string(self.columns_to_read)
-        identifier = str(self.current_tab.cell(line_index, column_to_read_by_index).value)
+        identifier = self.file_object.get_string_cell_value(self.current_tab, Cell(line_index, column_to_read_by_index))
 
         # Prepare a new tab
         if identifier not in tab_names:
@@ -219,12 +222,12 @@ class MultipleFilesController():
             tab_names.append(identifier) 
 
         tab_to = self.new_writebook[identifier]
-        add_line_at_bottom(Line(self.current_tab, line_index), tab_to)
+        TabsCopy(self.current_tab, tab_to).add_line_at_bottom(line_index)
 
     def _create_and_prepare_a_new_tab_called_identifier(self, identifier):
         self.new_writebook.create_sheet(identifier)
         tab_to = self.new_writebook[identifier]
-        copy_paste_line(Line(self.current_tab, 1), Line(tab_to, 1))
+        TabsCopy(self.current_tab, tab_to).copy_paste_line(1, 1)
          
     def _delete_first_tab_of_new_workbook(self, new_file_name):
         if new_file_name not in os.listdir(self.file_object.path):
@@ -315,8 +318,7 @@ class MultipleTabsControler():
         self.file_object.sheets_name = self.file_object.writebook.sheetnames 
     
     def _copy_column_from_a_tab_in_the_next_new_tab_column(self, tab_name): 
-        copy_paste_column(Column(self.current_tab, self.columns_to_read), Column(self.new_tab, self.columns_to_write))
-
+        TabsCopy(self.current_tab, self.new_tab).copy_paste_column(self.columns_to_read, self.columns_to_write)
         self.columns_to_write = self.new_tab.max_column + 1
         self.new_tab.cell(1, self.new_tab.max_column).value = tab_name  
     

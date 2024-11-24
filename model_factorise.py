@@ -33,55 +33,35 @@ class File():
         
     def get_tab_by_name(self, tab_name):
         return self.writebook[tab_name]
+    
+    def get_string_cell_value(self, tab, cell):
+        return str(tab.cell(cell.line_index, cell.column_index).value)
+    
 
 class Tab():
     """Handle methods modifying a tab"""
-    def __init__(self, tab_name): #file_object, tab_name):
-        #self.file_object = file_object
-        #self.tab = file_object.writebook[tab_name]  
-        self.tab_name = tab_name
-
-    # def _copy_old_file_tab_in_new_file_tab(self): 
-    #     for i in range(1, self.tab.max_row + 1):
-    #         for j in range(1, self.tab.max_column + 1): 
-    #             new_writebook = self.file_object.writebook_copy
-    #             Cell(self, i, j)._copy_old_file_cell_in_new_file_cell(new_writebook)
+    def __init__(self, tab_name):   
+        self.tab_name = tab_name 
 
 
-class Line():
-    def __init__(self, tab, line_index):
-        #self.tab_object = tab_object
-        self.tab = tab
-        self.line_index = line_index
+# class Line():
+#     def __init__(self, tab, line_index): 
+#         self.tab = tab
+#         self.line_index = line_index
 
 
-class Column():
-    def __init__(self, tab, letter):
-        #self.tab_object = tab_object
-        self.tab = tab
-        self.letter = letter
+# class Column():
+#     def __init__(self, tab, letter): 
+#         self.tab = tab
+#         self.letter = letter
             
 
 class Cell():
     """Handle methods modifying a cell"""
-    def __init__(self, i, j): 
-        #self.tab_object = tab_object 
-        self.i = i
-        self.j = j
-
-    # def _copy_old_file_cell_in_new_file_cell(self, new_writebook):   
-    #     new_tab = new_writebook[self.tab_object.tab_name] 
-    #     new_tab.cell(self.i, self.j).value = self.tab_object.tab.cell(self.i, self.j).value  
-    #     new_tab.cell(self.i, self.j).fill = copy(self.tab_object.tab.cell(self.i, self.j).fill)
-    #     new_tab.cell(self.i, self.j).font = copy(self.tab_object.tab.cell(self.i, self.j).font) 
-
-
-
-
-# def create_empty_workbook():
-#     workbook = openpyxl.Workbook()
-#     del workbook[workbook.active.title]
-#     return workbook
+    def __init__(self, line_index, column_index):  
+        self.line_index = line_index
+        self.column_index = column_index
+ 
 
 
 
