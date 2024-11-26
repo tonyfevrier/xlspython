@@ -25,10 +25,13 @@ class File():
         self.writebook = openpyxl.load_workbook(self.path + self.name_file, data_only = dataonly)
         self.sheets_name = self.writebook.sheetnames 
         
+    def create_and_return_new_tab(self, tab_name):
+        return self.writebook.create_sheet(tab_name)
+
     def get_tab_by_name(self, tab_name):
         return self.writebook[tab_name]
     
-    def get_string_cell_value(self, tab, cell):
+    def get_cell_value_from_a_tab(self, tab, cell):
         return str(tab.cell(cell.line_index, cell.column_index).value)
     
     def update_sheet_names(self):

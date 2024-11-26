@@ -1,5 +1,8 @@
 from openpyxl.styles import PatternFill
-from openpyxl.utils import get_column_interval, column_index_from_string, get_column_letter
+from openpyxl.utils import get_column_interval,\
+                           column_index_from_string,\
+                           get_column_letter,\
+                           coordinate_to_tuple
 from copy import copy 
 from time import time, sleep 
 from model_factorise import Cell
@@ -642,13 +645,13 @@ class DisplayRunningInfos():
             - duration (float) 
         """
         if duration < 60:
-            print(f'{self.time_title} : {round(duration, 20)} sec')
+            print(f'{self.time_title} : {round(duration, 2)} sec')
         elif 60 <= duration < 3600: 
             duration /= 60 
-            print(f'{self.time_title} : {round(duration, 20)} min')
+            print(f'{self.time_title} : {round(duration, 2)} min')
         else: 
             duration /= 3600 
-            print(f'{self.time_title} : {round(duration, 20)} h')
+            print(f'{self.time_title} : {round(duration, 2)} h')
 
     def _update_time_title(self, time_title):
         self.time_title = time_title
@@ -705,6 +708,10 @@ class TabsCopy():
             for line_index in range(1, self.tab_from.max_row + 1): 
                 self.tab_to.cell(line_index, column_to).value = self.tab_from.cell(line_index, column_from).value 
 
+    def copy_paste_multiple_columns(self, columns_int_list):
+        for column in columns_int_list:
+            self.copy_paste_column(column, column)
+
     def add_line_at_bottom(self, line_from):
             """
             Fonction qui copie une ligne spécifique de la feuille à la fin d'un autre onglet.
@@ -727,3 +734,20 @@ class TabsCopy():
     def copy_of_a_cell(self, cell_from, cell_to):   
         self.tab_to.cell(cell_to.line_index, cell_to.column_index).value = self.tab_from.cell(cell_from.line_index, cell_from.column_index).value
     
+
+class GetIndex():
+    """Handle methods to transform cell, columns in indexes"""
+
+    @staticmethod
+    def get_list_of_cells_coordinates(cells): 
+        cells_list = []
+        for cell in cells: 
+            cells_list.append(coordinate_to_tuple(cell)) 
+        return cells_list
+
+    @staticmethod
+    def get_list_of_columns_indexes(columns_letters_list):
+        columns_int_list = []
+        for column in columns_letters_list: 
+            columns_int_list.append(column_index_from_string(column)) 
+        return columns_int_list 

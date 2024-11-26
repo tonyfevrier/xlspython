@@ -7,9 +7,9 @@ import json
 import re
 
 from openpyxl.styles import PatternFill
-from openpyxl.utils import column_index_from_string, coordinate_to_tuple, get_column_letter
+from openpyxl.utils import column_index_from_string, get_column_letter, coordinate_to_tuple
 from time import time
-from utils.utils import Other, UtilsForFile, Str, DisplayRunningInfos, TabsCopy 
+from utils.utils import Other, UtilsForFile, Str, DisplayRunningInfos, TabsCopy, GetIndex 
 from copy import copy
 from model_factorise import Cell
 from pycel import ExcelCompiler  
@@ -22,12 +22,6 @@ def create_empty_workbook():
     workbook = openpyxl.Workbook()
     del workbook[workbook.active.title]
     return workbook
-
-def get_list_of_cells_coordinates(cells): 
-        cells_list = []
-        for cell in cells: 
-            cells_list.append(coordinate_to_tuple(cell)) 
-        return cells_list
 
 
 class TabController():
@@ -44,13 +38,13 @@ class TabController():
         """ 
         self.file_object = file_object
         self.tab_name = tab_name
-        self.tab = self.file_object.writebook[tab_name]
+        self.tab = self.file_object.get_tab_by_name(tab_name)
         self.columns_to_read = columns_to_read
         self.columns_to_write = columns_to_write
         self.first_line = first_line
     
 
-class MultipleFilesController():
+class MultipleFilesController(GetIndex):
     """
     Handle methods involving multiple files
 
@@ -92,19 +86,20 @@ class MultipleFilesController():
 
         for tab_name in self.file_object.sheets_name:            
             self.new_writebook.create_sheet(tab_name)
-            self._get_old_file_tab_and_new_file_tab(tab_name) 
+            self._update_old_file_tab_and_new_file_tab(tab_name) 
             self.tabs_copy.copy_old_file_tab_in_new_file_tab()
 
             self._update_display_infos('make_horodated_copy_of_a_file', tab_name, self.file_object.sheets_name)
             self.display.display_running_infos() 
 
-    def _get_old_file_tab_and_new_file_tab(self, tab_name): 
-        self.tabs_copy._choose_the_tab_to_read(self.file_object.writebook[tab_name])
+    def _update_old_file_tab_and_new_file_tab(self, tab_name): 
+        self.tabs_copy._choose_the_tab_to_read(self.file_object.get_tab_by_name(tab_name))
         self.tabs_copy._choose_the_tab_to_write_in(self.new_writebook[tab_name])
 
     def _save_horodated_file(self):
-        name_file_no_extension = Str(self.file_object.name_file).del_extension() 
-        self.new_writebook.save(self.file_object.path  + name_file_no_extension + '_date_' + datetime.now().strftime("%Y-%m-%d_%Hh%M") + '.xlsx') 
+        name_file_without_extension = Str(self.file_object.name_file).del_extension() 
+        file_to_save_name = self.file_object.path  + name_file_without_extension + '_date_' + datetime.now().strftime("%Y-%m-%d_%Hh%M") + '.xlsx'
+        self.new_writebook.save(file_to_save_name) 
 
     def _update_display_infos(self, method_name, current_running_part, list_of_running_parts):
         self.display.method_name = method_name
@@ -118,18 +113,18 @@ class MultipleFilesController():
         La fonction retourne un fichier contenant un onglet par chaîne de caractères.
         Chaque onglet contient toutes les lignes correspondant à cette chaîne de caractères.
         """ 
-        # Create a new workbook or load it if exists
+        
         new_file_name = f'divided_{self.file_object.name_file}'
         self._create_or_load_workbook(new_file_name)
         
-        # Get tab to read
-        self.tabs_copy.tab_from = self.file_object.get_tab_by_name(self.name_of_tabs_to_read)
+        self.tabs_copy._choose_the_tab_to_read(self.file_object.get_tab_by_name(self.name_of_tabs_to_read)) 
 
-        # Create a tab by identifier
-        for line_index in range(self.first_line, self.tabs_copy.tab_from.max_row + 1):
-            self._create_or_complete_a_tab_regarding_identifier(line_index)
+        last_line = self.tabs_copy.tab_from.max_row + 1
+        for line_index in range(self.first_line, last_line):
+            self.current_line = line_index
+            self._create_or_complete_a_tab_by_identifier()
 
-        # Keep only new tabs and save the new workbook
+        # The first tab automatically created when opening the new workbook is useless
         self._delete_first_tab_of_new_workbook(new_file_name)
         self.new_writebook.save(self.file_object.path + new_file_name)
 
@@ -139,18 +134,17 @@ class MultipleFilesController():
         except OSError:
             self.new_writebook = openpyxl.Workbook()
     
-    def _create_or_complete_a_tab_regarding_identifier(self, line_index): 
+    def _create_or_complete_a_tab_by_identifier(self): 
         tab_names = self.new_writebook.sheetnames 
         column_to_read_by_index = column_index_from_string(self.columns_to_read)
-        identifier = self.file_object.get_string_cell_value(self.tabs_copy.tab_from, Cell(line_index, column_to_read_by_index))
+        identifier = self.file_object.get_cell_value_from_a_tab(self.tabs_copy.tab_from, Cell(self.current_line, column_to_read_by_index))
 
-        # Prepare a new tab
         if identifier not in tab_names:
             self._create_tab_called_identifier_and_fill_first_line(identifier)
             tab_names.append(identifier) 
  
         self.tabs_copy._choose_the_tab_to_write_in(self.new_writebook[identifier])
-        self.tabs_copy.add_line_at_bottom(line_index)
+        self.tabs_copy.add_line_at_bottom(self.current_line)
 
     def _create_tab_called_identifier_and_fill_first_line(self, identifier):
         self.new_writebook.create_sheet(identifier)
@@ -159,7 +153,8 @@ class MultipleFilesController():
          
     def _delete_first_tab_of_new_workbook(self, new_file_name):
         if new_file_name not in os.listdir(self.file_object.path):
-            del self.new_writebook[self.new_writebook.sheetnames[0]] 
+            first_tab_name = self.new_writebook.sheetnames[0]
+            del self.new_writebook[first_tab_name] 
 
     def extract_cells_from_all_tabs(self, *cells):
         """
@@ -171,16 +166,16 @@ class MultipleFilesController():
         Inputs:
             - cells (list[str])
         """  
-        cells_list = get_list_of_cells_coordinates(cells) 
+        cells_list = self.get_list_of_cells_coordinates(cells) 
         
-        # Create a new file 
         self.new_writebook = openpyxl.Workbook() 
-        self.tabs_copy._choose_the_tab_to_write_in(self.new_writebook[self.new_writebook.sheetnames[0]])
+        first_tab_name = self.new_writebook.sheetnames[0]
+        self.tabs_copy._choose_the_tab_to_write_in(self.new_writebook[first_tab_name])
  
         self.display.start_time = time()
   
         for tab_name in self.file_object.sheets_name: 
-            self.tabs_copy._choose_the_tab_to_read(self.file_object.writebook[tab_name])   
+            self.tabs_copy._choose_the_tab_to_read(self.file_object.get_tab_by_name(tab_name))   
             self._fill_the_line_corresponding_to_one_tab(cells_list, tab_name)
             
             self._update_display_infos('extract_cells_from_all_sheets', tab_name, self.file_object.sheets_name)
@@ -196,15 +191,14 @@ class MultipleFilesController():
         self.tabs_copy.tab_to.cell(self.current_line, 1).value = tab_name
 
     def _fill_the_line_with_extracted_cells(self, cells_list):
-        current_column = 2
-        # Fill selected values one by one
+        current_column = 2 
         for cell in cells_list:   
             self.tabs_copy.copy_of_a_cell(Cell(cell[0],cell[1]), Cell(self.current_line, current_column)) 
             current_column += 1
         self.current_line += 1
    
 
-class MultipleTabsControler():
+class MultipleTabsControler(GetIndex):
     """
     Handle methods involving multiple tabs of a file.
     """
@@ -239,7 +233,6 @@ class MultipleTabsControler():
     def create_excel_compiler(self):
         return ExcelCompiler(self.file_object.path + self.file_object.name_file) 
 
-
     def apply_method_on_some_tabs(self, method_name, *args, **kwargs):
         """ 
         Vous avez un fichier contenant plusieurs onglets et vous souhaitez appliquer une même méthode de la 
@@ -251,7 +244,7 @@ class MultipleTabsControler():
         """  
         self.display.start_time = time()
         for tab_name in self.names_of_tabs_to_modify:    
-            # Get the method and apply it
+            # Get the method from its name and apply it
             method = getattr(self, method_name)
             method(tab_name, *args, **kwargs) 
 
@@ -267,7 +260,8 @@ class MultipleTabsControler():
         au nom de l'onglet. Attention, en l'état, il faut que tous les onglets aient la même structure.
         """ 
         self.columns_to_read = column_index_from_string(self.columns_to_read)
-        self.tabs_copy._choose_the_tab_to_write_in(self.file_object.writebook.create_sheet(f"gather_{self.columns_to_read}"))
+        new_tab = self.file_object.create_and_return_new_tab(f"gather_{self.columns_to_read}")
+        self.tabs_copy._choose_the_tab_to_write_in(new_tab)
         self.columns_to_write = 1
 
         self.display.start_time = time() 
@@ -287,55 +281,34 @@ class MultipleTabsControler():
         self.columns_to_write = self.tabs_copy.tab_to.max_column + 1
 
     def _choose_the_new_column_title(self, title):
-        self.tabs_copy.tab_to.cell(1, self.tabs_copy.tab_to.max_column).value = title  
+        self.tabs_copy.tab_to.cell(1, self.tabs_copy.tab_to.max_column).value = title    
 
-
-
-    # ARRIVE ICI
-    
-        
-
-    def apply_column_formula_on_all_sheets(self, *column_list):
+    def apply_columns_formula_on_all_tabs(self):
         """
         Fonction qui reproduit les formules d'une colonne ou plusieurs colonnes
           du premier onglet sur toutes les colonnes situées à la même position dans les 
           autres onglets.
 
         Input : 
-            -column_list : int. les positions des colonnes où récupérer et coller.
-
-        Exemples d'utilisation : 
-
-            Bien veiller à mettre dataonly = False sinon il ne copiera pas les formules mais
-            les valeurs des cellules. On peut aussi copier les valeurs des cellules : pour cela,
-            enlever dataonly = False.
-
-            Sur une colonne
-                file = File('dataset.xlsx', dataonly = False)
-                file.apply_column_formula_on_all_sheets(2) 
-
-            Sur trois colonnes
-                file = File('dataset.xlsx', dataonly = False)
-                file.apply_column_formula_on_all_sheets(2,5,10) 
-
-            Sur toutes les colonnes du fichier à partir de la colonne colmin jusque la colonne colmax :
-                file = File('dataset.xlsx', dataonly = False)
-                file.apply_column_formula_on_all_sheets(*[i for i in range(colmin,colmax + 1)]) 
+            -column_list : int. les positions des colonnes où récupérer et coller
         """
-        column_int_list = []
-        for column in column_list: 
-            column_int_list.append(column_index_from_string(column))  
+        columns_int_list = self.get_list_of_columns_indexes(self.columns_to_read)
 
-        start = time()
+        self.display.start_time = time()
+        self.tabs_copy._choose_the_tab_to_read(self.file_object.get_tab_by_name(self.file_object.sheets_name[0]))
 
-        #on applique les copies dans tous les onglets sauf le premier
-        for name_onglet in self.file.sheets_name[1:]:
-            for column in column_int_list:
-                self.copy_paste_column(self.file.writebook[self.file.sheets_name[0]],column,self.file.writebook[name_onglet],column)
-            Other.display_running_infos('apply_column_formula_on_all_sheets', name_onglet, self.file.sheets_name[1:], start)
+        # on applique les copies des formules dans tous les onglets sauf le premier duquel viennent ces formules
+        for tab_name in self.file_object.sheets_name[1:]:
+            self.tabs_copy._choose_the_tab_to_write_in(self.file_object.get_tab_by_name(tab_name))
+            self.tabs_copy.copy_paste_multiple_columns(columns_int_list) 
+
+            self._update_display_infos('apply_column_formula_on_all_sheets', tab_name, self.file_object.sheets_name[1:])
+            self.display.display_running_infos()
             
-
-        self.file.writebook.save(self.file.path + self.file.name_file)
+        self.file_object.save_file() 
+        
+    
+    # ARRIVE ICI
 
     def apply_cells_formula_on_all_sheets(self, *cells):
         """

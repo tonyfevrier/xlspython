@@ -55,7 +55,6 @@ class TestFile(TestCase):
         
         os.remove("fichiers_xls/divided_test_create_one_onglet_by_participant.xlsx")
 
-
     def test_extract_a_column_from_all_tabs(self):
         file = File('test_extract_column.xlsx')
         controler = MultipleTabsControler(file, columns_to_read='B')
@@ -65,22 +64,11 @@ class TestFile(TestCase):
         del file.writebook[file.sheets_name[-1]]
         file.writebook.save(file.path + 'test_extract_column.xlsx') 
 
-
-#     """
-#     def test_apply_column_formula_on_all_sheets(self):
-#         file = File('dataset.xlsx', dataonly = False)
-
-#         #sauvegarde du fichier initial
-#         file2 = file.sauvegarde()
-#         # test sur trois colonnes réparties au hasard
-#         file.apply_column_formula_on_all_sheets(2,5,10)
-#         #vérifier sur tous les onglets que ces trois colonnes sont identiques au fichier de réf.
-#         # on supprime file et on renomme file2 avec le nom de file pour retrouver le fichier initial.
-        
-#         # test sur toutes les colonnes à partir de la colonne 2 
-#         file.apply_column_formula_on_all_sheets(*[i for i in range(2,6)]) 
-#         #on refait ce qui a été fait ci-dessus.
-#     """
+    def test_apply_column_formula_on_all_tabs(self):
+        file = File('dataset.xlsx', dataonly = False)
+        controler = MultipleTabsControler(file, columns_to_read=['B','C'])
+        controler.apply_columns_formula_on_all_tabs()
+    
 
 #     def test_gather_columns_in_one(self):
 #         file = File("test_gather_columns_in_one.xlsx")
