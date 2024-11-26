@@ -1,7 +1,8 @@
 from openpyxl.styles import PatternFill
 from openpyxl.utils import get_column_interval, column_index_from_string, get_column_letter
 from copy import copy 
-from time import time 
+from time import time, sleep 
+from model_factorise import Cell
 
 import typer 
 import yagmail 
@@ -560,26 +561,27 @@ class Other():
         return value
     
     @classmethod
-    def display_running_infos(cls, method, name, list_name, start):
+    def display_running_infos(cls, method_run, current_part, list_of_method_parts, start):
         """ 
         Print the percentage of completion of a method 
         
         Inputs:
+            - method (str): the method which is raun
             - name (str): represents the current run (could be a tab if we run on multiple tabs)
             - list_name (list[str]) : list of names the program must run
             - start (float): the time at the beginning of the running process
         """
-        completion_percentage = round((list_name.index(name) + 1)/len(list_name) * 100,2)
+        completion_percentage = round((list_of_method_parts.index(current_part) + 1)/len(list_of_method_parts) * 100,2)
         time_elapsed = time() - start
-        remaining_time = (100 - completion_percentage) * time_elapsed / completion_percentage
-        print(f'\n---------------Currently running method {method}---------------\n')
+        time_remaining = (100 - completion_percentage) * time_elapsed / completion_percentage
+        print(f'\n---------------Currently running method {method_run}---------------\n')
         print(f'Percentage of completion : {completion_percentage}%')
-        print(f'{name} is finished')
+        print(f'{current_part} is finished')
         cls.display_time_in_adapted_unit(time_elapsed, 'Elapsed time')
-        cls.display_time_in_adapted_unit(remaining_time, 'Estimated remaining time') 
+        cls.display_time_in_adapted_unit(time_remaining, 'Estimated remaining time') 
 
     @staticmethod
-    def display_time_in_adapted_unit(duration, time_type):
+    def display_time_in_adapted_unit(duration, time_title):
         """
         Print a duration in sec if it is less than 60s, in minutes if it is between 60s and 3600s, in hours otherwise.
         
@@ -588,12 +590,160 @@ class Other():
             - time_type(str): the kinf of time to print in the string
         """
         if duration < 60:
-            print(f'{time_type} : {round(duration, 1)} sec')
+            print(f'{time_title} : {round(duration, 1)} sec')
         elif 60 <= duration < 3600: 
             duration /= 60 
-            print(f'{time_type} : {round(duration, 1)} min')
+            print(f'{time_title} : {round(duration, 1)} min')
         else: 
             duration /= 3600 
-            print(f'{time_type} : {round(duration, 1)} h')
+            print(f'{time_title} : {round(duration, 1)} h')
 
+
+class DisplayRunningInfos():
+    def __init__(self):
+        self.method_name = None
+        self.current_running_part = None
+        self.list_of_running_parts = None
+        self.start_time = None
+        self.elapsed_time = 0.
+        self.remaining_time = 0.
+        self.completion_percentage = 0.
+        self.time_title = ''  
+
+    def display_running_infos(self):
+        """ 
+        Print the percentage of completion of a method 
+        
+        Inputs:
+            - method (str): the method which is raun
+            - name (str): represents the current run (could be a tab if we run on multiple tabs)
+            - list_name (list[str]) : list of names the program must run
+            - start (float): the time at the beginning of the running process
+        """
+        self._compute_time_and_completion_data()
+        self._display_completion_data()
+        self._display_times_data() 
+
+    def _compute_time_and_completion_data(self):
+        self.completion_percentage = round((self.list_of_running_parts.index(self.current_running_part) + 1)/len(self.list_of_running_parts) * 100,2)
+        self.elapsed_time = time() - self.start_time 
+        self.remaining_time = (100 - self.completion_percentage) * self.elapsed_time / self.completion_percentage 
+
+    def _display_completion_data(self):
+        print(f'\n---------------Currently running method {self.method_name}---------------\n')
+        print(f'Percentage of completion : {self.completion_percentage}%')
+        print(f'{self.current_running_part} is finished')
+
+    def _display_times_data(self):
+        self._update_time_title('Elapsed time')
+        self.display_time_in_adapted_unit(self.elapsed_time)
+        self._update_time_title('Estimated remaining time')
+        self.display_time_in_adapted_unit(self.remaining_time)
+
+    def display_time_in_adapted_unit(self, duration):
+        """
+        Print a duration in sec if it is less than 60s, in minutes if it is between 60s and 3600s, in hours otherwise.
+        
+        Inputs:
+            - duration (float)
+            - time_type(str): the kind of time to print in the string
+        """
+        if duration < 60:
+            print(f'{self.time_title} : {round(duration, 20)} sec')
+        elif 60 <= duration < 3600: 
+            duration /= 60 
+            print(f'{self.time_title} : {round(duration, 20)} min')
+        else: 
+            duration /= 3600 
+            print(f'{self.time_title} : {round(duration, 20)} h')
+
+    def _update_time_title(self, time_title):
+        self.time_title = time_title
+
+
+class TabsCopy():
+    """Make copys from a tab to a new tab"""
+
+    def __init__(self):
+        self.tab_from = None
+        self.tab_to = None
+
+    def _choose_the_tab_to_write_in(self, tab):
+        self.tab_to = tab
+
+    def _choose_the_tab_to_read(self, tab):
+        self.tab_from = tab
+        
+    def copy_paste_line(self, line_from, line_to):#, values_only=False):
+            """
+            Fonction qui prend une ligne de la feuille et qui la copie dans un autre onglet.
+
+            Inputs : 
+                - onglet_from : onglet d'où on copie
+                - row_from : ligne de l'onglet d'origine.
+                - onglet_to : onglet où coller.
+                - row_to : la ligne où il faut coller dans l'onglet à modifier.
+
+            Exemple d'utilisation : 
+        
+                file = File('dataset.xlsx')
+                file.copy_paste_line('onglet1', 1, 'onglet2', 1)
+            """
+
+            """ 
+            ON REPRENDRA CETTE VERSION QUAND J ATTAQUERAIS LES HISTOIRES DE VALUES ONLY
+
+            # Cas où on ne copie que les valeurs, cell est un str
+            if values_only:
+                column_index = 1 
+                for column in onglet_from.iter_cols(min_row=row_from, max_row=row_from, min_col=0, max_col=onglet_from.max_column, values_only=values_only):
+                    for cell in column: 
+                        if cell:
+                            onglet_to.cell(row_to, column_index).value = cell
+                        column_index += 1
+                        
+            # Cas où on copie les formules, cell est un objet
+            else:
+                for column in onglet_from.iter_cols(min_row=row_from, max_row=row_from, min_col=0, max_col=onglet_from.max_column, values_only=values_only):
+                    for cell in column: 
+                        if cell.value != "":
+                            onglet_to.cell(row_to, cell.column).value = cell.value """
+
+            for column_index in range(1, self.tab_from.max_column + 1): 
+                self.tab_to.cell(line_to, column_index).value = self.tab_from.cell(line_from, column_index).value 
+
+    def copy_paste_column(self, column_from, column_to):
+            """
+            Fonction qui prend une colonne de la feuille et qui la copie dans un autre onglet.
+            """ 
+            for line_index in range(1, self.tab_from.max_row + 1): 
+                self.tab_to.cell(line_index, column_to).value = self.tab_from.cell(line_index, column_from).value 
+
+    def add_line_at_bottom(self, line_from):
+            """
+            Fonction qui copie une ligne spécifique de la feuille à la fin d'un autre onglet.
+
+            Input : 
+                - row_origin : ligne de l'onglet d'origine.
+                - onglet : l'onglet à modifier où on copie la ligne.
+
+            Exemple d'utilisation : 
+        
+                file = File('dataset.xlsx')
+                file.copy_paste_line('onglet1', 1, 'onglet2')
+            """ 
+            self.copy_paste_line(line_from, self.tab_to.max_row + 1) 
+
+    def copy_old_file_tab_in_new_file_tab(self): 
+        for i in range(1, self.tab_from.max_row + 1):
+            for j in range(1, self.tab_from.max_column + 1):  
+                self.deep_copy_of_a_cell(Cell(i,j), Cell(i,j))
+
+    def deep_copy_of_a_cell(self, cell_from, cell_to):   
+        self.tab_to.cell(cell_to.line_index, cell_to.column_index).value = self.tab_from.cell(cell_from.line_index, cell_from.column_index).value  
+        self.tab_to.cell(cell_to.line_index, cell_to.column_index).fill = copy(self.tab_from.cell(cell_from.line_index, cell_from.column_index).fill)
+        self.tab_to.cell(cell_to.line_index, cell_to.column_index).font = copy(self.tab_from.cell(cell_from.line_index, cell_from.column_index).font) 
+
+    def copy_of_a_cell(self, cell_from, cell_to):   
+        self.tab_to.cell(cell_to.line_index, cell_to.column_index).value = self.tab_from.cell(cell_from.line_index, cell_from.column_index).value
     

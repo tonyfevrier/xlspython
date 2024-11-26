@@ -142,13 +142,12 @@ class TestFile(TestCase):
 #         tabs = controler.check_linenumber_of_tabs(14)
 #         self.assertListEqual(tabs, ['cutinparts', 'cutinpartsbis', 'delete_lines', 'delete_lines_bis'])
 
-#     def test_extract_cells_from_all_sheets(self):
-#         file = File('test_extract_cells_from_all_sheets.xlsx')
-#         controler = FileControler(file)
-#         controler.extract_cells_from_all_sheets('C7','D7','C8','D8') 
-#         verify_files_identical(file, File('test_extract_cells_from_all_sheets - after.xlsx'))
-#         del file.writebook['gathered_data']
-#         file.writebook.save(file.path + 'test_extract_cells_from_all_sheets.xlsx')
+    def test_extract_cells_from_all_tabs(self):
+        file = File('test_extract_cells_from_all_sheets.xlsx')
+        controler = MultipleFilesController(file)
+        controler.extract_cells_from_all_tabs('C7','D7','C8','D8') 
+        file2 = File('gathered_data_test_extract_cells_from_all_sheets.xlsx')
+        verify_sheets_identical(file2.writebook['Sheet'], File('test_extract_cells_from_all_sheets - after.xlsx').writebook['gathered_data']) 
 
 #     def test_apply_same_method_on_all_sheets(self):
 #         file = File("test_method_on_all_sheets.xlsx")
@@ -474,14 +473,14 @@ def verify_files_identical(file1, file2):
             for j in range(1,sheet1.max_column+1):
                 testcase.assertEqual(sheet1.cell(i,j).value,sheet2.cell(i,j).value)
 
-# def verify_sheets_identical(sheet1, sheet2):  
-#     testcase = TestCase()
-#     testcase.assertEqual(sheet1.max_row,sheet2.max_row)
-#     testcase.assertEqual(sheet1.max_column,sheet2.max_column)
+def verify_sheets_identical(sheet1, sheet2):  
+    testcase = TestCase()
+    testcase.assertEqual(sheet1.max_row,sheet2.max_row)
+    testcase.assertEqual(sheet1.max_column,sheet2.max_column)
 
-#     for i in range(1,sheet1.max_row+1):
-#         for j in range(1,sheet1.max_column+1):
-#             testcase.assertEqual(sheet1.cell(i,j).value,sheet2.cell(i,j).value)
+    for i in range(1,sheet1.max_row+1):
+        for j in range(1,sheet1.max_column+1):
+            testcase.assertEqual(sheet1.cell(i,j).value,sheet2.cell(i,j).value)
 
 if __name__== "__main__":
     main()
