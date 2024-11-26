@@ -612,13 +612,7 @@ class DisplayRunningInfos():
 
     def display_running_infos(self):
         """ 
-        Print the percentage of completion of a method 
-        
-        Inputs:
-            - method (str): the method which is raun
-            - name (str): represents the current run (could be a tab if we run on multiple tabs)
-            - list_name (list[str]) : list of names the program must run
-            - start (float): the time at the beginning of the running process
+        Print the percentage of completion, elapsed time and remaining time when executing a method 
         """
         self._compute_time_and_completion_data()
         self._display_completion_data()
@@ -645,8 +639,7 @@ class DisplayRunningInfos():
         Print a duration in sec if it is less than 60s, in minutes if it is between 60s and 3600s, in hours otherwise.
         
         Inputs:
-            - duration (float)
-            - time_type(str): the kind of time to print in the string
+            - duration (float) 
         """
         if duration < 60:
             print(f'{self.time_title} : {round(duration, 20)} sec')
@@ -678,16 +671,9 @@ class TabsCopy():
             """
             Fonction qui prend une ligne de la feuille et qui la copie dans un autre onglet.
 
-            Inputs : 
-                - onglet_from : onglet d'où on copie
-                - row_from : ligne de l'onglet d'origine.
-                - onglet_to : onglet où coller.
-                - row_to : la ligne où il faut coller dans l'onglet à modifier.
-
-            Exemple d'utilisation : 
-        
-                file = File('dataset.xlsx')
-                file.copy_paste_line('onglet1', 1, 'onglet2', 1)
+            Inputs :  
+                - line_from : ligne de l'onglet d'origine.  
+                - line_to : la ligne où il faut coller dans l'onglet à modifier.
             """
 
             """ 
@@ -724,13 +710,7 @@ class TabsCopy():
             Fonction qui copie une ligne spécifique de la feuille à la fin d'un autre onglet.
 
             Input : 
-                - row_origin : ligne de l'onglet d'origine.
-                - onglet : l'onglet à modifier où on copie la ligne.
-
-            Exemple d'utilisation : 
-        
-                file = File('dataset.xlsx')
-                file.copy_paste_line('onglet1', 1, 'onglet2')
+                - line_from : ligne de l'onglet d'origine. 
             """ 
             self.copy_paste_line(line_from, self.tab_to.max_row + 1) 
 

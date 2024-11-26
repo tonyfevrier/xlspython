@@ -34,8 +34,10 @@ class TabController():
     """Handle methods reading and modifying a unique tab of a file."""
     def __init__(self, file_object, tab_name, columns_to_read=None, columns_to_write=None, first_line=2):
         """
-        Inputs:
+        Attributs:
             - file_object (file object)
+            - tab_name (str)
+            - tab (openpyxl.workbook.tab)
             - columns_to_read (optional str or list(str))
             - columns_to_write (optional str or list(str))
             - first_line (optional int)
@@ -52,20 +54,22 @@ class MultipleFilesController():
     """
     Handle methods involving multiple files
 
-    Il faudra y placer les sauvegardes ainsi que split_one_tab_...
-    On pourra y mettre newwritebook et enlever cet attribut de MultipleTabsController
     """
     def __init__(self, file_object, names_of_tabs_to_read=None,
                 names_of_tabs_to_modify=None, columns_to_read=None,
                 columns_to_write=None, first_line=2):
         """
-        Inputs: 
+        Attributs: 
             - file_object (object of class File)
             - names_of_tabs_to_read (optional str or list(str))
             - names_of_tabs_to_modify (optional str or list(str))
+            - columns_to_read (optional str or list(str))
+            - columns_to_write (optional str or list(str))
+            - first_line (optional int)
             - current_line (int): line likely to evolve in methods
             - new_writebook (openpyxl.WorkBook) : eventual workbook to complete
             - tabs_copy (TabsCopy object): object to apply copy method from a tab to a new tab
+            - display (DisplayRunningInfos object): to display the current state of the run
         """
         self.file_object = file_object
         self.name_of_tabs_to_read = names_of_tabs_to_read
@@ -82,8 +86,7 @@ class MultipleFilesController():
         self.new_writebook = create_empty_workbook()
         self._copy_tabs_in_new_workbook()
         self._save_horodated_file()            
-                    
-    #@display_run
+                     
     def _copy_tabs_in_new_workbook(self): 
         self.display.start_time = time() 
 
@@ -113,20 +116,7 @@ class MultipleFilesController():
         Fonction qui prend un onglet dont une colonne contient des chaînes de caractères comme par exemple un nom.
         Chaque chaîne de caractères peut apparaître plusieurs fois dans cette colonne (exe : quand un participant répond plusieurs fois)
         La fonction retourne un fichier contenant un onglet par chaîne de caractères.
-          Chaque onglet contient toutes les lignes correspondant à cette chaîne de caractères.
-
-        Input : 
-            onglet_from : onglet de référence.
-            column_read : l'étiquette de la colonne qui contient les chaînes de caractères.
-            newfile_name (str): name of the newfile
-            newfile_path (str): where to write/find the newfile
-            first_line : ligne où commencer à parcourir.
-            last_line : ligne de fin de parcours 
- 
-        Exemple d'utilisation : 
-    
-            file = File('dataset.xlsx')
-            file.create_one_onglet_by_participant('onglet1', 'A') 
+        Chaque onglet contient toutes les lignes correspondant à cette chaîne de caractères.
         """ 
         # Create a new workbook or load it if exists
         new_file_name = f'divided_{self.file_object.name_file}'
@@ -174,7 +164,7 @@ class MultipleFilesController():
     def extract_cells_from_all_tabs(self, *cells):
         """
         Vous avez un fichier avec des onglets de structure identique avec un onglet par participant. Vous souhaitez
-        récupérer des cellules identiques dans tous les onglets et créer un onglet avec une ligne par participant,
+        récupérer des cellules identiques dans tous les onglets et créer un fichier à un onglet avec une ligne par participant,
         qui contient les valeurs de ces cellules. Fonction analogue à gather_multiple_answers mais ne portant pas sur une
         seule feuille.
 
@@ -214,7 +204,6 @@ class MultipleFilesController():
         self.current_line += 1
    
 
-
 class MultipleTabsControler():
     """
     Handle methods involving multiple tabs of a file.
@@ -223,13 +212,15 @@ class MultipleTabsControler():
                 names_of_tabs_to_modify=None, columns_to_read=None,
                 columns_to_write=None, first_line=2):
         """
-        Inputs: 
+        Attributs: 
             - file_object (object of class File)
             - names_of_tabs_to_read (optional str or list(str))
             - names_of_tabs_to_modify (optional str or list(str))
-            - new_writebook (openpyxl.WorkBook) : eventual workbook to complete
-            - new_tab (openpyxl.WorkBook) : eventual new tab to complete
-            - current_tab (openpyxl.Workbook[tab]) : variable to store tab we are working on
+            - columns_to_read (optional str or list(str))
+            - columns_to_write (optional str or list(str))
+            - first_line (optional int)  
+            - tabs_copy (TabsCopy object): object to apply copy method from a tab to a new tab
+            - display (DisplayRunningInfos object): to display the current state of the run
         """
         self.file_object = file_object
         self.name_of_tabs_to_read = names_of_tabs_to_read
@@ -238,9 +229,7 @@ class MultipleTabsControler():
         self.columns_to_write = columns_to_write
         self.first_line = first_line 
         self.tabs_copy = TabsCopy()
-        self.display = DisplayRunningInfos()
-
-    ## Multiple tabs methods
+        self.display = DisplayRunningInfos() 
 
     def _update_display_infos(self, method_name, current_running_part, list_of_running_parts):
         self.display.method_name = method_name
@@ -276,19 +265,6 @@ class MultipleTabsControler():
         Fonction qui récupère une colonne dans chaque onglet pour former une nouvelle feuille
         contenant toutes les colonnes. La première cellule de chaque colonne correspond alors 
         au nom de l'onglet. Attention, en l'état, il faut que tous les onglets aient la même structure.
-
-        Input : 
-            column : str. L'étiquette de la colonne à récupérer dans chaque onglet 
-
-        Exemple d'utilisation : 
-    
-            file = File('dataset.xlsx')
-            file.extract_column_from_all_sheets('B') 
-
-            Si on veut extraire les formules
-
-            file = File('dataset.xlsx',dataonly = False)
-            file.extract_column_from_all_sheets('B') 
         """ 
         self.columns_to_read = column_index_from_string(self.columns_to_read)
         self.tabs_copy._choose_the_tab_to_write_in(self.file_object.writebook.create_sheet(f"gather_{self.columns_to_read}"))
