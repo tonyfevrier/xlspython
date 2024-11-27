@@ -730,10 +730,15 @@ class TabsCopy():
         self.tab_to.cell(cell_to.line_index, cell_to.column_index).value = self.tab_from.cell(cell_from.line_index, cell_from.column_index).value  
         self.tab_to.cell(cell_to.line_index, cell_to.column_index).fill = copy(self.tab_from.cell(cell_from.line_index, cell_from.column_index).fill)
         self.tab_to.cell(cell_to.line_index, cell_to.column_index).font = copy(self.tab_from.cell(cell_from.line_index, cell_from.column_index).font) 
-
+        self.tab_to.cell(cell_to.line_index, cell_to.column_index).border = copy(self.tab_from.cell(cell_from.line_index, cell_from.column_index).border) 
+        self.tab_to.cell(cell_to.line_index, cell_to.column_index).alignment = copy(self.tab_from.cell(cell_from.line_index, cell_from.column_index).alignment)     
+            
     def copy_of_a_cell(self, cell_from, cell_to):   
         self.tab_to.cell(cell_to.line_index, cell_to.column_index).value = self.tab_from.cell(cell_from.line_index, cell_from.column_index).value
     
+    def deep_copy_multiple_cells(self, cells_list):
+        for cell in cells_list: 
+            self.deep_copy_of_a_cell(Cell(cell[0],cell[1]), Cell(cell[0],cell[1])) 
 
 class GetIndex():
     """Handle methods to transform cell, columns in indexes"""

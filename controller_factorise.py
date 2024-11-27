@@ -306,11 +306,8 @@ class MultipleTabsControler(GetIndex):
             self.display.display_running_infos()
             
         self.file_object.save_file() 
-        
-    
-    # ARRIVE ICI
 
-    def apply_cells_formula_on_all_sheets(self, *cells):
+    def apply_cells_formula_on_all_tabs(self, *cells):
         """
         Fonction qui reproduit les formules d'une cellule ou plusieurs cellules
           du premier onglet sur toutes les cellules situées à la même position dans les 
@@ -318,35 +315,24 @@ class MultipleTabsControler(GetIndex):
 
         Input : 
             -cells : string. les positions des cellule où récupérer et coller 
-
-        Exemples d'utilisation : 
-
-            Bien veiller à mettre dataonly = False sinon il ne copiera pas les formules mais
-            les valeurs des cellules. On peut aussi copier les valeurs des cellules : pour cela,
-            enlever dataonly = False.
-
-            file = File('dataset.xlsx', dataonly = False)
-            file.apply_column_formula_on_all_sheets('C5','D6')  
         """
+        cells_list = GetIndex.get_list_of_cells_coordinates(cells) 
 
-        #obtenir les indices de la cellule 
-        cell_list = []
-        for cell in cells: 
-            cell_list.append(coordinate_to_tuple(cell)) 
+        self.display.start_time = time()
+        tab_to_read = self.file_object.get_tab_by_name(self.file_object.sheets_name[0])
+        self.tabs_copy._choose_the_tab_to_read(tab_to_read)
 
-        start = time()
+        # on applique les copies de formules dans tous les onglets sauf le premier duquel proviennent les formules
+        for tab_name in self.file_object.sheets_name[1:]: 
+            self.tabs_copy._choose_the_tab_to_write_in(self.file_object.get_tab_by_name(tab_name))  
+            self.tabs_copy.deep_copy_multiple_cells(cells_list)  
+            
+            self._update_display_infos('apply_cells_formula_on_all_sheets', tab_name, self.file_object.sheets_name[1:])
+            self.display.display_running_infos()
 
-        #on applique les copies dans tous les onglets sauf le premier
-        for name_onglet in self.file.sheets_name[1:]:   
-            for tuple in cell_list: 
-                self.file.writebook[name_onglet].cell(tuple[0],tuple[1]).value = self.file.writebook[self.file.sheets_name[0]].cell(tuple[0],tuple[1]).value  
-                self.file.writebook[name_onglet].cell(tuple[0],tuple[1]).fill = copy(self.file.writebook[self.file.sheets_name[0]].cell(tuple[0],tuple[1]).fill)  
-                self.file.writebook[name_onglet].cell(tuple[0],tuple[1]).font = copy(self.file.writebook[self.file.sheets_name[0]].cell(tuple[0],tuple[1]).font)  
-                self.file.writebook[name_onglet].cell(tuple[0],tuple[1]).border = copy(self.file.writebook[self.file.sheets_name[0]].cell(tuple[0],tuple[1]).border)  
-                self.file.writebook[name_onglet].cell(tuple[0],tuple[1]).alignment = copy(self.file.writebook[self.file.sheets_name[0]].cell(tuple[0],tuple[1]).alignment)    
-            Other.display_running_infos('apply_cells_formula_on_all_sheets', name_onglet, self.file.sheets_name[1:], start)
+        self.file_object.save_file() 
 
-        self.file.writebook.save(self.file.path + self.file.name_file)
+    # ARRIVE ICI : FONCTION précédente à tester
 
     def gather_columns_in_one(self, onglet, *column_lists):
         """

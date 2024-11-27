@@ -113,16 +113,16 @@ class TestFile(TestCase):
 #             self.assertIn(sheet['D5'],mergedcells)
 #             self.assertIn(sheet['D6'],mergedcells) """
         
-#     def test_apply_cell_formula_on_all_sheets(self):
-#         file = File("test_merging.xlsx")
-#         controler = FileControler(file)
-#         controler.apply_cells_formula_on_all_sheets('A10','B10','C10')
+    def test_apply_cell_formula_on_all_sheets(self):
+        file = File("test_merging.xlsx")
+        controler = MultipleTabsControler(file)
+        controler.apply_cells_formula_on_all_tabs('A10','B10','C10')
 
-#         for tab in file.sheets_name[1:]:
-#             sheet = file.writebook[tab]
-#             self.assertEqual(sheet['A10'].value, file.writebook[file.sheets_name[0]]['A10'].value)
-#             self.assertEqual(sheet['B10'].value, file.writebook[file.sheets_name[0]]['B10'].value)
-#             self.assertEqual(sheet['C10'].value, file.writebook[file.sheets_name[0]]['C10'].value)
+        for tab in file.sheets_name[1:]:
+            sheet = file.writebook[tab]
+            self.assertEqual(sheet['A10'].value, file.writebook[file.sheets_name[0]]['A10'].value)
+            self.assertEqual(sheet['B10'].value, file.writebook[file.sheets_name[0]]['B10'].value)
+            self.assertEqual(sheet['C10'].value, file.writebook[file.sheets_name[0]]['C10'].value)
     
 #     def test_check_linenumber_of_tabs(self):
 #         file = File('test.xlsx')

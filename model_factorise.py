@@ -47,18 +47,6 @@ class Tab():
         self.tab_name = tab_name 
 
 
-# class Line():
-#     def __init__(self, tab, line_index): 
-#         self.tab = tab
-#         self.line_index = line_index
-
-
-# class Column():
-#     def __init__(self, tab, letter): 
-#         self.tab = tab
-#         self.letter = letter
-            
-
 class Cell():
     """Handle methods modifying a cell"""
     def __init__(self, line_index, column_index):  
