@@ -103,7 +103,7 @@ class UtilsForFile():
             target_sheet.cell(line - 2 + maxrow, 1).value = import_sheet.cell(1, column).value
             target_sheet.cell(line - 2 + maxrow, 2).value = import_sheet.cell(line, column).value
 
-    def envoi_mail(self,adresse, file, expeditor, password, object, message): 
+    def envoi_mail(self, adresse, file, expeditor, password, object, message): 
         """
         Fonction qui envoie un mail avec une pièce jointe.
 
@@ -749,6 +749,22 @@ class TabsCopy():
     def deep_copy_multiple_cells(self, cells_list):
         for cell in cells_list: 
             self.deep_copy_of_a_cell(Cell(cell[0],cell[1]), Cell(cell[0],cell[1])) 
+
+    def deep_copy_of_a_tab(self):
+        """
+        Fonction qui copie une page sur une autre. La copie est totale : valeur, couleur, cellules fusionnées
+        """
+        for i in range(1, self.tab_from.max_row + 1):
+            for j in range(1,self.tab_from.max_column + 1): 
+                self.deep_copy_of_a_cell(Cell(i,j), Cell(i,j))  
+ 
+        self.merge_cells_as_in_tab_from()
+
+    def merge_cells_as_in_tab_from(self):
+        for merged_range in self.tab_from.merged_cells.ranges:  
+            start_column, start_row, end_column, end_row = merged_range.bounds  
+            self.tab_to.merge_cells(start_row=start_row, start_column=start_column, end_row=end_row, end_column=end_column)
+
 
 class GetIndex():
     """Handle methods to transform cell, columns in indexes"""

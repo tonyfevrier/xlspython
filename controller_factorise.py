@@ -159,9 +159,7 @@ class MultipleFilesController(GetIndex):
         """  
         cells_list = self.get_list_of_cells_coordinates(cells) 
         
-        self.new_writebook = openpyxl.Workbook() 
-        first_tab_name = self.new_writebook.sheetnames[0]
-        self.tabs_copy._choose_the_tab_to_write_in(self.new_writebook[first_tab_name])
+        self._create_workbook_and_choose_first_tab_to_write_in()
  
         self.display.start_time = time()
   
@@ -173,6 +171,11 @@ class MultipleFilesController(GetIndex):
             self.display.display_running_infos()
  
         self.new_writebook.save(self.file_object.path + 'gathered_data_' + self.file_object.name_file) 
+
+    def _create_workbook_and_choose_first_tab_to_write_in(self):
+        self.new_writebook = openpyxl.Workbook()
+        first_tab_name = self.new_writebook.sheetnames[0]
+        return self.tabs_copy._choose_the_tab_to_write_in(self.new_writebook[first_tab_name])
     
     def _fill_the_line_corresponding_to_one_tab(self, cells_list, tab_name):
         self._fill_the_first_cell_of_the_line_with_tab_name(tab_name)
@@ -187,6 +190,26 @@ class MultipleFilesController(GetIndex):
             self.tabs_copy.copy_of_a_cell(Cell(cell[0],cell[1]), Cell(self.current_line, current_column)) 
             current_column += 1
         self.current_line += 1
+            
+    def create_one_file_by_tab(self):
+        """
+        Vous souhaitez fabriquer un fichier par onglet. Chaque fichier aura le nom de l'onglet. 
+        """
+        self.display.start_time = time()
+
+        for tab_name in self.file_object.sheets_name: 
+            self._create_a_file_from_a_tab(tab_name)
+            self._update_display_infos('one_file_by_tab_sendmail', tab_name, self.file_object.sheets_name)
+            self.display.display_running_infos()
+
+    def _create_a_file_from_a_tab(self, tab_name):
+        """
+        Fonction qui prend un nom d'onglet dans un fichier et qui crée un fichier associé. 
+        """
+        self.tabs_copy._choose_the_tab_to_read(self.file_object.get_tab_by_name(tab_name))
+        self._create_workbook_and_choose_first_tab_to_write_in() 
+        self.tabs_copy.deep_copy_of_a_tab() 
+        self.new_writebook.save('multifiles/' + tab_name + '.xlsx')  
    
 
 class MultipleTabsControler(GetIndex):
@@ -324,7 +347,8 @@ class MultipleTabsControler(GetIndex):
             - onglet (str) : nom de l'onglet d'où on importe les colonnes.
             - column_lists (list[list[str]]) : liste de groupes de colonnes. Chaque groupe est une liste de colonnes.
         """ 
-        self.tabs_copy._choose_the_tab_to_read(self.file_object.get_tab_by_name(self.optional_names_of_file.name_of_tab_to_read))
+        tab_to_read = self.file_object.get_tab_by_name(self.optional_names_of_file.name_of_tab_to_read)
+        self.tabs_copy._choose_the_tab_to_read(tab_to_read)
 
         for list_of_columns in lists_of_columns: 
             self.optional_names_of_file.columns_to_read = list_of_columns
@@ -344,58 +368,7 @@ class MultipleTabsControler(GetIndex):
             self.tabs_copy.copy_tag_and_values_of_a_column_at_tab_bottom(column_index_from_string(column))
 
 
-    # Arrive ici avant à tester
-
-    def build_file_from_tab(self, tab):
-        """
-        Fonction qui prend un nom d'onglet dans un fichier et qui crée un fichier associé.
-
-        Input :
-            - tab (str) : the name of the tab from which we want to create the file.
-        """
-
-        sheet_from = self.file.writebook[tab]
-        newfile = openpyxl.Workbook() 
-        sheet_to = newfile['Sheet']  
-        path = 'multifiles/' 
-  
-        self.deep_copy_of_a_sheet(sheet_from, sheet_to) 
-
-        namefile = path + tab + '.xlsx'
-        newfile.save(namefile) 
-        return namefile
-            
-            
-    def one_file_by_tab_sendmail(self, send = False, adressjson = "", objet = "", message = ""):
-        """
-        Vous souhaitez fabriquer un fichier par onglet. Chaque fichier aura le nom de l'onglet. 
-        Vous souhaitez éventuellement envoyer chaque fichier à la personne associée.
-        Attention, pour utiliser cette fonction, les onglets doivent être de la forme "prenom nom" sans caractère spéciaux. 
-
-        Inputs : 
-            send(optional boolean) : True si on veut envoyer le mail, False si on veut juste couper en fichiers.
-            adressjson(str) : nom du fichier xlsx qui contient deux colonnes la première avec les noms des onglets, la seconde avec l'adresse mail. Ce fichier doit être mis dans le dossier fichier_xls. 
-            objet(optional str) : Objet du message.
-            message (optional str) : Contenu du message.
-        """ 
-        if adressjson != "":
-            file = open(self.file.path + adressjson, 'r')
-            mailinglist = json.load(file)
-            file.close()
-
-        start = time()
-
-        for tab in self.file.sheets_name: 
-
-            file_to_send = self.build_file_from_tab(tab)
-            if send:
-                if adressjson == "":
-                    prenom = tab.split(" ")[0]
-                    nom = tab.split(" ")[1]
-                    self.envoi_mail(prenom + "." + nom + "@universite-paris-saclay.fr", file_to_send, "tony.fevrier62@gmail.com", "qkxqzhlvsgdssboh", objet, message)
-                else: 
-                    self.envoi_mail(mailinglist[tab], file_to_send, "tony.fevrier62@gmail.com", "qkxqzhlvsgdssboh", objet, message) 
-            Other.display_running_infos('one_file_by_tab_sendmail', tab, self.file.sheets_name, start)
+    # Arrive ici
              
 
     def merge_cells_on_all_tabs(self, start_column, end_column, start_row, end_row):
@@ -1008,6 +981,38 @@ class MultipleTabsControler(GetIndex):
 #     def __init__(self, path):
 #         """Input : path (object of the class Path)"""
 #         self.path = path
+    
+    # DANS LA FONCTION CI-DESSOUS, IL NE RESTE QU A ECRIRE LENVOI DES FICHIERS PAR MAIL.
+    #  def create_one_file_by_tab_and_send_by_mail(self, send = False, adressjson = "", objet = "", message = ""):
+    #     """
+    #     Vous souhaitez fabriquer un fichier par onglet. Chaque fichier aura le nom de l'onglet. 
+    #     Vous souhaitez éventuellement envoyer chaque fichier à la personne associée.
+    #     Attention, pour utiliser cette fonction, les onglets doivent être de la forme "prenom nom" sans caractère spéciaux. 
+
+    #     Inputs : 
+    #         send(optional boolean) : True si on veut envoyer le mail, False si on veut juste couper en fichiers.
+    #         adressjson(str) : nom du fichier xlsx qui contient deux colonnes la première avec les noms des onglets, la seconde avec l'adresse mail. Ce fichier doit être mis dans le dossier fichier_xls. 
+    #         objet(optional str) : Objet du message.
+    #         message (optional str) : Contenu du message.
+    #     """ 
+    #     if adressjson != "":
+    #         file = open(self.file.path + adressjson, 'r')
+    #         mailinglist = json.load(file)
+    #         file.close()
+
+    #     start = time()
+
+    #     for tab in self.file.sheets_name: 
+
+    #         file_to_send = self.build_file_from_tab(tab)
+    #         if send:
+    #             if adressjson == "":
+    #                 prenom = tab.split(" ")[0]
+    #                 nom = tab.split(" ")[1]
+    #                 self.envoi_mail(prenom + "." + nom + "@universite-paris-saclay.fr", file_to_send, "tony.fevrier62@gmail.com", "qkxqzhlvsgdssboh", objet, message)
+    #             else: 
+    #                 self.envoi_mail(mailinglist[tab], file_to_send, "tony.fevrier62@gmail.com", "qkxqzhlvsgdssboh", objet, message) 
+    #         Other.display_running_infos('one_file_by_tab_sendmail', tab, self.file.sheets_name, start)
 
 #     def apply_method_on_homononymous_files(self, filename, method_name, *args, **kwargs):
 #         """ 

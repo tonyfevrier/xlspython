@@ -84,19 +84,19 @@ class TestFile(TestCase):
         del file
 
 
-#     def test_one_file_by_tab_sendmail(self):
-#         file = File("test_onefile_sendmail.xlsx")
-#         controler = FileControler(file)
-#         controler.one_file_by_tab_sendmail()
+    def test_one_file_by_tab(self):
+        file = File("test_onefile_sendmail.xlsx")
+        controler = MultipleFilesController(file)
+        controler.create_one_file_by_tab()
  
-#         sheet1 = File("tony fevrier.xlsx", "multifiles/").writebook["Sheet"]
-#         sheet2 = File("Marine Moyon.xlsx", "multifiles/").writebook["Sheet"] 
+        sheet1 = File("tony fevrier.xlsx", "multifiles/").writebook["Sheet"]
+        sheet2 = File("Marine Moyon.xlsx", "multifiles/").writebook["Sheet"] 
 
-#         sheet1o = File("test_onefile_sendmail.xlsx").writebook["tony fevrier"] 
-#         sheet2o = File("test_onefile_sendmail.xlsx").writebook["Marine Moyon"]
+        sheet1o = File("test_onefile_sendmail.xlsx").writebook["tony fevrier"] 
+        sheet2o = File("test_onefile_sendmail.xlsx").writebook["Marine Moyon"]
 
-#         verify_sheets_identical(sheet1, sheet1o)
-#         verify_sheets_identical(sheet2, sheet2o) 
+        verify_sheets_identical(sheet1, sheet1o)
+        verify_sheets_identical(sheet2, sheet2o) 
 
 #     def test_merge_cells_on_all_tabs(self): 
 #         file = File("test_merging.xlsx")

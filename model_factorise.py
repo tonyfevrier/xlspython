@@ -1,5 +1,6 @@
 import openpyxl
 import os   
+import yagmail
 
 """ def display_run():
     def wrapper(method, *args, **kwargs):
@@ -77,6 +78,22 @@ class OptionalNamesOfFile(OptionalNamesOfTab):
         self.name_of_tab_to_modify = name_of_tab_to_modify 
         self.names_of_tabs_to_modify = names_of_tabs_to_modify 
  
+
+class Mail():
+    def __init__(self, sender_mail, receiver_mail, joint_file, subject, message, password):
+        self.sender_mail = sender_mail
+        self.receiver_mail = receiver_mail
+        self.joint_file = joint_file
+        self.subject = subject
+        self.message = message
+        self.password = password
+        
+    def send(self): 
+        """
+        Fonction qui envoie un mail avec une pièce jointe. 
+        """
+        yag = yagmail.SMTP(self.sender_mail, self.password)  
+        yag.send(to=self.receiver_mail, subject=self.subject, contents=self.message, attachments = self.joint_file)
 
 
 
