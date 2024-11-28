@@ -782,3 +782,4 @@ class GetIndex():
         for column in columns_letters_list: 
             columns_int_list.append(column_index_from_string(column)) 
         return columns_int_list 
+     

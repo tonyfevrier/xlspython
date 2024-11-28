@@ -1,5 +1,5 @@
 from unittest import TestCase, main 
-from model_factorise import File, OptionalNamesOfFile
+from model_factorise import File, OptionalNamesOfFile, MergedCellsRange
 from controller_factorise import MultipleTabsControler, MultipleFilesController
 from utils.utils import Other, Str
  
@@ -98,21 +98,21 @@ class TestFile(TestCase):
         verify_sheets_identical(sheet1, sheet1o)
         verify_sheets_identical(sheet2, sheet2o) 
 
-#     def test_merge_cells_on_all_tabs(self): 
-#         file = File("test_merging.xlsx")
-#         controler = FileControler(file)
-#         controler.merge_cells_on_all_tabs('C', 'D', 5, 7)
+    def test_merge_cells_on_all_tabs(self): 
+        file = File("test_merging.xlsx")
+        controler = MultipleTabsControler(file)
+        controler.merge_cells_on_all_tabs(MergedCellsRange('C', 'D', 12, 15))
 
-#         #voir comment tester le fait qu'une cellule est mergée : comprendre l'objet mergedcells
-#         """ for tab in file1.sheets_name:
-#             sheet = file1.writebook[tab]
-#             mergedcells = sheet.merged_cells
-#             print(mergedcells.ranges, type(mergedcells))
-#             self.assertEqual('C5' in mergedcells.ranges,True)
-#             self.assertIn(sheet['C6'],mergedcells)
-#             self.assertIn(sheet['C7'],mergedcells)
-#             self.assertIn(sheet['D5'],mergedcells)
-#             self.assertIn(sheet['D6'],mergedcells) """
+        #voir comment tester le fait qu'une cellule est mergée : comprendre l'objet mergedcells
+        """ for tab in file1.sheets_name:
+            sheet = file1.writebook[tab]
+            mergedcells = sheet.merged_cells
+            print(mergedcells.ranges, type(mergedcells))
+            self.assertEqual('C5' in mergedcells.ranges,True)
+            self.assertIn(sheet['C6'],mergedcells)
+            self.assertIn(sheet['C7'],mergedcells)
+            self.assertIn(sheet['D5'],mergedcells)
+            self.assertIn(sheet['D6'],mergedcells) """
         
     def test_apply_cell_formula_on_all_sheets(self):
         file = File("test_merging.xlsx")
@@ -125,11 +125,11 @@ class TestFile(TestCase):
             self.assertEqual(sheet['B10'].value, file.writebook[file.sheets_name[0]]['B10'].value)
             self.assertEqual(sheet['C10'].value, file.writebook[file.sheets_name[0]]['C10'].value)
     
-#     def test_check_linenumber_of_tabs(self):
-#         file = File('test.xlsx')
-#         controler = FileControler(file)
-#         tabs = controler.check_linenumber_of_tabs(14)
-#         self.assertListEqual(tabs, ['cutinparts', 'cutinpartsbis', 'delete_lines', 'delete_lines_bis'])
+    def test_check_linenumber_of_tabs(self):
+        file = File('test.xlsx')
+        controler = MultipleTabsControler(file)
+        tabs = controler.list_tabs_with_different_number_of_lines(14)
+        self.assertListEqual(tabs, ['cutinparts', 'cutinpartsbis', 'delete_lines', 'delete_lines_bis'])
 
     def test_extract_cells_from_all_tabs(self):
         file = File('test_extract_cells_from_all_sheets.xlsx')

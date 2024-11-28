@@ -365,45 +365,45 @@ class MultipleTabsControler(GetIndex):
 
     def copy_tags_and_values_of_a_list_of_columns(self):
         for column in self.optional_names_of_file.columns_to_read: 
-            self.tabs_copy.copy_tag_and_values_of_a_column_at_tab_bottom(column_index_from_string(column))
+            self.tabs_copy.copy_tag_and_values_of_a_column_at_tab_bottom(column_index_from_string(column))         
 
-
-    # Arrive ici
-             
-
-    def merge_cells_on_all_tabs(self, start_column, end_column, start_row, end_row):
+    def merge_cells_on_all_tabs(self, merged_cells_range):
         """
         Fonction qui merge les mêmes cellules sur tous les onglets d'un fichier 
-
-        Inputs :
-            - start_column (string): Letter of the column where to start the merging
-            - end_column (string): Letter of the column where to end the merging
-            - start_row (int): Index of the row where to start the merging
-            - end_row (int): Index of the row where to start the merging
-
         """
         
-        start_column = column_index_from_string(start_column)
-        end_column = column_index_from_string(end_column)
+        merged_cells_range.start_column = column_index_from_string(merged_cells_range.start_column)
+        merged_cells_range.end_column = column_index_from_string(merged_cells_range.end_column)
 
-        start = time()
+        self.display.start_time = time()
 
-        for tab in self.file.sheets_name: 
-            sheet = self.file.writebook[tab] 
-            sheet.merge_cells(start_row=start_row, start_column=start_column, end_row=end_row, end_column=end_column)
-            Other.display_running_infos('merge_cells_on_all_tabs', tab, self.file.sheets_name, start)
+        for tab_name in self.file_object.sheets_name: 
+            self.tabs_copy._choose_the_tab_to_write_in(self.file_object.get_tab_by_name(tab_name)) 
+            self.tabs_copy.tab_to.merge_cells(start_row=merged_cells_range.start_line, 
+                                              start_column=merged_cells_range.start_column, 
+                                              end_row=merged_cells_range.end_line, 
+                                              end_column=merged_cells_range.end_column)
+            self._update_display_infos('merge_cells_on_all_tabs', tab_name, self.file_object.sheets_name)
+            self.display.display_running_infos()
 
-        self.file.writebook.save(self.file.path + self.file.name_file)
+        self.file_object.save_file() 
 
-    def check_linenumber_of_tabs(self, line_number):
+    # Arrive ici
+
+    def list_tabs_with_different_number_of_lines(self, number_of_lines):
         """
         Fonction qui prend un fichier et qui contrôle si tous les onglets ont un nombre de lignes égal à l'argument
         """
-        wrong_tabs = []
-        for tab in self.file.sheets_name:
-            if self.file.writebook[tab].max_row != line_number:
-                wrong_tabs.append(tab)
-        return wrong_tabs
+        list_of_tab_names = []
+        for tab_name in self.file_object.sheets_name:
+            list_of_tab_names = self.add_tab_to_list_if_different_number_of_lines(tab_name, list_of_tab_names, number_of_lines)
+        return list_of_tab_names
+    
+    def add_tab_to_list_if_different_number_of_lines(self, tab_name, list_of_tab_names, number_of_lines):
+        tab = self.file_object.get_tab_by_name(tab_name)
+        if tab.max_row != number_of_lines:
+            list_of_tab_names.append(tab_name)
+        return list_of_tab_names
     
 
     ## Sheet methods

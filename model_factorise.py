@@ -53,7 +53,15 @@ class Cell():
     def __init__(self, line_index, column_index):  
         self.line_index = line_index
         self.column_index = column_index
+        
 
+class MergedCellsRange():
+    def __init__(self, start_column, end_column, start_line, end_line):
+        self.start_column = start_column
+        self.end_column = end_column
+        self.start_line = start_line
+        self.end_line = end_line
+        
 
 class OptionalNamesOfTab():
     """Get all names of tabs, columns, lines which will be read or modified in methods """
