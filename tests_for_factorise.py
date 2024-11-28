@@ -1,5 +1,5 @@
 from unittest import TestCase, main 
-from model_factorise import File
+from model_factorise import File, OptionalNamesOfFile
 from controller_factorise import MultipleTabsControler, MultipleFilesController
 from utils.utils import Other, Str
  
@@ -46,7 +46,7 @@ class TestFile(TestCase):
 
     def test_split_one_tab_in_multiple_tabs(self): 
         file = File('test_create_one_onglet_by_participant.xlsx') 
-        controler = MultipleFilesController(file, 'Stroops_test (7)', columns_to_read='A')
+        controler = MultipleFilesController(file, OptionalNamesOfFile(name_of_tab_to_read='Stroops_test (7)', column_to_read='A'))
         controler.make_horodated_copy_of_a_file()
         controler.split_one_tab_in_multiple_tabs()  
         file2 = File('divided_test_create_one_onglet_by_participant.xlsx')
@@ -57,7 +57,7 @@ class TestFile(TestCase):
 
     def test_extract_a_column_from_all_tabs(self):
         file = File('test_extract_column.xlsx')
-        controler = MultipleTabsControler(file, columns_to_read='B')
+        controler = MultipleTabsControler(file, OptionalNamesOfFile(column_to_read='B'))
         controler.extract_a_column_from_all_tabs() 
         verify_files_identical(File('test_extract_column_ref.xlsx'),file)
 
@@ -66,21 +66,22 @@ class TestFile(TestCase):
 
     def test_apply_column_formula_on_all_tabs(self):
         file = File('dataset.xlsx', dataonly = False)
-        controler = MultipleTabsControler(file, columns_to_read=['B','C'])
+        controler = MultipleTabsControler(file, OptionalNamesOfFile(columns_to_read=['B','C']))
         controler.apply_columns_formula_on_all_tabs()
     
 
-#     def test_gather_columns_in_one(self):
-#         file = File("test_gather_columns_in_one.xlsx")
-#         controler = FileControler(file)
-#         controler.gather_columns_in_one("test", ['C','D','E'], ['G','H','I'])
+    def test_gather_groups_of_multiple_columns_in_tabs_of_two_columns_containing_tags_and_values(self):
+        file = File("test_gather_columns_in_one.xlsx")
+        controler = MultipleTabsControler(file, OptionalNamesOfFile(name_of_tab_to_read='test'))
+        controler.gather_groups_of_multiple_columns_in_tabs_of_two_columns_containing_tags_and_values(['C','D','E'], ['G','H','I'])
 
-#         verify_files_identical(File("test_gather_columns_in_one - ref.xlsx"), File("test_gather_columns_in_one.xlsx"))
-
-#         del file.writebook['tab_column_gathered_0']
-#         del file.writebook['tab_column_gathered_1']
-#         file.writebook.save(file.path + 'test_gather_columns_in_one.xlsx')
-#         del file
+        file = File("test_gather_columns_in_one.xlsx")
+        verify_files_identical(File("test_gather_columns_in_one - ref.xlsx"), file)
+ 
+        del file.writebook['tab_column_gathered_CDE']
+        del file.writebook['tab_column_gathered_GHI']
+        file.writebook.save(file.path + 'test_gather_columns_in_one.xlsx')
+        del file
 
 
 #     def test_one_file_by_tab_sendmail(self):

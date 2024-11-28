@@ -52,6 +52,30 @@ class Cell():
     def __init__(self, line_index, column_index):  
         self.line_index = line_index
         self.column_index = column_index
+
+
+class OptionalNamesOfTab():
+    """Get all names of tabs, columns, lines which will be read or modified in methods """
+    def __init__(self, column_to_read=None, columns_to_read=None,
+                 column_to_write=None, columns_to_write=None): 
+        
+        self.column_to_read = column_to_read
+        self.columns_to_read = columns_to_read
+        self.column_to_write = column_to_write
+        self.columns_to_write = columns_to_write
+
+
+class OptionalNamesOfFile(OptionalNamesOfTab):
+    """Get all names of tabs, columns, lines which will be read or modified in methods """
+    def __init__(self, name_of_tab_to_read=None, names_of_tabs_to_read=None,
+                 name_of_tab_to_modify=None, names_of_tabs_to_modify=None, column_to_read=None, columns_to_read=None,
+                 column_to_write=None, columns_to_write=None):
+        
+        OptionalNamesOfTab.__init__(self, column_to_read, columns_to_read, column_to_write, columns_to_write)
+        self.name_of_tab_to_read = name_of_tab_to_read
+        self.names_of_tabs_to_read = names_of_tabs_to_read
+        self.name_of_tab_to_modify = name_of_tab_to_modify 
+        self.names_of_tabs_to_modify = names_of_tabs_to_modify 
  
 
 

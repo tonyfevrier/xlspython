@@ -26,21 +26,19 @@ def create_empty_workbook():
 
 class TabController():
     """Handle methods reading and modifying a unique tab of a file."""
-    def __init__(self, file_object, tab_name, columns_to_read=None, columns_to_write=None, first_line=2):
+    def __init__(self, file_object, tab_name, optional_names_of_tab=None, first_line=2):
         """
         Attributs:
             - file_object (file object)
             - tab_name (str)
-            - tab (openpyxl.workbook.tab)
-            - columns_to_read (optional str or list(str))
-            - columns_to_write (optional str or list(str))
+            - tab (openpyxl.workbook.tab)            
+            - optional_names_of_tab (OptionalNamesOfTab object)
             - first_line (optional int)
         """ 
         self.file_object = file_object
         self.tab_name = tab_name
         self.tab = self.file_object.get_tab_by_name(tab_name)
-        self.columns_to_read = columns_to_read
-        self.columns_to_write = columns_to_write
+        self.optional_names_of_tab = optional_names_of_tab 
         self.first_line = first_line
     
 
@@ -49,16 +47,11 @@ class MultipleFilesController(GetIndex):
     Handle methods involving multiple files
 
     """
-    def __init__(self, file_object, names_of_tabs_to_read=None,
-                names_of_tabs_to_modify=None, columns_to_read=None,
-                columns_to_write=None, first_line=2):
+    def __init__(self, file_object, optional_names_of_file=None, first_line=2):
         """
         Attributs: 
             - file_object (object of class File)
-            - names_of_tabs_to_read (optional str or list(str))
-            - names_of_tabs_to_modify (optional str or list(str))
-            - columns_to_read (optional str or list(str))
-            - columns_to_write (optional str or list(str))
+            - optional_names_of_file (OptionalNamesOfFile object)
             - first_line (optional int)
             - current_line (int): line likely to evolve in methods
             - new_writebook (openpyxl.WorkBook) : eventual workbook to complete
@@ -66,10 +59,7 @@ class MultipleFilesController(GetIndex):
             - display (DisplayRunningInfos object): to display the current state of the run
         """
         self.file_object = file_object
-        self.name_of_tabs_to_read = names_of_tabs_to_read
-        self.names_of_tabs_to_modify = names_of_tabs_to_modify 
-        self.columns_to_read = columns_to_read
-        self.columns_to_write = columns_to_write
+        self.optional_names_of_file = optional_names_of_file 
         self.first_line = first_line
         self.current_line = 2
         self.new_writebook = None 
@@ -117,7 +107,8 @@ class MultipleFilesController(GetIndex):
         new_file_name = f'divided_{self.file_object.name_file}'
         self._create_or_load_workbook(new_file_name)
         
-        self.tabs_copy._choose_the_tab_to_read(self.file_object.get_tab_by_name(self.name_of_tabs_to_read)) 
+        tab_to_read_name = self.optional_names_of_file.name_of_tab_to_read
+        self.tabs_copy._choose_the_tab_to_read(self.file_object.get_tab_by_name(tab_to_read_name)) 
 
         last_line = self.tabs_copy.tab_from.max_row + 1
         for line_index in range(self.first_line, last_line):
@@ -136,7 +127,7 @@ class MultipleFilesController(GetIndex):
     
     def _create_or_complete_a_tab_by_identifier(self): 
         tab_names = self.new_writebook.sheetnames 
-        column_to_read_by_index = column_index_from_string(self.columns_to_read)
+        column_to_read_by_index = column_index_from_string(self.optional_names_of_file.column_to_read)
         identifier = self.file_object.get_cell_value_from_a_tab(self.tabs_copy.tab_from, Cell(self.current_line, column_to_read_by_index))
 
         if identifier not in tab_names:
@@ -202,25 +193,17 @@ class MultipleTabsControler(GetIndex):
     """
     Handle methods involving multiple tabs of a file.
     """
-    def __init__(self, file_object, names_of_tabs_to_read=None,
-                names_of_tabs_to_modify=None, columns_to_read=None,
-                columns_to_write=None, first_line=2):
+    def __init__(self, file_object, optional_names_of_file=None, first_line=2):
         """
         Attributs: 
-            - file_object (object of class File)
-            - names_of_tabs_to_read (optional str or list(str))
-            - names_of_tabs_to_modify (optional str or list(str))
-            - columns_to_read (optional str or list(str))
-            - columns_to_write (optional str or list(str))
+            - file_object (object of class File) 
+            - optional_names_of_file (OptionalNamesOfFile object)
             - first_line (optional int)  
             - tabs_copy (TabsCopy object): object to apply copy method from a tab to a new tab
             - display (DisplayRunningInfos object): to display the current state of the run
         """
         self.file_object = file_object
-        self.name_of_tabs_to_read = names_of_tabs_to_read
-        self.names_of_tabs_to_modify = names_of_tabs_to_modify 
-        self.columns_to_read = columns_to_read
-        self.columns_to_write = columns_to_write
+        self.optional_names_of_file = optional_names_of_file  
         self.first_line = first_line 
         self.tabs_copy = TabsCopy()
         self.display = DisplayRunningInfos() 
@@ -259,10 +242,10 @@ class MultipleTabsControler(GetIndex):
         contenant toutes les colonnes. La première cellule de chaque colonne correspond alors 
         au nom de l'onglet. Attention, en l'état, il faut que tous les onglets aient la même structure.
         """ 
-        self.columns_to_read = column_index_from_string(self.columns_to_read)
-        new_tab = self.file_object.create_and_return_new_tab(f"gather_{self.columns_to_read}")
+        self.optional_names_of_file.column_to_read = column_index_from_string(self.optional_names_of_file.column_to_read)
+        new_tab = self.file_object.create_and_return_new_tab(f"gather_{self.optional_names_of_file.column_to_read}")
         self.tabs_copy._choose_the_tab_to_write_in(new_tab)
-        self.columns_to_write = 1
+        self.optional_names_of_file.column_to_write = 1
 
         self.display.start_time = time() 
         for tab_name in self.file_object.sheets_name: 
@@ -276,9 +259,9 @@ class MultipleTabsControler(GetIndex):
         self.file_object.update_sheet_names()
     
     def _copy_column_from_a_tab_in_the_next_new_tab_column(self, tab_name): 
-        self.tabs_copy.copy_paste_column(self.columns_to_read, self.columns_to_write) 
+        self.tabs_copy.copy_paste_column(self.optional_names_of_file.column_to_read, self.optional_names_of_file.column_to_write) 
         self._choose_the_new_column_title(tab_name)  
-        self.columns_to_write = self.tabs_copy.tab_to.max_column + 1
+        self.optional_names_of_file.column_to_write = self.tabs_copy.tab_to.max_column + 1
 
     def _choose_the_new_column_title(self, title):
         self.tabs_copy.tab_to.cell(1, self.tabs_copy.tab_to.max_column).value = title    
@@ -292,7 +275,7 @@ class MultipleTabsControler(GetIndex):
         Input : 
             -column_list : int. les positions des colonnes où récupérer et coller
         """
-        columns_int_list = self.get_list_of_columns_indexes(self.columns_to_read)
+        columns_int_list = self.get_list_of_columns_indexes(self.optional_names_of_file.columns_to_read)
 
         self.display.start_time = time()
         self.tabs_copy._choose_the_tab_to_read(self.file_object.get_tab_by_name(self.file_object.sheets_name[0]))
@@ -332,9 +315,7 @@ class MultipleTabsControler(GetIndex):
 
         self.file_object.save_file() 
 
-    # ARRIVE ICI : FONCTION précédente à tester
-
-    def gather_columns_in_one(self, onglet, *column_lists):
+    def gather_groups_of_multiple_columns_in_tabs_of_two_columns_containing_tags_and_values(self, *lists_of_columns):
         """
         Vous avez des groupes de colonnes de valeurs avec une étiquette en première cellule. Pour chaque groupe, vous souhaitez former deux colonnes de valeurs : l'une qui contient
         les valeurs rassemblées en une colonne, l'autre, à sa gauche, qui indique l'étiquette de la colonne dans laquelle elle a été prise.
@@ -343,15 +324,27 @@ class MultipleTabsControler(GetIndex):
             - onglet (str) : nom de l'onglet d'où on importe les colonnes.
             - column_lists (list[list[str]]) : liste de groupes de colonnes. Chaque groupe est une liste de colonnes.
         """ 
+        self.tabs_copy._choose_the_tab_to_read(self.file_object.get_tab_by_name(self.optional_names_of_file.name_of_tab_to_read))
 
-        for liste in column_lists:
-            tab_number = column_lists.index(liste)
-            self.file.writebook.create_sheet(f"tab_column_gathered_{tab_number}")
-            target_sheet = self.file.writebook[f"tab_column_gathered_{tab_number}"]
-            for column in liste: 
-                self.copy_column_tags_and_values_at_bottom(self.file.writebook[onglet], column_index_from_string(column), target_sheet)
+        for list_of_columns in lists_of_columns: 
+            self.optional_names_of_file.columns_to_read = list_of_columns
+            tab_to = self._create_a_tab_for_a_list_of_columns()
+            self.tabs_copy._choose_the_tab_to_write_in(tab_to) 
+            self.copy_tags_and_values_of_a_list_of_columns()
 
-        self.file.writebook.save(self.file.path + self.file.name_file) 
+        self.file_object.save_file() 
+    
+    def _create_a_tab_for_a_list_of_columns(self):
+        string_of_columns = ''.join(self.optional_names_of_file.columns_to_read)
+        tab_name = f"tab_column_gathered_{string_of_columns}"
+        return self.file_object.writebook.create_sheet(tab_name) 
+
+    def copy_tags_and_values_of_a_list_of_columns(self):
+        for column in self.optional_names_of_file.columns_to_read: 
+            self.tabs_copy.copy_tag_and_values_of_a_column_at_tab_bottom(column_index_from_string(column))
+
+
+    # Arrive ici avant à tester
 
     def build_file_from_tab(self, tab):
         """

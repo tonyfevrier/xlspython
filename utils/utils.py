@@ -699,18 +699,28 @@ class TabsCopy():
                             onglet_to.cell(row_to, cell.column).value = cell.value """
 
             for column_index in range(1, self.tab_from.max_column + 1): 
-                self.tab_to.cell(line_to, column_index).value = self.tab_from.cell(line_from, column_index).value 
+                self.copy_of_a_cell(Cell(line_from, column_index), Cell(line_to, column_index)) 
 
     def copy_paste_column(self, column_from, column_to):
             """
             Fonction qui prend une colonne de la feuille et qui la copie dans un autre onglet.
             """ 
             for line_index in range(1, self.tab_from.max_row + 1): 
-                self.tab_to.cell(line_index, column_to).value = self.tab_from.cell(line_index, column_from).value 
+                self.copy_of_a_cell(Cell(line_index, column_from), Cell(line_index, column_to))  
 
     def copy_paste_multiple_columns(self, columns_int_list):
         for column in columns_int_list:
             self.copy_paste_column(column, column)
+
+    def copy_tag_and_values_of_a_column_at_tab_bottom(self, column_index):
+        """
+        Fonction qui prend une colonne de valeurs nommée C et la copie à la fin de la colonne 2 d'un onglet (à partir de la première cellule vide).
+        Cette fonction écrit également dans la colonne 1 les valeurs de la première cellule de C.
+        """
+        max_row = self.tab_to.max_row + 1
+        for line_index in range(2, self.tab_from.max_row + 1):
+            self.copy_of_a_cell(Cell(1, column_index), Cell(line_index - 2 + max_row, 1)) 
+            self.copy_of_a_cell(Cell(line_index, column_index), Cell(line_index - 2 + max_row, 2)) 
 
     def add_line_at_bottom(self, line_from):
             """
