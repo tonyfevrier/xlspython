@@ -1,7 +1,7 @@
 from unittest import TestCase, main 
 from model_factorise import File, OptionalNamesOfFile, MergedCellsRange
 from controller_factorise import OneFileMultipleTabsController, OneFileCreatedController, TwoFilesController
-from utils.utils import Other, Str
+from utils.utils import Other, Str, ColumnDelete, ColumnInsert, LineDelete, LineInsert, TabUpdate
  
 import os
  
@@ -233,8 +233,10 @@ class TestFile(TestCase):
 
         self.column_identical('test.xlsx','test.xlsx',4,5,5,5)
         self.column_identical('test.xlsx','test.xlsx',4,5,6,6)
+        self.column_identical('test.xlsx','test.xlsx',4,5,8,8)
         
         sheet2.delete_cols(5,2)
+        TabUpdate(sheet2, ColumnDelete(['E','F'])).update_cells_formulas()
         file2.writebook.save(file2.path + 'test.xlsx')
         
 #     def test_color_line_containing_chaines(self):
@@ -433,26 +435,28 @@ class TestFile(TestCase):
 #     def test_range_Letter(self):
 #         self.assertListEqual(Str.rangeLetter('D-H'), ['D','E','F','G','H'])
 
-#     def testUpdateOneFormulaForOneInsertion(self):
-#         formula = Str.updateOneFormulaForOneInsertion("SI(J10+K$1+L$3)",True,'row','2')
-#         self.assertEqual(formula, "SI(J11+K$1+L$4)")
+    def testUpdateOneFormulaForOneInsertion(self):
+        formula = LineInsert(['2'])._update_a_cell("SI(J10+K$1+L$3)")
+        self.assertEqual(formula, "SI(J11+K$1+L$4)")
 
-#         formula = Str.updateOneFormulaForOneInsertion("SI(J12+K$1+L$3)",False,'row','11')
-#         self.assertEqual(formula, "SI(J11+K$1+L$3)")
+        formula = LineDelete(['11'])._update_a_cell("SI(J12+K$1+L$3)")
+        self.assertEqual(formula, "SI(J11+K$1+L$3)")
 
-#         formula = Str.updateOneFormulaForOneInsertion("SI(J12+K$1+L$3)",False,'row','13')
-#         self.assertEqual(formula, "SI(J12+K$1+L$3)")
+        formula = LineDelete(['13'])._update_a_cell("SI(J12+K$1+L$3)")
+        self.assertEqual(formula, "SI(J12+K$1+L$3)")
 
-#         formula = Str.updateOneFormulaForOneInsertion("SI(J10+K$1+L$3)",True,'column','C')
-#         self.assertEqual(formula, "SI(K10+L$1+M$3)")
+        formula = ColumnInsert(['C'])._update_a_cell("SI(J10+K$1+L$3)")
+        self.assertEqual(formula, "SI(K10+L$1+M$3)")
 
-#         formula = Str.updateOneFormulaForOneInsertion("SI(J10+K$1+L$3)",False,'column','C')
-#         self.assertEqual(formula, "SI(I10+J$1+K$3)")
+        formula = ColumnDelete(['C'])._update_a_cell("SI(J10+K$1+L$3)")
+        self.assertEqual(formula, "SI(I10+J$1+K$3)")
 
-#     def testUpdateOneFormula(self):
-#         formula = Str.updateOneFormula("SI(J10+K$1+L$3)",True,'row',['2','5'])
-#         self.assertEqual(formula, "SI(J12+K$1+L$4)")
+    def testUpdateOneFormula(self):
+        formula = LineInsert(['2', '5'])._update_a_cell("SI(J10+K$1+L$3)") 
+        self.assertEqual(formula, "SI(J12+K$1+L$4)")
  
+        formula = ColumnInsert(['C', 'D','E', 'F'])._update_a_cell("SI(D10+E$1)") 
+        self.assertEqual(formula, "SI(H10+I$1)")
         
 def verify_files_identical(file1, file2):
     testcase = TestCase()

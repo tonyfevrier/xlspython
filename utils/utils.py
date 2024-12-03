@@ -602,6 +602,8 @@ class Other():
             print(f'{time_title} : {round(duration, 1)} h')
 
 
+# TOUT CE QUI A AVANT DOIT ETRE FACTORISE
+
 class DisplayRunningInfos():
     def __init__(self):
         self.method_name = None
@@ -742,10 +744,6 @@ class TabsCopy():
         self.tab_to.cell(cell_to.line_index, cell_to.column_index).font = copy(self.tab_from.cell(cell_from.line_index, cell_from.column_index).font) 
         self.tab_to.cell(cell_to.line_index, cell_to.column_index).border = copy(self.tab_from.cell(cell_from.line_index, cell_from.column_index).border) 
         self.tab_to.cell(cell_to.line_index, cell_to.column_index).alignment = copy(self.tab_from.cell(cell_from.line_index, cell_from.column_index).alignment)     
-            
-    def deep_copy_of_a_cell_from_(self, cell_from, ):
-        self.tab_to.cell(line_index, column_insertion_index + column_index).value = cells_to_copy[column_index].value
-        self.tab_to.cell(line_index, column_insertion_index + column_index).fill = copy(cells_to_copy[column_index].fill)
 
     def copy_of_a_cell(self, cell_from, cell_to):   
         self.tab_to.cell(cell_to.line_index, cell_to.column_index).value = self.tab_from.cell(cell_from.line_index, cell_from.column_index).value
@@ -791,182 +789,213 @@ class GetIndex():
     def get_cells_indexes_of_one_line_and_some_columns(line_index, columns_indexes):
         return  [(line_index, column_index) for column_index in columns_indexes]
     
+    @staticmethod
+    def get_list_of_consecutive_column_letters(column_begin_index, number_of_columns):
+        return [get_column_letter(column_begin_index + i ) for i in range(number_of_columns)]
+    
+
+class RegularExpression():
+
+    @staticmethod
+    def _split_a(formula):
+        """Returns a list containing expressions like C1, D$15 from a formula linking them"""
+        return re.split(r'(\b[A-Za-z-$]+\d+\b)', formula)  
+
+    @staticmethod
+    def _is_string_a_cell_expression(string):
+        """Verifies if the string has the shape A1 or C$5 (LetterNumber or Letter$Number)"""
+        return re.fullmatch(r'\b[A-Za-z-$]+\d+\b', string)
+    
+    @staticmethod
+    def _split_cell_expression_from(cell_expression):
+        """Get list of the form ['C','15'] or ['C$', '15'] from C15 or C$15"""
+        return re.split(r'(\d+)', cell_expression)[:-1]
+    
+    @staticmethod
+    def _recover_cell_expression_from(splitted_cell_expression):
+        """ Get 'C5' from ['C', '5']"""
+        return ''.join(splitted_cell_expression)
+    
+    @staticmethod
+    def _recover_cell_formula_from(cells_expression_list):
+        """ Get 'C5+D$6' from ['C5', '+', 'D$6']"""
+        return ''.join(cells_expression_list)
+    
 
 class TabUpdate():
     """Handles """
-    def __init__(self, tab, modification_object):
+    def __init__(self, tab=None, modification_object=None):
         self.tab = tab 
         self.modification_object = modification_object
 
-        # ET ON VA APPELER DANS LES METHODES LA METHODE UPDATE FORMULA de modifobject!!
+    def choose_tab_with_formula_to_update(self, tab):
+        self.tab = tab
 
-    def updateCellFormulas(self,sheet,insert, rowOrColumn, modifications):
+    def choose_modifications_to_apply(self, modification_object):
+        self.modification_object = modification_object
+
+    def _get_cell_value(self, cell):
+        return self.tab.cell(cell.line_index, cell.column_index).value 
+
+    def update_cells_formulas(self):
         """
-        Fonction qui met à jour les formules d'une feuille entière 
-
-        Inputs : 
-            - sheet (obj): la feuille sur laquelle on agit.
-            - insert (bool) : True si les modifications sont toutes des insertions, False si ce sont toutes des suppressions.
-            - rowOrColumn (str): 'row' ou 'column' suivant que la série d'opérations effectuées porte sur ligne ou colonne.
-            - modifications (list[str]) : liste de str donnant les modifications. Si on a inséré 10 colonnes, ce sera la liste des 10 lettres correspondantes.
-
+        Fonction qui met à jour les formules d'une feuille entière  
         """
-        for row in range(1,sheet.max_row + 1):
-            for column in range(1,sheet.max_column + 1): 
-                formula = sheet.cell(row,column).value 
-                if isinstance(formula, str) and formula.startswith('='):
-                    sheet.cell(row,column).value  = Str.updateOneFormula(formula, insert, rowOrColumn, modifications)
-
+        for line_index in range(1, self.tab.max_row + 1):
+            for column_index in range(1, self.tab.max_column + 1): 
+                cell_value = self._get_cell_value(Cell(line_index, column_index))
+                if self._is_cell_value_a_formula(cell_value): 
+                    self.tab.cell(line_index, column_index).value  = self.modification_object._update_a_cell(cell_value)
+    
     @staticmethod
-    def updateOneFormula(formula, insert, rowOrColumn, modifications):
-        """
-        Fonction qui va mettre à jour la formule d'une cellule suite plusieurs suppressions de colonne/ligne.
-
-        Inputs : 
-            - formula (str) : la chaîne de caractères.
-            - insert (bool) : True si les modifications sont toutes des insertions, False si ce sont toutes des suppressions.
-            - rowOrColumn (str): 'row' ou 'column' suivant que la série d'opérations effectuées porte sur ligne ou colonne.
-            - modifications (list[str]) : liste de str donnant les modifications. Si on a inséré 10 colonnes, ce sera la liste des 10 lettres correspondantes.
-
-        Output : 
-            - formula modified (str).
-        """
-        for elt in modifications:
-            formula = Str.updateOneFormulaForOneInsertion(formula,insert,rowOrColumn,elt)
-            
-        return formula
-
-
-    @staticmethod
-    def updateOneFormulaForOneInsertion(formula, insert, rowOrColumn, modification):
-        """
-        Fonction qui va mettre à jour la formule d'une cellule suite à un ajout ou une suppression de colonne/ligne.
-
-        Inputs : 
-            - formula (str) : la chaîne de caractères.
-            - insert (bool) : True si on a inséré, False si on a supprimé.
-            - rowOrColumn (str): 'row' ou 'column' suivant que la série d'opérations effectuées porte sur ligne ou colonne.
-            - modification (str) :  str donnant la modification, soit la lettre de la colonne, soit le numéro de la ligne
-
-
-        Output : 
-            - formula modified (str).
-        """
-         
-        #Isoler les cellules des formules
-        L1 = re.split(r'(\b[A-Za-z-$]+\d+\b)',formula) 
-        for i in range(len(L1)):
-            elt = L1[i]
-            #si l'élt est une cellule, on la modifie :
-            if re.fullmatch(r'\b[A-Za-z-$]+\d+\b', elt):
-                L2 = re.split(r'(\d+)', elt)[:-1] 
-                #si on a supprimé ou inséré une ligne
-                if rowOrColumn == "row":
-                    if int(L2[1]) > int(modification):
-                        if insert: 
-                            L2[1] = str(int(L2[1])+1) 
-                        else:
-                            L2[1] = str(int(L2[1])-1)
-                #même chose sur les colonnes
-                else:
-                    if '$' in L2[0]:
-                        letter = L2[0][:-1]
-                    else:
-                        letter = L2[0] 
-                    if column_index_from_string(letter) > column_index_from_string(modification):
-                        if insert:
-                            letter = get_column_letter(column_index_from_string(letter) + 1)
-                        else:
-                            letter = get_column_letter(column_index_from_string(letter) - 1)
-                    if '$' in L2[0]:
-                        L2[0] = letter + '$'
-                    else:
-                        L2[0] = letter
-                L1[i] = ''.join(L2) 
-        return ''.join(L1) 
+    def _is_cell_value_a_formula(cell_value):
+        return isinstance(cell_value, str) and cell_value.startswith('=')        
     
-    def _list_cells_expressions_from_an_excel_formula(formula):
-        return re.split(r'(\b[A-Za-z-$]+\d+\b)', formula)  
 
-    def _is_string_a_cell_expression(string):
-        return re.fullmatch(r'\b[A-Za-z-$]+\d+\b', string)
+class ColumnInsert(RegularExpression):
+    def __init__(self, columns_inserted):   
+        self.columns_inserted = columns_inserted
+
+    def _update_a_cell(self, formula):
+        """
+        Fonction qui va mettre à jour la formule d'une cellule suite à un ajout ou une suppression de colonne/ligne. 
+        A cell formula is of the form '=C5+D$6'
+        """
+        
+        parts_of_formula = self._split_a(formula) 
+        for index in range(len(parts_of_formula)): 
+            if self._is_string_a_cell_expression(parts_of_formula[index]): 
+                parts_of_formula[index] = self._update_one_cell_expression(parts_of_formula[index])
+        return self._recover_cell_formula_from(parts_of_formula) 
+
+    def _update_one_cell_expression(self, cell_expression):
+        for column_inserted in self.columns_inserted:
+            cell_expression = self._update_one_cell_expression_after_one_modification(cell_expression, column_inserted)
+        return cell_expression
     
-    def _separate_letter_and_number_of_cell_expression(cell_expression):
-        return re.split(r'(\d+)', cell_expression)[:-1]
-    
-    def _update_column_letter_after_insertion(column_letter, columns_inserted):
+    def _update_one_cell_expression_after_one_modification(self, cell_expression, column_inserted):
+        """A cell expression if of type C5 or C$5"""
+
+        splitted_cell_expression = self._split_cell_expression_from(cell_expression)
+        column_of_cell_expression = splitted_cell_expression[0]
         try: 
-            if column_index_from_string(column_letter) > column_index_from_string(columns_inserted):
-                column_letter = get_column_letter(column_index_from_string(column_letter) + 1)
-        except:
+            if self._does_column_needs_to_be_updated(column_of_cell_expression, column_inserted):
+                splitted_cell_expression[0] = get_column_letter(column_index_from_string(column_of_cell_expression) + 1)
+        except ValueError:
             #The column letter may be of the form C$ in excel formula so we have to clean $ to get index and readd it after 
-            if column_index_from_string(column_letter[:-1]) > column_index_from_string(columns_inserted):
-                column_letter = get_column_letter(column_index_from_string(column_letter[:-1]) + 1) + "$"
+            if self._does_column_needs_to_be_updated(column_of_cell_expression[:-1], column_inserted):
+                splitted_cell_expression[0] = get_column_letter(column_index_from_string(column_of_cell_expression[:-1]) + 1) + "$"
+ 
+        return self._recover_cell_expression_from(splitted_cell_expression)
+    
+    @staticmethod
+    def _does_column_needs_to_be_updated(column_of_cell_expression, column_inserted):
+        return column_index_from_string(column_of_cell_expression) > column_index_from_string(column_inserted)
+
+
+class ColumnDelete(RegularExpression):
+    def __init__(self, columns_deleted): 
+        self.columns_deleted = columns_deleted
+
+    def _update_a_cell(self, formula):
+        """
+        Fonction qui va mettre à jour la formule d'une cellule suite à un ajout ou une suppression de colonne/ligne. 
+        A cell formula is of the form '=C5+D$6'
+        """
+        
+        parts_of_formula = self._split_a(formula) 
+        for index in range(len(parts_of_formula)): 
+            if self._is_string_a_cell_expression(parts_of_formula[index]): 
+                parts_of_formula[index] = self._update_one_cell_expression(parts_of_formula[index])
+        return self._recover_cell_formula_from(parts_of_formula) 
+
+    def _update_one_cell_expression(self, cell_expression):
+        for column_deleted in self.columns_deleted:
+            cell_expression = self._update_one_cell_expression_after_one_modification(cell_expression, column_deleted)
+        return cell_expression
+
+    def _update_one_cell_expression_after_one_modification(self, cell_expression, column_deleted):
+        """A cell expression if of type C5 or C$5"""
+        splitted_cell_expression = self._split_cell_expression_from(cell_expression)
+        column_of_cell_expression = splitted_cell_expression[0]
+        try: 
+            if self._does_column_needs_to_be_updated(column_of_cell_expression, column_deleted):
+                splitted_cell_expression[0] = get_column_letter(column_index_from_string(column_of_cell_expression) - 1)
+        except ValueError:
+            #The column letter may be of the form C$ in excel formula so we have to clean $ to get index and readd it after 
+            if self._does_column_needs_to_be_updated(column_of_cell_expression[:-1], column_deleted):
+                splitted_cell_expression[0] = get_column_letter(column_index_from_string(column_of_cell_expression[:-1]) - 1) + "$"
+ 
+        return self._recover_cell_expression_from(splitted_cell_expression)
+    
+    @staticmethod
+    def _does_column_needs_to_be_updated(column_of_cell_expression, column_deleted):
+        return column_index_from_string(column_of_cell_expression) > column_index_from_string(column_deleted)
     
 
-    def update_a_formula_after_inserting_columns(formula, columns_inserted):
+class LineInsert(RegularExpression):
+    def __init__(self, lines_inserted):
+        self.lines_inserted = lines_inserted
+
+    def _update_a_cell(self, formula):
         """
-        Fonction qui va mettre à jour la formule d'une cellule suite à un ajout de lignes.
+        Fonction qui va mettre à jour la formule d'une cellule suite à un ajout ou une suppression de colonne/ligne. 
+        A cell formula is of the form '=C5+D$6'
         """
-         
-        #Isoler les cellules des formules
-        L1 = re.split(r'(\b[A-Za-z-$]+\d+\b)',formula) 
-        for i in range(len(L1)):
-            elt = L1[i]
-            #si l'élt est une cellule, on la modifie :
-            if re.fullmatch(r'\b[A-Za-z-$]+\d+\b', elt):
-                L2 = re.split(r'(\d+)',elt)[:-1]  
-                if '$' in L2[0]:
-                    letter = L2[0][:-1]
-                else:
-                    letter = L2[0] 
-                if column_index_from_string(letter) > column_index_from_string(modification): 
-                    letter = get_column_letter(column_index_from_string(letter) + 1)
-                if '$' in L2[0]:
-                    L2[0] = letter + '$'
-                else:
-                    L2[0] = letter
-                L1[i] = ''.join(L2) 
-        return ''.join(L1) 
+        
+        parts_of_formula = self._split_a(formula) 
+        for index in range(len(parts_of_formula)): 
+            if self._is_string_a_cell_expression(parts_of_formula[index]): 
+                parts_of_formula[index] = self._update_one_cell_expression(parts_of_formula[index])
+        return self._recover_cell_formula_from(parts_of_formula) 
+    
+    def _update_one_cell_expression(self, cell_expression):
+        for line_inserted in self.lines_inserted:
+            cell_expression = self._update_one_cell_expression_after_one_modification(cell_expression, int(line_inserted))
+        return cell_expression
 
-    def update_a_formula_after_deleting_columns(formula):
-        pass
-
-    def update_a_formula_after_insertion_of_lines(formula):
-        pass
-
-    def update_a_formula_after_insertion_of_lines(formula):
-        pass
+    def _update_one_cell_expression_after_one_modification(self, cell_expression, line_inserted):
+        """A cell expression if of type C5 or C$5"""
+        splitted_cell_expression = self._split_cell_expression_from(cell_expression)
+        line_of_cell_expression = int(splitted_cell_expression[1])
+        if self._does_line_letter_needs_to_be_updated(line_of_cell_expression, line_inserted): 
+            splitted_cell_expression[1] = str(line_of_cell_expression + 1)
+        return self._recover_cell_expression_from(splitted_cell_expression)
+    
+    @staticmethod
+    def _does_line_letter_needs_to_be_updated(line_letter, line_deleted):
+        return line_letter > line_deleted
 
 
-class ColumnInsert():
-    def __init__(self, formula, column_inserted):
-        self.formula = formula
-        self.column_inserted = column_inserted
+class LineDelete(RegularExpression):
+    def __init__(self, lines_deleted):
+        self.lines_deleted = lines_deleted
 
-    def update_formula():
-        pass
+    def _update_a_cell(self, formula):
+        """
+        Fonction qui va mettre à jour la formule d'une cellule suite à un ajout ou une suppression de colonne/ligne. 
+        A cell formula is of the form '=C5+D$6'
+        """
+        
+        parts_of_formula = self._split_a(formula) 
+        for index in range(len(parts_of_formula)): 
+            if self._is_string_a_cell_expression(parts_of_formula[index]): 
+                parts_of_formula[index] = self._update_one_cell_expression(parts_of_formula[index])
+        return self._recover_cell_formula_from(parts_of_formula) 
+    
+    def _update_one_cell_expression(self, cell_expression):
+        for line_deleted in self.lines_deleted:
+            cell_expression = self._update_one_cell_expression_after_one_modification(cell_expression, int(line_deleted))
+        return cell_expression
 
-class ColumnDelete():
-    def __init__(self, formula, column_deleted):
-        self.formula = formula
-        self.column_deleted = column_deleted
-
-    def update_formula():
-        pass
-
-class LineInsert():
-    def __init__(self, formula, line_inserted):
-        self.formula = formula
-        self.line_inserted = line_inserted
-
-    def update_formula():
-        pass
-
-class LineDelete():
-    def __init__(self, formula, column_deleted):
-        self.formula = formula
-        self.line_deleted = line_deleted
-
-    def update_formula():
-        pass
+    def _update_one_cell_expression_after_one_modification(self, cell_expression, line_deleted):
+        """A cell expression if of type C5 or C$5"""
+        splitted_cell_expression = self._split_cell_expression_from(cell_expression)
+        line_of_cell_expression = int(splitted_cell_expression[1])
+        if self._does_line_letter_needs_to_be_updated(line_of_cell_expression, line_deleted): 
+            splitted_cell_expression[1] = str(line_of_cell_expression - 1)
+        return self._recover_cell_expression_from(splitted_cell_expression)
+    
+    @staticmethod
+    def _does_line_letter_needs_to_be_updated(line_letter, line_deleted):
+        return line_letter > line_deleted

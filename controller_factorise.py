@@ -9,7 +9,7 @@ import re
 from openpyxl.styles import PatternFill
 from openpyxl.utils import column_index_from_string, get_column_letter, coordinate_to_tuple
 from time import time
-from utils.utils import Other, UtilsForFile, Str, DisplayRunningInfos, TabsCopy, GetIndex 
+from utils.utils import Other, UtilsForFile, Str, DisplayRunningInfos, TabsCopy, GetIndex, TabUpdate, ColumnDelete, ColumnInsert, LineDelete, LineInsert
 from copy import copy
 from model_factorise import Cell
 from pycel import ExcelCompiler  
@@ -50,6 +50,7 @@ class TwoFilesController(GetIndex):
         self.first_line = first_line
         self.tabs_copy = TabsCopy(file_object_from.get_tab_by_name(tab_name_from),
                                   file_object_to.get_tab_by_name(tab_name_to))
+        self.tab_update = TabUpdate()
         self._get_columns_identifiers_indexes(column_with_identifiers_from, column_with_identifiers_to)
 
     def _get_columns_identifiers_indexes(self, column_with_identifiers_from, column_with_identifiers_to):
@@ -70,11 +71,14 @@ class TwoFilesController(GetIndex):
         """ 
         column_insertion_index = column_index_from_string(column_insertion) 
         columns_to_copy_indexes = self.get_list_of_columns_indexes(columns_to_copy) 
-        modifications = [get_column_letter(column_insertion_index + i ) for i in range(len(columns_to_copy))]
         cells_to_copy_by_identifier = self._create_a_dictionary_with_identifiers_and_indexes_of_cells_to_copy(columns_to_copy_indexes)
         self.tabs_copy.tab_to.insert_cols(column_insertion_index, len(columns_to_copy)) 
         self._copy_cells_values_in_the_new_tab(cells_to_copy_by_identifier, column_insertion_index)
-        self.updateCellFormulas(self.tabs_copy.tab_to, True, 'column', modifications)         
+
+        modification_object = ColumnInsert(self.get_list_of_consecutive_column_letters(column_insertion_index, len(columns_to_copy))) 
+        self.tab_update.choose_modifications_to_apply(modification_object)
+        self.tab_update.choose_tab_with_formula_to_update(self.tabs_copy.tab_to)
+        self.tab_update.update_cells_formulas()       
         self.file_object_to.save_file()
 
     def _create_a_dictionary_with_identifiers_and_indexes_of_cells_to_copy(self, columns_to_copy_indexes):
