@@ -1,6 +1,6 @@
 from unittest import TestCase, main 
 from model_factorise import File, OptionalNamesOfFile, MergedCellsRange
-from controller_factorise import MultipleTabsControler, MultipleFilesController
+from controller_factorise import OneFileMultipleTabsController, OneFileCreatedController, TwoFilesController
 from utils.utils import Other, Str
  
 import os
@@ -46,7 +46,7 @@ class TestFile(TestCase):
 
     def test_split_one_tab_in_multiple_tabs(self): 
         file = File('test_create_one_onglet_by_participant.xlsx') 
-        controler = MultipleFilesController(file, OptionalNamesOfFile(name_of_tab_to_read='Stroops_test (7)', column_to_read='A'))
+        controler = OneFileCreatedController(file, OptionalNamesOfFile(name_of_tab_to_read='Stroops_test (7)', column_to_read='A'))
         controler.make_horodated_copy_of_a_file()
         controler.split_one_tab_in_multiple_tabs()  
         file2 = File('divided_test_create_one_onglet_by_participant.xlsx')
@@ -57,7 +57,7 @@ class TestFile(TestCase):
 
     def test_extract_a_column_from_all_tabs(self):
         file = File('test_extract_column.xlsx')
-        controler = MultipleTabsControler(file, OptionalNamesOfFile(column_to_read='B'))
+        controler = OneFileMultipleTabsController(file, OptionalNamesOfFile(column_to_read='B'))
         controler.extract_a_column_from_all_tabs() 
         verify_files_identical(File('test_extract_column_ref.xlsx'),file)
 
@@ -66,13 +66,13 @@ class TestFile(TestCase):
 
     def test_apply_column_formula_on_all_tabs(self):
         file = File('dataset.xlsx', dataonly = False)
-        controler = MultipleTabsControler(file, OptionalNamesOfFile(columns_to_read=['B','C']))
+        controler = OneFileMultipleTabsController(file, OptionalNamesOfFile(columns_to_read=['B','C']))
         controler.apply_columns_formula_on_all_tabs()
     
 
     def test_gather_groups_of_multiple_columns_in_tabs_of_two_columns_containing_tags_and_values(self):
         file = File("test_gather_columns_in_one.xlsx")
-        controler = MultipleTabsControler(file, OptionalNamesOfFile(name_of_tab_to_read='test'))
+        controler = OneFileMultipleTabsController(file, OptionalNamesOfFile(name_of_tab_to_read='test'))
         controler.gather_groups_of_multiple_columns_in_tabs_of_two_columns_containing_tags_and_values(['C','D','E'], ['G','H','I'])
 
         file = File("test_gather_columns_in_one.xlsx")
@@ -86,7 +86,7 @@ class TestFile(TestCase):
 
     def test_one_file_by_tab(self):
         file = File("test_onefile_sendmail.xlsx")
-        controler = MultipleFilesController(file)
+        controler = OneFileCreatedController(file)
         controler.create_one_file_by_tab()
  
         sheet1 = File("tony fevrier.xlsx", "multifiles/").writebook["Sheet"]
@@ -100,7 +100,7 @@ class TestFile(TestCase):
 
     def test_merge_cells_on_all_tabs(self): 
         file = File("test_merging.xlsx")
-        controler = MultipleTabsControler(file)
+        controler = OneFileMultipleTabsController(file)
         controler.merge_cells_on_all_tabs(MergedCellsRange('C', 'D', 12, 15))
 
         #voir comment tester le fait qu'une cellule est mergée : comprendre l'objet mergedcells
@@ -116,7 +116,7 @@ class TestFile(TestCase):
         
     def test_apply_cell_formula_on_all_sheets(self):
         file = File("test_merging.xlsx")
-        controler = MultipleTabsControler(file)
+        controler = OneFileMultipleTabsController(file)
         controler.apply_cells_formula_on_all_tabs('A10','B10','C10')
 
         for tab in file.sheets_name[1:]:
@@ -127,13 +127,13 @@ class TestFile(TestCase):
     
     def test_check_linenumber_of_tabs(self):
         file = File('test.xlsx')
-        controler = MultipleTabsControler(file)
+        controler = OneFileMultipleTabsController(file)
         tabs = controler.list_tabs_with_different_number_of_lines(14)
         self.assertListEqual(tabs, ['cutinparts', 'cutinpartsbis', 'delete_lines', 'delete_lines_bis'])
 
     def test_extract_cells_from_all_tabs(self):
         file = File('test_extract_cells_from_all_sheets.xlsx')
-        controler = MultipleFilesController(file)
+        controler = OneFileCreatedController(file)
         controler.extract_cells_from_all_tabs('C7','D7','C8','D8') 
         file2 = File('gathered_data_test_extract_cells_from_all_sheets.xlsx')
         verify_sheets_identical(file2.writebook['Sheet'], File('test_extract_cells_from_all_sheets - after.xlsx').writebook['gathered_data']) 
@@ -161,18 +161,18 @@ class TestFile(TestCase):
 #         for i in range(1,feuille2.max_row):
 #             self.assertEqual(feuille.cell(i,1).value,feuille2.cell(i,1).value)
          
-#     def column_identical(self,name_file1, name_file2, index_onglet1, index_onglet2, column1,column2):
-#         """
-#         Méthode qui prend deux fichiers et regarde si à une colonne donnée les valeurs sont les mêmes
-#         """
-#         file1 = File(name_file1) 
-#         file2 = File(name_file2)  
-#         sheet1 = file1.writebook.worksheets[index_onglet1] 
-#         sheet2 = file2.writebook.worksheets[index_onglet2] 
-#         self.assertEqual(sheet1.max_row,sheet2.max_row) 
+    def column_identical(self,name_file1, name_file2, index_onglet1, index_onglet2, column1,column2):
+        """
+        Méthode qui prend deux fichiers et regarde si à une colonne donnée les valeurs sont les mêmes
+        """
+        file1 = File(name_file1) 
+        file2 = File(name_file2)  
+        sheet1 = file1.writebook.worksheets[index_onglet1] 
+        sheet2 = file2.writebook.worksheets[index_onglet2] 
+        self.assertEqual(sheet1.max_row,sheet2.max_row) 
         
-#         for i in range(2,sheet1.max_row + 1): 
-#             self.assertEqual(sheet1.cell(i,column1).value,sheet2.cell(i,column2).value)
+        for i in range(2,sheet1.max_row + 1): 
+            self.assertEqual(sheet1.cell(i,column1).value,sheet2.cell(i,column2).value)
 
 #     def test_column_transform_string_in_binary(self): 
 #         file = File('test.xlsx')
@@ -223,16 +223,19 @@ class TestFile(TestCase):
 #                 self.assertEqual(sheet.sheet.cell(i,j).fill.fgColor.rgb,sheet2.sheet.cell(i,j).fill.fgColor.rgb)
 #     """
     
-#     def test_add_column_in_sheet_differently_sorted(self):
-#         file = File('test.xlsx')
-#         controler = FileControler(file)
-#         sheet1 = file.writebook['Feuille5'] 
-#         controler.add_column_in_sheet_differently_sorted('Feuille5','C','E',['test.xlsx','sheet1','C',['B','F']]) 
-#         self.column_identical('test.xlsx','test.xlsx',4,5,5,5)
-#         self.column_identical('test.xlsx','test.xlsx',4,5,6,6)
-#         sheet1.delete_cols(5,2)
+    def test_add_column_in_sheet_differently_sorted(self):
+        file1 = File('test.xlsx', dataonly=True)
+        file2 = File('test.xlsx')
+        sheet2 = file2.writebook['Feuille5']
 
-#         file.writebook.save(file.path + 'test.xlsx')
+        controler = TwoFilesController(file1, file2, 'sheet1', 'Feuille5', 'C', 'C') 
+        controler.copy_columns_in_a_tab_differently_sorted(['B','F'], 'E') 
+
+        self.column_identical('test.xlsx','test.xlsx',4,5,5,5)
+        self.column_identical('test.xlsx','test.xlsx',4,5,6,6)
+        
+        sheet2.delete_cols(5,2)
+        file2.writebook.save(file2.path + 'test.xlsx')
         
 #     def test_color_line_containing_chaines(self):
 #         file = File('test.xlsx')

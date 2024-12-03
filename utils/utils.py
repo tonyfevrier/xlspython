@@ -660,9 +660,9 @@ class DisplayRunningInfos():
 class TabsCopy():
     """Make copys from a tab to a new tab"""
 
-    def __init__(self):
-        self.tab_from = None
-        self.tab_to = None
+    def __init__(self, tab_from=None, tab_to=None):
+        self.tab_from = tab_from
+        self.tab_to = tab_to
 
     def _choose_the_tab_to_write_in(self, tab):
         self.tab_to = tab
@@ -743,6 +743,10 @@ class TabsCopy():
         self.tab_to.cell(cell_to.line_index, cell_to.column_index).border = copy(self.tab_from.cell(cell_from.line_index, cell_from.column_index).border) 
         self.tab_to.cell(cell_to.line_index, cell_to.column_index).alignment = copy(self.tab_from.cell(cell_from.line_index, cell_from.column_index).alignment)     
             
+    def deep_copy_of_a_cell_from_(self, cell_from, ):
+        self.tab_to.cell(line_index, column_insertion_index + column_index).value = cells_to_copy[column_index].value
+        self.tab_to.cell(line_index, column_insertion_index + column_index).fill = copy(cells_to_copy[column_index].fill)
+
     def copy_of_a_cell(self, cell_from, cell_to):   
         self.tab_to.cell(cell_to.line_index, cell_to.column_index).value = self.tab_from.cell(cell_from.line_index, cell_from.column_index).value
     
@@ -782,4 +786,187 @@ class GetIndex():
         for column in columns_letters_list: 
             columns_int_list.append(column_index_from_string(column)) 
         return columns_int_list 
-     
+    
+    @staticmethod
+    def get_cells_indexes_of_one_line_and_some_columns(line_index, columns_indexes):
+        return  [(line_index, column_index) for column_index in columns_indexes]
+    
+
+class TabUpdate():
+    """Handles """
+    def __init__(self, tab, modification_object):
+        self.tab = tab 
+        self.modification_object = modification_object
+
+        # ET ON VA APPELER DANS LES METHODES LA METHODE UPDATE FORMULA de modifobject!!
+
+    def updateCellFormulas(self,sheet,insert, rowOrColumn, modifications):
+        """
+        Fonction qui met à jour les formules d'une feuille entière 
+
+        Inputs : 
+            - sheet (obj): la feuille sur laquelle on agit.
+            - insert (bool) : True si les modifications sont toutes des insertions, False si ce sont toutes des suppressions.
+            - rowOrColumn (str): 'row' ou 'column' suivant que la série d'opérations effectuées porte sur ligne ou colonne.
+            - modifications (list[str]) : liste de str donnant les modifications. Si on a inséré 10 colonnes, ce sera la liste des 10 lettres correspondantes.
+
+        """
+        for row in range(1,sheet.max_row + 1):
+            for column in range(1,sheet.max_column + 1): 
+                formula = sheet.cell(row,column).value 
+                if isinstance(formula, str) and formula.startswith('='):
+                    sheet.cell(row,column).value  = Str.updateOneFormula(formula, insert, rowOrColumn, modifications)
+
+    @staticmethod
+    def updateOneFormula(formula, insert, rowOrColumn, modifications):
+        """
+        Fonction qui va mettre à jour la formule d'une cellule suite plusieurs suppressions de colonne/ligne.
+
+        Inputs : 
+            - formula (str) : la chaîne de caractères.
+            - insert (bool) : True si les modifications sont toutes des insertions, False si ce sont toutes des suppressions.
+            - rowOrColumn (str): 'row' ou 'column' suivant que la série d'opérations effectuées porte sur ligne ou colonne.
+            - modifications (list[str]) : liste de str donnant les modifications. Si on a inséré 10 colonnes, ce sera la liste des 10 lettres correspondantes.
+
+        Output : 
+            - formula modified (str).
+        """
+        for elt in modifications:
+            formula = Str.updateOneFormulaForOneInsertion(formula,insert,rowOrColumn,elt)
+            
+        return formula
+
+
+    @staticmethod
+    def updateOneFormulaForOneInsertion(formula, insert, rowOrColumn, modification):
+        """
+        Fonction qui va mettre à jour la formule d'une cellule suite à un ajout ou une suppression de colonne/ligne.
+
+        Inputs : 
+            - formula (str) : la chaîne de caractères.
+            - insert (bool) : True si on a inséré, False si on a supprimé.
+            - rowOrColumn (str): 'row' ou 'column' suivant que la série d'opérations effectuées porte sur ligne ou colonne.
+            - modification (str) :  str donnant la modification, soit la lettre de la colonne, soit le numéro de la ligne
+
+
+        Output : 
+            - formula modified (str).
+        """
+         
+        #Isoler les cellules des formules
+        L1 = re.split(r'(\b[A-Za-z-$]+\d+\b)',formula) 
+        for i in range(len(L1)):
+            elt = L1[i]
+            #si l'élt est une cellule, on la modifie :
+            if re.fullmatch(r'\b[A-Za-z-$]+\d+\b', elt):
+                L2 = re.split(r'(\d+)', elt)[:-1] 
+                #si on a supprimé ou inséré une ligne
+                if rowOrColumn == "row":
+                    if int(L2[1]) > int(modification):
+                        if insert: 
+                            L2[1] = str(int(L2[1])+1) 
+                        else:
+                            L2[1] = str(int(L2[1])-1)
+                #même chose sur les colonnes
+                else:
+                    if '$' in L2[0]:
+                        letter = L2[0][:-1]
+                    else:
+                        letter = L2[0] 
+                    if column_index_from_string(letter) > column_index_from_string(modification):
+                        if insert:
+                            letter = get_column_letter(column_index_from_string(letter) + 1)
+                        else:
+                            letter = get_column_letter(column_index_from_string(letter) - 1)
+                    if '$' in L2[0]:
+                        L2[0] = letter + '$'
+                    else:
+                        L2[0] = letter
+                L1[i] = ''.join(L2) 
+        return ''.join(L1) 
+    
+    def _list_cells_expressions_from_an_excel_formula(formula):
+        return re.split(r'(\b[A-Za-z-$]+\d+\b)', formula)  
+
+    def _is_string_a_cell_expression(string):
+        return re.fullmatch(r'\b[A-Za-z-$]+\d+\b', string)
+    
+    def _separate_letter_and_number_of_cell_expression(cell_expression):
+        return re.split(r'(\d+)', cell_expression)[:-1]
+    
+    def _update_column_letter_after_insertion(column_letter, columns_inserted):
+        try: 
+            if column_index_from_string(column_letter) > column_index_from_string(columns_inserted):
+                column_letter = get_column_letter(column_index_from_string(column_letter) + 1)
+        except:
+            #The column letter may be of the form C$ in excel formula so we have to clean $ to get index and readd it after 
+            if column_index_from_string(column_letter[:-1]) > column_index_from_string(columns_inserted):
+                column_letter = get_column_letter(column_index_from_string(column_letter[:-1]) + 1) + "$"
+    
+
+    def update_a_formula_after_inserting_columns(formula, columns_inserted):
+        """
+        Fonction qui va mettre à jour la formule d'une cellule suite à un ajout de lignes.
+        """
+         
+        #Isoler les cellules des formules
+        L1 = re.split(r'(\b[A-Za-z-$]+\d+\b)',formula) 
+        for i in range(len(L1)):
+            elt = L1[i]
+            #si l'élt est une cellule, on la modifie :
+            if re.fullmatch(r'\b[A-Za-z-$]+\d+\b', elt):
+                L2 = re.split(r'(\d+)',elt)[:-1]  
+                if '$' in L2[0]:
+                    letter = L2[0][:-1]
+                else:
+                    letter = L2[0] 
+                if column_index_from_string(letter) > column_index_from_string(modification): 
+                    letter = get_column_letter(column_index_from_string(letter) + 1)
+                if '$' in L2[0]:
+                    L2[0] = letter + '$'
+                else:
+                    L2[0] = letter
+                L1[i] = ''.join(L2) 
+        return ''.join(L1) 
+
+    def update_a_formula_after_deleting_columns(formula):
+        pass
+
+    def update_a_formula_after_insertion_of_lines(formula):
+        pass
+
+    def update_a_formula_after_insertion_of_lines(formula):
+        pass
+
+
+class ColumnInsert():
+    def __init__(self, formula, column_inserted):
+        self.formula = formula
+        self.column_inserted = column_inserted
+
+    def update_formula():
+        pass
+
+class ColumnDelete():
+    def __init__(self, formula, column_deleted):
+        self.formula = formula
+        self.column_deleted = column_deleted
+
+    def update_formula():
+        pass
+
+class LineInsert():
+    def __init__(self, formula, line_inserted):
+        self.formula = formula
+        self.line_inserted = line_inserted
+
+    def update_formula():
+        pass
+
+class LineDelete():
+    def __init__(self, formula, column_deleted):
+        self.formula = formula
+        self.line_deleted = line_deleted
+
+    def update_formula():
+        pass

@@ -24,7 +24,7 @@ def create_empty_workbook():
     return workbook
 
 
-class TabController():
+class OneFileOneTabController():
     """Handle methods reading and modifying a unique tab of a file."""
     def __init__(self, file_object, tab_name, optional_names_of_tab=None, first_line=2):
         """
@@ -40,9 +40,69 @@ class TabController():
         self.tab = self.file_object.get_tab_by_name(tab_name)
         self.optional_names_of_tab = optional_names_of_tab 
         self.first_line = first_line
-    
 
-class MultipleFilesController(GetIndex):
+
+class TwoFilesController(GetIndex):
+    def __init__(self, file_object_from, file_object_to, tab_name_from, tab_name_to,
+                 column_with_identifiers_from=None, column_with_identifiers_to=None, first_line=2):
+        self.file_object_from = file_object_from
+        self.file_object_to = file_object_to
+        self.first_line = first_line
+        self.tabs_copy = TabsCopy(file_object_from.get_tab_by_name(tab_name_from),
+                                  file_object_to.get_tab_by_name(tab_name_to))
+        self._get_columns_identifiers_indexes(column_with_identifiers_from, column_with_identifiers_to)
+
+    def _get_columns_identifiers_indexes(self, column_with_identifiers_from, column_with_identifiers_to):
+        try:
+            self.column_with_identifiers_to = column_index_from_string(column_with_identifiers_to) 
+            self.column_with_identifiers_from = column_index_from_string(column_with_identifiers_from)
+        except TypeError:
+            pass
+        
+    def copy_columns_in_a_tab_differently_sorted(self, columns_to_copy, column_insertion):
+        """
+        Fonction qui insère dans un onglet des colonnes d'un autre onglet de référence. 
+        Les deux feuilles ont une colonne d'identifiants communs (exemple : des mails) mais qui peut être
+        triés dans des ordres différents.
+        La fonction récupère un ou plusieurs éléments d'une ligne déterminée par un identifiant.
+        Elle recherche l'identifiant dans la seconde feuille et insère les éléments
+        dans la ligne correspondante.
+        """ 
+        column_insertion_index = column_index_from_string(column_insertion) 
+        columns_to_copy_indexes = self.get_list_of_columns_indexes(columns_to_copy) 
+        modifications = [get_column_letter(column_insertion_index + i ) for i in range(len(columns_to_copy))]
+        cells_to_copy_by_identifier = self._create_a_dictionary_with_identifiers_and_indexes_of_cells_to_copy(columns_to_copy_indexes)
+        self.tabs_copy.tab_to.insert_cols(column_insertion_index, len(columns_to_copy)) 
+        self._copy_cells_values_in_the_new_tab(cells_to_copy_by_identifier, column_insertion_index)
+        self.updateCellFormulas(self.tabs_copy.tab_to, True, 'column', modifications)         
+        self.file_object_to.save_file()
+
+    def _create_a_dictionary_with_identifiers_and_indexes_of_cells_to_copy(self, columns_to_copy_indexes):
+        tab_from = self.tabs_copy.tab_from
+        dico = {}
+        for line_index in range(1, tab_from.max_row + 1):
+            identifier = self.file_object_from.get_cell_value_from_a_tab(tab_from, Cell(line_index, self.column_with_identifiers_from))  
+            dico[identifier] = GetIndex.get_cells_indexes_of_one_line_and_some_columns(line_index, columns_to_copy_indexes)
+        return dico
+
+    def _copy_cells_values_in_the_new_tab(self, cells_to_copy_indexes_by_identifier, column_insertion_index):
+        tab_to = self.tabs_copy.tab_to
+        for line_index in range(1, tab_to.max_row + 1):
+
+            # The identifiers of tab_to may not be present in tab_from so that it may not be a key of the dictionary created from tab_from
+            try:
+                identifier = self.file_object_to.get_cell_value_from_a_tab(tab_to, Cell(line_index, self.column_with_identifiers_to))
+                cells_to_copy_indexes = cells_to_copy_indexes_by_identifier[identifier]
+                self._copy_values_for_a_line_in_the_new_tab(line_index, cells_to_copy_indexes, column_insertion_index)
+            except KeyError:
+                continue
+        
+    def _copy_values_for_a_line_in_the_new_tab(self, line_index, cells_to_copy_indexes, column_insertion_index): 
+        for column_index in range(len(cells_to_copy_indexes)):
+            self.tabs_copy.deep_copy_of_a_cell(Cell(*cells_to_copy_indexes[column_index]), Cell(line_index, column_insertion_index + column_index))
+ 
+
+class OneFileCreatedController(GetIndex):
     """
     Handle methods involving multiple files
 
@@ -210,9 +270,9 @@ class MultipleFilesController(GetIndex):
         self._create_workbook_and_choose_first_tab_to_write_in() 
         self.tabs_copy.deep_copy_of_a_tab() 
         self.new_writebook.save('multifiles/' + tab_name + '.xlsx')  
-   
 
-class MultipleTabsControler(GetIndex):
+
+class OneFileMultipleTabsController(GetIndex):
     """
     Handle methods involving multiple tabs of a file.
     """
@@ -388,8 +448,6 @@ class MultipleTabsControler(GetIndex):
 
         self.file_object.save_file() 
 
-    # Arrive ici
-
     def list_tabs_with_different_number_of_lines(self, number_of_lines):
         """
         Fonction qui prend un fichier et qui contrôle si tous les onglets ont un nombre de lignes égal à l'argument
@@ -458,60 +516,6 @@ class MultipleTabsControler(GetIndex):
 
         for j in range(1, sheet.max_column + 1):
             self.color_special_cases_in_column(sheet_name, get_column_letter(j),chainecolor)
-
-    def add_column_in_sheet_differently_sorted(self, sheet_name, column_identifiant, column_insertion, other_sheet):
-        """
-        Fonction qui insère dans un onglet des colonnes d'un autre onglet de référence. 
-        Les deux feuilles ont une colonne d'identifiants communs (exemple : des mails) mais qui peut être
-        triés dans des ordres différents.
-        La fonction récupère un ou plusieurs éléments d'une ligne déterminée par un identifiant.
-        Elle recherche l'identifiant dans la seconde feuille et insère les éléments
-        dans la ligne correspondante.
-
-        Inputs :
-            - column_identifiant : numéro de la colonne où sont situés les identifiants dans l'onglet qu'on souhaite modifier.
-            - column_insertion : numéro de la colonne où on insère les colonnes à récupérer.
-            - other_sheet : liste représentant l'onglet duquel on récupère les colonnes  ['namefile','namesheet',numéro de la colonne où sont les identifiants,[numéros des colonnes à récupérer sous forme de liste]]
-                namefile doit être au format .xlsx et mis dans le dossier fichier_xls. 
-            
-        Exemple d'utilisation : 
-    
-            sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.add_column_in_sheet_differently_sorted('B','C',['file.xlsx', 'onglet2', 'B', ['E','F','H','AA]]) 
-                  
-        """
-        sheet = self.file.writebook[sheet_name]
-        
-        file_to_copy = openpyxl.load_workbook(self.file.path + other_sheet[0], data_only=True)
-        sheet_to_copy = file_to_copy[other_sheet[1]]
-        columns_to_copy = other_sheet[3]
-        dico = {}
-
-        column_identifiant = column_index_from_string(column_identifiant)
-        column_insertion = column_index_from_string(column_insertion)
-        other_sheet[2] = column_index_from_string(other_sheet[2])
-        columns_to_copy = [column_index_from_string(column) for column in columns_to_copy]
-
-        modifications = [get_column_letter(column_insertion + i ) for i in range(len(columns_to_copy))]
-
-        #Passage en revue les identifiants du premier fichier et création d'un dictionnaire dont les clés sont ces identifiants et les valeurs sont une liste de valeurs à récupérer.
-        for i in range(1,sheet_to_copy.max_row + 1):
-            value = sheet_to_copy.cell(i,other_sheet[2]).value
-            dico[value] = [sheet_to_copy.cell(i,j) for j in columns_to_copy]
-
-        sheet.insert_cols(column_insertion,len(columns_to_copy)) 
-
-        #Passage en revue des identifiants du second fichier et insertion des valeurs si les identifiants sont dans les clés du dico
-        #. 
-        for i in range(1, sheet.max_row+1):
-            key = sheet.cell(i,column_identifiant).value
-            if key in dico.keys():
-                for j in range(len(columns_to_copy)):
-                    sheet.cell(i,column_insertion + j).value = dico[key][j].value
-                    sheet.cell(i,column_insertion + j).fill = copy(dico[key][j].fill)
-        
-        self.updateCellFormulas(sheet,True,'column', modifications)         
-        self.file.writebook.save(self.file.path + self.file.name_file)
 
 
     def color_lines_containing_chaines(self, sheet_name, color,*chaines):

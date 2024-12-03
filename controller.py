@@ -462,7 +462,7 @@ class FileControler(UtilsForFile):
                     sheet.cell(i,column_insertion + j).value = dico[key][j].value
                     sheet.cell(i,column_insertion + j).fill = copy(dico[key][j].fill)
         
-        self.updateCellFormulas(sheet,True,'column', modifications)         
+        self.updateCellFormulas(sheet, True, 'column', modifications)         
         self.file.writebook.save(self.file.path + self.file.name_file)
 
 
