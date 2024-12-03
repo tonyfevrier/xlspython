@@ -5,7 +5,7 @@ from openpyxl.utils import get_column_interval,\
                            coordinate_to_tuple
 from copy import copy 
 from time import time, sleep 
-from model_factorise import Cell
+from model.model_factorise import Cell
 
 import typer 
 import yagmail 

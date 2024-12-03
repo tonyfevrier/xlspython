@@ -1,6 +1,7 @@
 from unittest import TestCase, main 
-from model_factorise import File, OptionalNamesOfFile, MergedCellsRange
-from controller_factorise import OneFileMultipleTabsController, OneFileCreatedController, TwoFilesController
+from model.model_factorise import File, OptionalNamesOfFile, MergedCellsRange 
+from controller.one_file_multiple_tabs import OneFileMultipleTabsController
+from controller.two_files import OneFileCreatedController, TwoFilesController
 from utils.utils import Other, Str, ColumnDelete, ColumnInsert, LineDelete, LineInsert, TabUpdate
  
 import os
