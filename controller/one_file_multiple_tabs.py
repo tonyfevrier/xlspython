@@ -8,7 +8,7 @@ from model.model_factorise import OptionalNamesOfTab
 
 class MultipleSameTabController():
 
-    def __init__(self, file_object, optional_names_of_file=None, first_line=2):
+    def __init__(self, file_object, tab_controller, optional_names_of_file=None, first_line=2):
         """
         Attributs: 
             - file_object (object of class File) 
@@ -18,7 +18,7 @@ class MultipleSameTabController():
             - display (DisplayRunningInfos object): to display the current state of the run
         """
         self.file_object = file_object
-        self.tab_controller = OneFileOneTabController(file_object, optional_names_of_tab=OptionalNamesOfTab())
+        self.tab_controller = tab_controller  #OneFileOneTabController(file_object, optional_names_of_tab=OptionalNamesOfTab())
         self.optional_names_of_file = optional_names_of_file  
         self.display = DisplayRunningInfos() 
 

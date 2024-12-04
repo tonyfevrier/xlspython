@@ -1,5 +1,6 @@
 from unittest import TestCase, main 
-from model.model_factorise import File, OptionalNamesOfFile, OptionalNamesOfTab, MergedCellsRange 
+from model.model_factorise import File, OptionalNamesOfFile, OptionalNamesOfTab, MergedCellsRange
+from controller.one_file_one_tab import ColorTabController 
 from controller.one_file_multiple_tabs import OneFileMultipleTabsController, MultipleSameTabController
 from controller.two_files import OneFileCreatedController, TwoFilesController
 from utils.utils import Other, Str, ColumnDelete, ColumnInsert, LineDelete, LineInsert, TabUpdate
@@ -242,24 +243,27 @@ class TestFile(TestCase):
 
     def test_color_column(self):
         file = File('test.xlsx')
-        controler = MultipleSameTabController(file, 
+        controler = MultipleSameTabController(file,
+                                              ColorTabController(file, optional_names_of_tab=OptionalNamesOfTab(column_to_read='D')), 
                                               optional_names_of_file=OptionalNamesOfFile(names_of_tabs_to_modify=['cutinpartsbis']))  
-        controler.tab_controller.optional_names_of_tab.column_to_read = 'D'#OptionalNamesOfTab(column_to_read='D')
+        #controler.tab_controller.optional_names_of_tab.column_to_read = 'D'#OptionalNamesOfTab(column_to_read='D')
         controler.apply_method_on_some_tabs('color_cases_in_column', 
                                             {' partie 2 : Vrai':'0000a933'}) 
          
     def test_color_cases_in_sheet(self):
         file = File('test.xlsx')
-        controler = MultipleSameTabController(file, 
+        controler = MultipleSameTabController(file,
+                                              ColorTabController(file, optional_names_of_tab=OptionalNamesOfTab()), 
                                               optional_names_of_file=OptionalNamesOfFile(names_of_tabs_to_modify=['cutinpartsbis']))   
         controler.apply_method_on_some_tabs('color_cases_in_sheet', 
                                             {'partie 1 : Vrai':'0000a933', 'Abbas':'0000a933'}) 
         
-#     def test_color_line_containing_chaines(self):
-#         file = File('test.xlsx')
-#         controler = FileControler(file) 
-#         controler.apply_method_on_some_sheets(['color_line'], 'color_lines_containing_chaines', '0000a933', '-', '+')
-#         #controler.color_lines_containing_chaines('color_line','0000a933','-','+')
+    def test_color_line_containing_chaines(self):
+        file = File('test.xlsx')
+        controler = MultipleSameTabController(file, 
+                                              ColorTabController(file, color='0000a933'),
+                                              optional_names_of_file=OptionalNamesOfFile(names_of_tabs_to_modify=['color_line']))    
+        controler.apply_method_on_some_tabs('color_lines_containing_chaines', '-', '+') 
         
 #     def test_column_cut_string_in_parts(self):
 #         file = File('test.xlsx')

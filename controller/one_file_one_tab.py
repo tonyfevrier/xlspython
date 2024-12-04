@@ -20,9 +20,8 @@ def create_empty_workbook():
     return workbook
 
 
-class OneFileOneTabController(String):
-    """Handle methods reading and modifying a unique tab of a file."""
-    def __init__(self, file_object, tab_name=None, optional_names_of_tab=None, first_line=2):
+class ColorTabController():
+    def __init__(self, file_object, tab_name=None, optional_names_of_tab=None, color=None, first_line=2):
         """
         Attributs:
             - file_object (file object)
@@ -37,6 +36,7 @@ class OneFileOneTabController(String):
             self.tab = self.file_object.get_tab_by_name(tab_name)
         self.optional_names_of_tab = optional_names_of_tab 
         self.first_line = first_line 
+        self.color = color
 
     def color_cases_in_column(self, map_string_to_color):
         """
@@ -44,7 +44,7 @@ class OneFileOneTabController(String):
         """  
         column_index = column_index_from_string(self.optional_names_of_tab.column_to_read) 
         
-        for i in range(1, self.tab.max_row + 1):
+        for i in range(self.first_line, self.tab.max_row + 1):
             cell = self.tab.cell(i, column_index) 
             self._color_cell_if_contains_string(cell, map_string_to_color) 
 
@@ -69,37 +69,53 @@ class OneFileOneTabController(String):
             self.optional_names_of_tab.column_to_read = get_column_letter(j) 
             self.color_cases_in_column(chainecolor)
 
-    
-    # ARRIVE ICI   
-
-    def color_lines_containing_chaines(self, sheet_name, color,*chaines):
+    def color_lines_containing_chaines(self, *strings):
         """
         Fonction qui colore les lignes dont une des cases contient une str particulière.
+        """ 
 
-        Input : 
-            - color : une couleur indiquée en haxadécimal par l'utilisateur.
-            - chaines : des chaines de caractères que l'utilisateur entre et qui entraînent la coloration de la ligne.
-            
-        Exemple d'utilisation : 
+        lines_indexes = self._list_lines_containing_strings(*strings)
+        
+        for line_index in lines_indexes:
+            self._color_line(line_index)
+
+    def _list_lines_containing_strings(self, *strings):
+        lines_indexes = []
+        for line_index in range(self.first_line, self.tab.max_row + 1):
+            lines_indexes = self._add_line_containing_strings_to_list(strings, line_index, lines_indexes)
+        return lines_indexes
     
-            sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.color_lines_containing_chaine('#FF0000', 'vrai', 'hello', 'heeenri', 'ficheux') 
-        
+    def _color_line(self, line_index): 
+        for column_index in range(1, self.tab.max_column + 1):
+            self.tab.cell(line_index, column_index).fill = PatternFill(fill_type = 'solid', start_color = self.color)
+
+    def _add_line_containing_strings_to_list(self, strings, line_index, lines_indexes):
+        for column_index in range(1, self.tab.max_column + 1):
+            if self.file_object.get_cell_value_from_a_tab(self.tab, Cell(line_index, column_index)) in strings:
+                lines_indexes.append(line_index)
+                break
+        return lines_indexes
+
+
+class OneFileOneTabController(String):
+    """Handle methods reading and modifying a unique tab of a file."""
+    def __init__(self, file_object, tab_name=None, optional_names_of_tab=None, first_line=2):
         """
-        sheet = self.file.writebook[sheet_name]
+        Attributs:
+            - file_object (file object)
+            - tab_name (str)
+            - tab (openpyxl.workbook.tab)            
+            - optional_names_of_tab (OptionalNamesOfTab object)
+            - first_line (optional int)
+        """ 
+        self.file_object = file_object
+        self.tab_name = tab_name
+        if tab_name is not None:
+            self.tab = self.file_object.get_tab_by_name(tab_name)
+        self.optional_names_of_tab = optional_names_of_tab 
+        self.first_line = first_line 
 
-        lines_to_color = []
-
-        for i in range(1, sheet.max_row + 1):
-            for j in range(1, sheet.max_column + 1):
-                if str(sheet.cell(i,j).value) in chaines:
-                    lines_to_color.append(i)
-                    break
-        
-        for row in lines_to_color:
-            self.color_line(sheet, color, row)
-        
-        #self.file.writebook.save(self.file.path + self.file.name_file)
+    # ARRIVE ICI
 
     def column_cut_string_in_parts(self, sheet_name, column_to_cut,column_insertion,separator):
         """
