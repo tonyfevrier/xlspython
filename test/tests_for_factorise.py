@@ -1,6 +1,6 @@
 from unittest import TestCase, main 
-from model.model_factorise import File, OptionalNamesOfFile, MergedCellsRange 
-from controller.one_file_multiple_tabs import OneFileMultipleTabsController
+from model.model_factorise import File, OptionalNamesOfFile, OptionalNamesOfTab, MergedCellsRange 
+from controller.one_file_multiple_tabs import OneFileMultipleTabsController, MultipleSameTabController
 from controller.two_files import OneFileCreatedController, TwoFilesController
 from utils.utils import Other, Str, ColumnDelete, ColumnInsert, LineDelete, LineInsert, TabUpdate
  
@@ -239,6 +239,14 @@ class TestFile(TestCase):
         sheet2.delete_cols(5,2)
         TabUpdate(sheet2, ColumnDelete(['E','F'])).update_cells_formulas()
         file2.writebook.save(file2.path + 'test.xlsx')
+
+    def test_color_line_containing_chaines(self):
+         file = File('test.xlsx')
+         controler = MultipleSameTabController(file, 
+                                               optional_names_of_file=OptionalNamesOfFile(names_of_tabs_to_modify=['cutinpartsbis']))  
+         controler.tab_controller.optional_names_of_tab = OptionalNamesOfTab(column_to_read='D')
+         controler.apply_method_on_some_tabs('color_cases_in_a_column', 
+                                             {' partie 2 : Vrai':'0000a933'}) 
         
 #     def test_color_line_containing_chaines(self):
 #         file = File('test.xlsx')

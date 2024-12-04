@@ -999,3 +999,27 @@ class LineDelete(RegularExpression):
     @staticmethod
     def _does_line_letter_needs_to_be_updated(line_letter, line_deleted):
         return line_letter > line_deleted
+    
+
+class String():
+
+    @staticmethod
+    def clean_string_from_spaces(string):
+        """
+        Fonction qui prend une chaîne de caractère et qui élimine tous les espaces de début et de fin.
+        Fonction qui nettoie également les espaces insécables \xa0 par un espace régulier.
+        Ceci rendra une chaîne de caractère qui remplacera l'attribut chaine de la classe.  
+        On pourra ainsi éviter les erreurs liées à une différence d'un seul espace.      
+        """
+        depart = 0
+        fin = len(string)
+        while string[depart] == ' ' or string[fin-1] == ' ':
+            if string[depart] == ' ':
+                depart += 1
+            if string[fin-1] == ' ':
+                fin -= 1
+        string = string[depart:fin]
+ 
+        chaine2 = string.replace('\xa0', ' ')
+        string = chaine2
+        return string

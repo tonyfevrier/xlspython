@@ -2,6 +2,50 @@ from utils.utils import GetIndex, TabsCopy, DisplayRunningInfos
 from openpyxl.utils import column_index_from_string
 from pycel import ExcelCompiler  
 from time import time
+from controller.one_file_one_tab import OneFileOneTabController
+
+
+class MultipleSameTabController():
+
+    def __init__(self, file_object, optional_names_of_file=None, first_line=2):
+        """
+        Attributs: 
+            - file_object (object of class File) 
+            - optional_names_of_file (OptionalNamesOfFile object)
+            - first_line (optional int)  
+            - tabs_copy (TabsCopy object): object to apply copy method from a tab to a new tab
+            - display (DisplayRunningInfos object): to display the current state of the run
+        """
+        self.file_object = file_object
+        self.tab_controller = OneFileOneTabController(file_object)
+        self.optional_names_of_file = optional_names_of_file  
+        self.display = DisplayRunningInfos() 
+
+    def apply_method_on_some_tabs(self, method_name, *args, **kwargs):
+        """ 
+        Vous avez un fichier contenant plusieurs onglets et vous souhaitez appliquer une même méthode de la 
+        classe Sheet sur une liste de ces onglets du fichier. On s'attend à ce que tous les onglets aient une structure identique.
+
+        Inputs:
+            - method_name (str): the name of the method to execute 
+            - *args, **kwargs : arguments of the method associated with method_name
+        """  
+        self.display.start_time = time()
+        for tab_name in self.optional_names_of_file.names_of_tabs_to_modify:    
+            # Get the method from its name and apply it
+            self.tab_controller.tab = self.file_object.get_tab_by_name(tab_name)
+            method = getattr(self.tab_controller, method_name)
+            method(*args, **kwargs) 
+
+            self._update_display_infos(method_name, tab_name, self.optional_names_of_file.names_of_tabs_to_modify) 
+            self.display.display_running_infos() 
+
+        self.file_object.save_file() 
+    
+    def _update_display_infos(self, method_name, current_running_part, list_of_running_parts):
+        self.display.method_name = method_name
+        self.display.current_running_part = current_running_part
+        self.display.list_of_running_parts = list_of_running_parts
 
 
 class OneFileMultipleTabsController(GetIndex):
@@ -30,26 +74,6 @@ class OneFileMultipleTabsController(GetIndex):
 
     def create_excel_compiler(self):
         return ExcelCompiler(self.file_object.path + self.file_object.name_file) 
-
-    def apply_method_on_some_tabs(self, method_name, *args, **kwargs):
-        """ 
-        Vous avez un fichier contenant plusieurs onglets et vous souhaitez appliquer une même méthode de la 
-        classe Sheet sur une liste de ces onglets du fichier. On s'attend à ce que tous les onglets aient une structure identique.
-
-        Inputs:
-            - method_name (str): the name of the method to execute 
-            - *args, **kwargs : arguments of the method associated with method_name
-        """  
-        self.display.start_time = time()
-        for tab_name in self.names_of_tabs_to_modify:    
-            # Get the method from its name and apply it
-            method = getattr(self, method_name)
-            method(tab_name, *args, **kwargs) 
-
-            self._update_display_infos(method_name, tab_name, self.names_of_tabs_to_modify) 
-            self.display.display_running_infos() 
-
-        self.file_object.save_file() 
 
     def extract_a_column_from_all_tabs(self):
         """

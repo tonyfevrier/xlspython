@@ -9,13 +9,9 @@ import re
 from openpyxl.styles import PatternFill
 from openpyxl.utils import column_index_from_string, get_column_letter, coordinate_to_tuple
 from time import time
-from utils.utils import Other, UtilsForFile, Str, DisplayRunningInfos, TabsCopy, GetIndex, TabUpdate, ColumnDelete, ColumnInsert, LineDelete, LineInsert
+from utils.utils import Other, String, UtilsForFile, Str, DisplayRunningInfos, TabsCopy, GetIndex, TabUpdate, ColumnDelete, ColumnInsert, LineDelete, LineInsert
 from copy import copy
-from model.model_factorise import Cell
-from pycel import ExcelCompiler  
-from time import time
-from datetime import datetime 
-from copy import copy
+from model.model_factorise import Cell 
 
 
 def create_empty_workbook():
@@ -24,9 +20,9 @@ def create_empty_workbook():
     return workbook
 
 
-class OneFileOneTabController():
+class OneFileOneTabController(String):
     """Handle methods reading and modifying a unique tab of a file."""
-    def __init__(self, file_object, tab_name, optional_names_of_tab=None, first_line=2):
+    def __init__(self, file_object, tab_name=None, optional_names_of_tab=None, first_line=2):
         """
         Attributs:
             - file_object (file object)
@@ -37,43 +33,34 @@ class OneFileOneTabController():
         """ 
         self.file_object = file_object
         self.tab_name = tab_name
-        self.tab = self.file_object.get_tab_by_name(tab_name)
+        if tab_name is not None:
+            self.tab = self.file_object.get_tab_by_name(tab_name)
         self.optional_names_of_tab = optional_names_of_tab 
         self.first_line = first_line 
-    
 
-    ## Sheet methods
-
-    def color_special_cases_in_column(self, sheet_name, column, chainecolor):
+    def color_cases_in_a_column(self, map_string_to_color):
         """
-        Fonction qui regarde pour une colonne donnée colore les cases correspondant à certaines chaînes de caractères.
-
-        Input : 
-            - column : le numéro de la colonne.
-            - chainecolor (dict) : les chaînes de caractères qui vont être colorées et les couleurs qui correspondent à écrire avec la syntaxe suivante {'vrai':'couleur1','autre':couleur2}. Attention,
-                la couleur doit être entrée en hexadécimal et les chaînes de caractères ne doivent pas avoir d'espace au début ou à la fin.
+        Fonction qui pour une colonne donnée colore les cases correspondant à certaines chaînes de caractères.
+        """  
+        column_index = column_index_from_string(self.optional_names_of_tab.column_to_read) 
         
-        Exemple d'utilisation : 
-        
-            sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.color_special_cases_in_column('L', {'vrai': '#FF0000','faux': '#00FF00'}) 
+        for i in range(1, self.tab.max_row + 1):
+            cell = self.tab.cell(i, column_index) 
+            self._color_cell_if_contains_string(cell, map_string_to_color) 
 
-        """ 
-        sheet = self.file.writebook[sheet_name]
-        column = column_index_from_string(column) 
-        
-        for i in range(1, sheet.max_row + 1):
-            cellule = sheet.cell(i,column) 
+    def _color_cell_if_contains_string(self, cell, map_string_to_color):
+        cleaned_cell_value = self._get_cleaned_cell_value(cell)
+        if cleaned_cell_value in map_string_to_color.keys():
+            cell.fill = PatternFill(fill_type = 'solid', start_color = map_string_to_color[cleaned_cell_value])
 
-            if cellule.value is str:
-                key = Str(cellule.value).clean_string().chaine
-            else: 
-                key = cellule.value
+    def _get_cleaned_cell_value(self, cell): 
+        if cell.value is str:
+            cleaned_cell_value = self.clean_string_from_spaces(cell.value) 
+        else: 
+            cleaned_cell_value = cell.value
+        return cleaned_cell_value
 
-            if key in chainecolor.keys():
-                cellule.fill = PatternFill(fill_type = 'solid', start_color = chainecolor[key])
-
-        #self.file.writebook.save(self.file.path + self.file.name_file)
+    # ARRIVE ICI
 
     def color_special_cases_in_sheet(self, sheet_name, chainecolor): 
         """
