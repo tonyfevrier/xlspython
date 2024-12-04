@@ -38,7 +38,7 @@ class OneFileOneTabController(String):
         self.optional_names_of_tab = optional_names_of_tab 
         self.first_line = first_line 
 
-    def color_cases_in_a_column(self, map_string_to_color):
+    def color_cases_in_column(self, map_string_to_color):
         """
         Fonction qui pour une colonne donnée colore les cases correspondant à certaines chaînes de caractères.
         """  
@@ -60,28 +60,17 @@ class OneFileOneTabController(String):
             cleaned_cell_value = cell.value
         return cleaned_cell_value
 
-    # ARRIVE ICI
-
-    def color_special_cases_in_sheet(self, sheet_name, chainecolor): 
+    def color_cases_in_sheet(self, chainecolor): 
         """
-        Fonction qui colore les cases contenant à certaines chaînes de caractères d'une feuille
-        
-        Input : 
-            - column : le numéro de la colonne.
-            - chainecolor (dict) : les chaînes de caractères qui vont être colorées et les couleurs qui correspondent à écrire avec la syntaxe suivante {'vrai':'couleur1','autre':couleur2}. Attention,
-                la couleur doit être entrée en hexadécimal et les chaînes de caractères ne doivent pas avoir d'espace au début ou à la fin.
-            
-        Exemple d'utilisation : 
+        Fonction qui colore les cases contenant à certaines chaînes de caractères d'une feuille 
+        """  
+
+        for j in range(1, self.tab.max_column + 1):
+            self.optional_names_of_tab.column_to_read = get_column_letter(j) 
+            self.color_cases_in_column(chainecolor)
+
     
-            sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.color_special_cases_in_sheet({'vrai': '#FF0000','faux': '#00FF00'}) 
-                
-        """ 
-        sheet = self.file.writebook[sheet_name]
-
-        for j in range(1, sheet.max_column + 1):
-            self.color_special_cases_in_column(sheet_name, get_column_letter(j),chainecolor)
-
+    # ARRIVE ICI   
 
     def color_lines_containing_chaines(self, sheet_name, color,*chaines):
         """

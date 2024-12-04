@@ -240,13 +240,20 @@ class TestFile(TestCase):
         TabUpdate(sheet2, ColumnDelete(['E','F'])).update_cells_formulas()
         file2.writebook.save(file2.path + 'test.xlsx')
 
-    def test_color_line_containing_chaines(self):
-         file = File('test.xlsx')
-         controler = MultipleSameTabController(file, 
-                                               optional_names_of_file=OptionalNamesOfFile(names_of_tabs_to_modify=['cutinpartsbis']))  
-         controler.tab_controller.optional_names_of_tab = OptionalNamesOfTab(column_to_read='D')
-         controler.apply_method_on_some_tabs('color_cases_in_a_column', 
-                                             {' partie 2 : Vrai':'0000a933'}) 
+    def test_color_column(self):
+        file = File('test.xlsx')
+        controler = MultipleSameTabController(file, 
+                                              optional_names_of_file=OptionalNamesOfFile(names_of_tabs_to_modify=['cutinpartsbis']))  
+        controler.tab_controller.optional_names_of_tab.column_to_read = 'D'#OptionalNamesOfTab(column_to_read='D')
+        controler.apply_method_on_some_tabs('color_cases_in_column', 
+                                            {' partie 2 : Vrai':'0000a933'}) 
+         
+    def test_color_cases_in_sheet(self):
+        file = File('test.xlsx')
+        controler = MultipleSameTabController(file, 
+                                              optional_names_of_file=OptionalNamesOfFile(names_of_tabs_to_modify=['cutinpartsbis']))   
+        controler.apply_method_on_some_tabs('color_cases_in_sheet', 
+                                            {'partie 1 : Vrai':'0000a933', 'Abbas':'0000a933'}) 
         
 #     def test_color_line_containing_chaines(self):
 #         file = File('test.xlsx')

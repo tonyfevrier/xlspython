@@ -3,6 +3,7 @@ from openpyxl.utils import column_index_from_string
 from pycel import ExcelCompiler  
 from time import time
 from controller.one_file_one_tab import OneFileOneTabController
+from model.model_factorise import OptionalNamesOfTab
 
 
 class MultipleSameTabController():
@@ -17,7 +18,7 @@ class MultipleSameTabController():
             - display (DisplayRunningInfos object): to display the current state of the run
         """
         self.file_object = file_object
-        self.tab_controller = OneFileOneTabController(file_object)
+        self.tab_controller = OneFileOneTabController(file_object, optional_names_of_tab=OptionalNamesOfTab())
         self.optional_names_of_file = optional_names_of_file  
         self.display = DisplayRunningInfos() 
 
