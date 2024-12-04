@@ -10,6 +10,7 @@ from time import time
 
 
 class TwoFilesController(GetIndex):
+    """Handle methods linking two existing files"""
     def __init__(self, file_object_from, file_object_to, tab_name_from, tab_name_to,
                  column_with_identifiers_from=None, column_with_identifiers_to=None, first_line=2):
         self.file_object_from = file_object_from
@@ -73,10 +74,8 @@ class TwoFilesController(GetIndex):
  
 
 class OneFileCreatedController(GetIndex):
-    """
-    Handle methods involving multiple files
+    """Handle methods creating a new file from an existing file"""
 
-    """
     def __init__(self, file_object, optional_names_of_file=None, first_line=2):
         """
         Attributs: 

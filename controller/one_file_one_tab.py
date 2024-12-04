@@ -1,3 +1,5 @@
+"""Handle methods reading and modifying a unique tab of a file."""
+
 # Ce que j'ai fait pr les classes. 
 # Attributs : initiaux, mais aussi transitoires pour éviter de créer des arguments dans les fonctions
 
@@ -21,6 +23,8 @@ def create_empty_workbook():
 
 
 class ColorTabController():
+    """Handle methods coloring a unique tab of a file."""
+
     def __init__(self, file_object, tab_name=None, optional_names_of_tab=None, color=None, first_line=2):
         """
         Attributs:
@@ -30,8 +34,7 @@ class ColorTabController():
             - optional_names_of_tab (OptionalNamesOfTab object)
             - first_line (optional int)
         """ 
-        self.file_object = file_object
-        self.tab_name = tab_name
+        self.file_object = file_object 
         if tab_name is not None:
             self.tab = self.file_object.get_tab_by_name(tab_name)
         self.optional_names_of_tab = optional_names_of_tab 
@@ -95,6 +98,16 @@ class ColorTabController():
                 lines_indexes.append(line_index)
                 break
         return lines_indexes
+    
+
+class DeleteController():
+    """Handle methods deleting lines or columns of a tab"""
+    pass
+
+
+class InsertController():
+    """Handle methods inserting columns in a tab"""
+    pass
 
 
 class OneFileOneTabController(String):
