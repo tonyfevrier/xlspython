@@ -1,6 +1,6 @@
 from unittest import TestCase, main 
 from model.model_factorise import File, OptionalNamesOfFile, OptionalNamesOfTab, MergedCellsRange
-from controller.one_file_one_tab import ColorTabController 
+from controller.one_file_one_tab import ColorTabController, DeleteController 
 from controller.one_file_multiple_tabs import OneFileMultipleTabsController, MultipleSameTabController
 from controller.two_files import OneFileCreatedController, TwoFilesController
 from utils.utils import Other, Str, ColumnDelete, ColumnInsert, LineDelete, LineInsert, TabUpdate
@@ -143,7 +143,7 @@ class TestFile(TestCase):
 #     def test_apply_same_method_on_all_sheets(self):
 #         file = File("test_method_on_all_sheets.xlsx")
 #         controler = FileControler(file)
-#         controler.apply_method_on_some_sheets(file.sheets_name, 'column_transform_string_in_binary', 'C', 'D', "partie 7 : Faux")
+#         controler.apply_method_on_some_tabs(file.sheets_name, 'column_transform_string_in_binary', 'C', 'D', "partie 7 : Faux")
 #         ref_sheet = File('test_method_on_all_sheets - ref.xlsx').writebook['Feuille5']
 #         for sheet in file.sheets_name:
 #             actual_sheet = file.writebook[sheet]
@@ -181,7 +181,7 @@ class TestFile(TestCase):
 #         controler = FileControler(file)
 #         sheet2 = file.writebook['Feuille2']
         
-#         controler.apply_method_on_some_sheets(['Feuille2'], 'column_transform_string_in_binary', 'F','G','partie 12 : Faux',1) 
+#         controler.apply_method_on_some_tabs(['Feuille2'], 'column_transform_string_in_binary', 'F','G','partie 12 : Faux',1) 
 #         #controler.column_transform_string_in_binary('Feuille2','F','G','partie 12 : Faux',1)
 #         self.column_identical('test.xlsx','test.xlsx', 1, 1, 7,8)
 #         sheet2.delete_cols(7) #sinon à chaque lancement de test.py il insère une colonne en plus.
@@ -194,7 +194,7 @@ class TestFile(TestCase):
         
 #         groups_of_response = {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']}  
 
-#         controler.apply_method_on_some_sheets(['sheet1'], 'column_set_answer_in_group', 'B','C', groups_of_response) 
+#         controler.apply_method_on_some_tabs(['sheet1'], 'column_set_answer_in_group', 'B','C', groups_of_response) 
 #         #controler.column_set_answer_in_group('sheet1','B','C',groups_of_response)
  
 #         self.column_identical('test_column_set_answer.xlsx','test_column_set_answer.xlsx',0,1,3,3)
@@ -238,7 +238,7 @@ class TestFile(TestCase):
         self.column_identical('test.xlsx','test.xlsx',4,5,8,8)
         
         sheet2.delete_cols(5,2)
-        TabUpdate(sheet2, ColumnDelete(['E','F'])).update_cells_formulas()
+        TabUpdate(ColumnDelete(['E','F'])).update_cells_formulas(sheet2)
         file2.writebook.save(file2.path + 'test.xlsx')
 
     def test_color_column(self):
@@ -263,13 +263,13 @@ class TestFile(TestCase):
         controler = MultipleSameTabController(file, 
                                               ColorTabController(file, color='0000a933'),
                                               optional_names_of_file=OptionalNamesOfFile(names_of_tabs_to_modify=['color_line']))    
-        controler.apply_method_on_some_tabs('color_lines_containing_chaines', '-', '+') 
+        controler.apply_method_on_some_tabs('color_lines_containing_strings', '-', '+') 
         
 #     def test_column_cut_string_in_parts(self):
 #         file = File('test.xlsx')
 #         controler = FileControler(file)
 #         sheet = file.writebook['cutinparts']  
-#         controler.apply_method_on_some_sheets(['cutinparts'], 'column_cut_string_in_parts', 'B','C',';')
+#         controler.apply_method_on_some_tabs(['cutinparts'], 'column_cut_string_in_parts', 'B','C',';')
 #         #controler.column_cut_string_in_parts('cutinparts','B','C',';') 
 #         self.column_identical('test.xlsx','test.xlsx',7,8, 3, 3)
 #         self.column_identical('test.xlsx','test.xlsx',7,8, 4, 4)
@@ -278,43 +278,47 @@ class TestFile(TestCase):
 #         sheet.delete_cols(3,3)
 #         file.writebook.save(file.path + 'test.xlsx') 
 
-#     def test_delete_lines(self):
-#         file = File('test.xlsx')
-#         controler = FileControler(file)  
-#         controler.apply_method_on_some_sheets(['delete_lines'], 'delete_lines_containing_str', 'D', '0')
-#         controler.apply_method_on_some_sheets(['delete_lines'], 'delete_lines_containing_str', 'D', 'p a')
-#         #controler.delete_lines_containing_str('delete_lines', 'D', '0')
-#         #controler.delete_lines_containing_str('delete_lines', 'D','p a')
-#         self.column_identical('test.xlsx','test.xlsx',9,10, 1, 1)
-#         self.column_identical('test.xlsx','test.xlsx',9,10, 2, 2)
-#         self.column_identical('test.xlsx','test.xlsx',9,10, 3, 3)
-#         self.column_identical('test.xlsx','test.xlsx',9,10, 4, 4)
-#         self.column_identical('test.xlsx','test.xlsx',9,10, 5, 5)
-#         self.column_identical('test.xlsx','test.xlsx',9,10, 6, 6)
+    def test_delete_lines(self):
+        file = File('test.xlsx')
+        controler = MultipleSameTabController(file, tab_controller=DeleteController(file),
+                                              optional_names_of_file=OptionalNamesOfFile(names_of_tabs_to_modify=['delete_lines']))  
+        controler.apply_method_on_some_tabs('delete_lines_containing_strings_in_given_column', 'D', '0')
+        controler.apply_method_on_some_tabs('delete_lines_containing_strings_in_given_column', 'D', 'p a') 
+        self.column_identical('test.xlsx','test.xlsx',9,10, 1, 1)
+        self.column_identical('test.xlsx','test.xlsx',9,10, 2, 2)
+        self.column_identical('test.xlsx','test.xlsx',9,10, 3, 3)
+        self.column_identical('test.xlsx','test.xlsx',9,10, 4, 4)
+        self.column_identical('test.xlsx','test.xlsx',9,10, 5, 5)
+        self.column_identical('test.xlsx','test.xlsx',9,10, 6, 6)
 
-#     def test_delete_lines_with_formulas(self):
-#         file = File('listing_par_etape - Copie.xlsx')
-#         controler = FileControler(file) 
-#         controler.apply_method_on_some_sheets(['Feuil1'], 'delete_lines_containing_str', 'B', 'pas consenti')
-#         #controler.delete_lines_containing_str('Feuil1', 'B', 'pas consenti') 
-#         self.column_identical('listing_par_etape - Copie.xlsx','listing_par_etape - Copie.xlsx',0, 1, 2, 2)
-#         self.column_identical('listing_par_etape - Copie.xlsx','listing_par_etape - Copie.xlsx',0, 1, 10, 10) 
+    def test_delete_lines_with_formulas(self):
+        file = File('listing_par_etape - Copie.xlsx')
+        controler = MultipleSameTabController(file, tab_controller=DeleteController(file),
+                                              optional_names_of_file=OptionalNamesOfFile(names_of_tabs_to_modify=['Feuil1']))   
+        controler.apply_method_on_some_tabs('delete_lines_containing_strings_in_given_column', 'B', 'pas consenti') 
+        self.column_identical('listing_par_etape - Copie.xlsx','listing_par_etape - Copie.xlsx',0, 1, 2, 2)
+        self.column_identical('listing_par_etape - Copie.xlsx','listing_par_etape - Copie.xlsx',0, 1, 10, 10) 
 
-#     def test_delete_doublons(self): 
-#         file = File('test_doublons.xlsx')
-#         controler = FileControler(file)
-#         sheet1 = file.writebook['sheet1']  
-#         sheet2 = file.writebook['Feuille2']  
-#         controler.apply_method_on_some_sheets(['sheet1'], 'delete_doublons', 'C', color = True)
-#         #controler.delete_doublons('sheet1', 'C', color = True)
-#         verify_sheets_identical(sheet1,sheet2)
+    def test_delete_doublons(self): 
+        file = File('test_doublons.xlsx')
+        controler = MultipleSameTabController(file, 
+                                              tab_controller=DeleteController(file), 
+                                              optional_names_of_file=OptionalNamesOfFile(names_of_tabs_to_modify=['sheet2', 'sheet1', 'sheet3']))
+        sheet_result = file.writebook['result']  
+        controler.apply_method_on_some_tabs('delete_twins_lines_and_color_last_twin', 'C', color = 'FFFFFF00') 
+        sheet1 = file.writebook['sheet1']  
+        sheet2 = file.writebook['sheet2']  
+        sheet3 = file.writebook['sheet3']  
+        verify_sheets_identical(sheet1, sheet_result)
+        verify_sheets_identical(sheet2, sheet_result)
+        verify_sheets_identical(sheet3, sheet_result)
 
 #     def test_create_one_column_by_QCM_answer(self):
 #         file = File('test_create_one_column.xlsx')
 #         controler = FileControler(file)
 #         sheet = file.writebook['sheet1']  
 
-#         controler.apply_method_on_some_sheets(['sheet1'], 'create_one_column_by_QCM_answer', 'D','E',['OUI', 'NON'], 'Alain', 'Henri', 'Tony', 'Dulcinée')
+#         controler.apply_method_on_some_tabs(['sheet1'], 'create_one_column_by_QCM_answer', 'D','E',['OUI', 'NON'], 'Alain', 'Henri', 'Tony', 'Dulcinée')
 #         #controler.create_one_column_by_QCM_answer('sheet1','D','E',['OUI', 'NON'], 'Alain', 'Henri', 'Tony', 'Dulcinée') 
         
 #         self.column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 5, 5)
@@ -345,7 +349,7 @@ class TestFile(TestCase):
 #         controler = FileControler(file)
 #         sheet = file.writebook['sheet1']  
 
-#         controler.apply_method_on_some_sheets(['sheet1'], 'give_names_of_maximum',  ['A', 'B', 'C'], 'D')
+#         controler.apply_method_on_some_tabs(['sheet1'], 'give_names_of_maximum',  ['A', 'B', 'C'], 'D')
 #         #controler.give_names_of_maximum('sheet1', ['A', 'B', 'C'], 'D') 
 
 #         verify_sheets_identical(sheet, file.writebook['Feuille2'])
@@ -353,19 +357,30 @@ class TestFile(TestCase):
 #         sheet.delete_cols(4)
 #         file.writebook.save(file.path + 'test_give_names.xlsx') 
         
-#     """ def test_delete_other_columns(self):
-#         # Fonctionnel une fois
-#         sheet = Sheet('test_keep_only_columns.xlsx','sheet1')
-#         sheet.delete_other_columns('B-H,L,M,AI-AJ')
+    """ def test_delete_other_columns(self):
+        # Fonctionnel une fois
+        file = File('test_keep_only_columns.xlsx')
+        controller = DeleteController(file, 'sheet1')
+        controller.delete_other_columns('A-C,D-K')
 
-#         verify_sheets_identical(sheet, Sheet('test_keep_only_columns.xlsx','Feuille2')) """
+        verify_sheets_identical(file.get_tab_by_name('sheet1'), File('test_keep_only_columns.xlsx').get_tab_by_name('Feuille2')) """
+
+    def test_delete_columns(self):
+        # Fonctionnel une fois
+        file = File('test_keep_only_columns.xlsx')
+        controller = MultipleSameTabController(file, DeleteController(file, 'sheet1'), 
+                                  optional_names_of_file=OptionalNamesOfFile(names_of_tabs_to_modify=['sheet1']))  
+                                   
+        controller.apply_method_on_some_tabs('delete_columns', 'L,M,N-V')
+
+        verify_sheets_identical(file.get_tab_by_name('sheet1'), File('test_keep_only_columns.xlsx').get_tab_by_name('Feuille2'))
 
 #     def test_column_get_part_of_str(self):
 #         file = File('test_colgetpartofstr.xlsx')
 #         controler = FileControler(file)
 #         sheet = file.writebook['Feuille2'] 
-#         controler.apply_method_on_some_sheets(['Feuille2'], 'column_get_part_of_str', 'C','D','_',0)
-#         controler.apply_method_on_some_sheets(['Feuille2'], 'column_get_part_of_str', 'F','G',';',1)
+#         controler.apply_method_on_some_tabs(['Feuille2'], 'column_get_part_of_str', 'C','D','_',0)
+#         controler.apply_method_on_some_tabs(['Feuille2'], 'column_get_part_of_str', 'F','G',';',1)
         
 #         #controler.column_get_part_of_str('Feuille2','C','D','_',0)
 #         #controler.column_get_part_of_str('Feuille2','F','G',';',1)
@@ -378,7 +393,7 @@ class TestFile(TestCase):
 #         file = File('test_maptwocolumns.xlsx')
 #         controler = FileControler(file)
 #         sheet = file.writebook['Feuille2']  
-#         controler.apply_method_on_some_sheets(['Feuille2'], 'map_two_columns_to_a_third_column',  ['B', 'C'], 'D', {'cat1':['prime','1'], 'cat2':['probe','2']})
+#         controler.apply_method_on_some_tabs(['Feuille2'], 'map_two_columns_to_a_third_column',  ['B', 'C'], 'D', {'cat1':['prime','1'], 'cat2':['probe','2']})
 
 #         #controler.map_two_columns_to_a_third_column('Feuille2', ['B', 'C'], 'D', {'cat1':['prime','1'], 'cat2':['probe','2']})
 #         verify_sheets_identical(sheet, file.writebook['expected'])

@@ -22,7 +22,7 @@ def create_empty_workbook():
     return workbook
 
 
-class ColorTabController():
+class ColorTabController(String):
     """Handle methods coloring a unique tab of a file."""
 
     def __init__(self, file_object, tab_name=None, optional_names_of_tab=None, color=None, first_line=2):
@@ -40,6 +40,9 @@ class ColorTabController():
         self.optional_names_of_tab = optional_names_of_tab 
         self.first_line = first_line 
         self.color = color
+
+    def reinitialize_storing_attributes(self):
+        pass
 
     def color_cases_in_column(self, map_string_to_color):
         """
@@ -63,24 +66,22 @@ class ColorTabController():
             cleaned_cell_value = cell.value
         return cleaned_cell_value
 
-    def color_cases_in_sheet(self, chainecolor): 
+    def color_cases_in_sheet(self, map_string_to_color): 
         """
         Fonction qui colore les cases contenant à certaines chaînes de caractères d'une feuille 
         """  
 
         for j in range(1, self.tab.max_column + 1):
             self.optional_names_of_tab.column_to_read = get_column_letter(j) 
-            self.color_cases_in_column(chainecolor)
+            self.color_cases_in_column(map_string_to_color)
 
-    def color_lines_containing_chaines(self, *strings):
+    def color_lines_containing_strings(self, *strings):
         """
         Fonction qui colore les lignes dont une des cases contient une str particulière.
         """ 
 
         lines_indexes = self._list_lines_containing_strings(*strings)
-        
-        for line_index in lines_indexes:
-            self._color_line(line_index)
+        self.color_lines(lines_indexes) 
 
     def _list_lines_containing_strings(self, *strings):
         lines_indexes = []
@@ -94,24 +95,141 @@ class ColorTabController():
 
     def _add_line_containing_strings_to_list(self, strings, line_index, lines_indexes):
         for column_index in range(1, self.tab.max_column + 1):
-            if self.file_object.get_cell_value_from_a_tab(self.tab, Cell(line_index, column_index)) in strings:
+            if self.file_object.get_compiled_cell_value(self.tab, Cell(line_index, column_index)) in strings:
                 lines_indexes.append(line_index)
                 break
         return lines_indexes
     
+    def color_lines(self, list_of_lines):
+        for line_index in list_of_lines:
+            self._color_line(line_index) 
+    
 
-class DeleteController():
+class DeleteController(String):
     """Handle methods deleting lines or columns of a tab"""
-    pass
 
+    def __init__(self, file_object, tab_name=None, first_line=2):
+        self.file_object = file_object
+        self.tab_name = tab_name
+        self.tab = None
+        if tab_name is not None:
+            self.tab = self.file_object.get_tab_by_name(tab_name)  
+        self.tab_update = TabUpdate()
+        self.columns_to_delete = []
+        self.lines_to_delete = []
+        self.first_line = first_line  
+    
+    def reinitialize_storing_attributes(self):
+        self.columns_to_delete = []
+        self.lines_to_delete = []
+
+    def update_cell_formulas(self, modification_object): 
+        self.tab_update.choose_modifications_to_apply(modification_object)  
+        self.tab_update.update_cells_formulas(self.tab) 
+    
+    def delete_columns(self, string_of_columns):
+        """
+        Prend une séquence de colonnes sous la forme 'C-J,K,L-N,Z' qu'on souhaite supprimer. 
+        """  
+
+        # Réordonner par les lettres les plus grandes pour supprimer de la droite vers la gauche dans l'excel  
+        self.columns_to_delete = self.get_columns_from(string_of_columns)
+        self.columns_to_delete.sort(reverse = True)  
+
+        for column_letter in self.columns_to_delete:  
+            self.tab.delete_cols(column_index_from_string(column_letter)) 
+
+        self.update_cell_formulas(ColumnDelete(self.columns_to_delete)) 
+
+    def delete_other_columns(self, string_of_columns):
+        """
+        Prend une séquence de colonnes sous la forme 'C-J,K,L-N,Z' et supprime les autres 
+        """  
+        columns_to_keep = self.get_columns_from(string_of_columns)
+        list_all_columns = self._get_list_of_columns()
+
+        #Réordonner par les lettres les plus grandes pour supprimer de la droite vers la gauche
+        list_all_columns.sort(reverse=True) 
+
+        for column_letter in list_all_columns: 
+            self._delete_column_not_to_keep(column_letter, columns_to_keep)
+       
+        self.update_cell_formulas(ColumnDelete(self.columns_to_delete))
+        self.file_object.save_file() 
+
+    def _delete_column_not_to_keep(self, column_letter, columns_to_keep):
+        if column_letter not in columns_to_keep:
+            self.columns_to_delete.append(column_letter)
+            self.tab.delete_cols(column_index_from_string(column_letter)) 
+
+    def _get_list_of_columns(self):
+        return [get_column_letter(column_index) for column_index in range(1, self.tab.max_column + 1)]
+
+    def delete_lines_containing_strings_in_given_column(self, column_letter, *strings):
+        """
+        Fonction qui parcourt une colonne et qui supprime la ligne si celle-ci contient une chaîne particulière.
+
+        """ 
+
+        column_index = column_index_from_string(column_letter)  
+
+        # On part de la plus grande ligne pour éviter qu'une suppression ne change la position d'une ligne à supprimer après
+        for line_index in range(self.tab.max_row, 0, -1):
+            cell_value = self.file_object.get_compiled_cell_value(self.tab, Cell(line_index,column_index)) 
+            self._delete_line_containing_strings(line_index, cell_value, *strings)
+ 
+        self.update_cell_formulas(LineDelete(self.lines_to_delete))   
+
+    def _delete_line_containing_strings(self, line_index, cell_value, *strings):
+        if str(cell_value) in strings:  
+            self.tab.delete_rows(line_index) 
+            self.lines_to_delete.append(str(line_index))     
+
+    def delete_twins_lines_and_color_last_twin(self, column_identifier, color = 'FFFFFF00'):
+        """
+        Certains participants répondent plusieurs fois à une étude. Cette fonction supprime les premières lignes réponses
+        des participants dans ce cas. Elle ne garde que leur dernière réponse. On repère les participants
+        par leur identifiant unique donné dans colum_identifiant.
+        """
+
+        column_identifier = column_index_from_string(column_identifier) 
+
+        map_identifier_to_line = {}  
+
+        #On parcourt dans le sens inverse afin d'éviter que la suppression progressive impacte la position des lignes étudiées ensuite. 
+        for line_index in range(self.tab.max_row, 0, -1):
+            cell_identifier = Cell(line_index, column_identifier)
+            self._delete_line_and_color_last_twin(cell_identifier, map_identifier_to_line, color) 
+        self.update_cell_formulas(LineDelete(self.lines_to_delete))       
+
+    def _delete_line_and_color_last_twin(self, cell_identifier, map_identifier_to_line, color):
+        """
+        map_identifier_to_line stocke tous les identifiants et la ligne associée. Si un identifiant I1
+        est déjà dans le dictionnaire, on va supprimer sa ligne et donc décaler toutes les lignes en-dessous 
+        de -1, il faut donc baisser la ligne de I1 de 1 car si I1 vient une troisième fois, on ne colorerait pas 
+        la bonne ligne 
+        """
+        cell_value = self.file_object.get_compiled_cell_value(self.tab, cell_identifier)
+        identifier = self.clean_string_from_spaces(cell_value) 
+
+        if identifier in map_identifier_to_line.keys(): 
+            self._color_line(map_identifier_to_line[identifier], color)
+            self.tab.delete_rows(cell_identifier.line_index)
+            self.lines_to_delete.append(str(cell_identifier.line_index))
+            map_identifier_to_line[identifier] -= 1    
+        else:
+            map_identifier_to_line[identifier] = cell_identifier.line_index 
+
+        return map_identifier_to_line
+
+    def _color_line(self, line_index, color):  
+        for column_index in range(1, self.tab.max_column + 1):
+            self.tab.cell(line_index, column_index).fill = PatternFill(fill_type = 'solid', start_color = color)  
+        
 
 class InsertController():
-    """Handle methods inserting columns in a tab"""
-    pass
+    """Handle methods inserting columns in a tab""" 
 
-
-class OneFileOneTabController(String):
-    """Handle methods reading and modifying a unique tab of a file."""
     def __init__(self, file_object, tab_name=None, optional_names_of_tab=None, first_line=2):
         """
         Attributs:
@@ -125,11 +243,14 @@ class OneFileOneTabController(String):
         self.tab_name = tab_name
         if tab_name is not None:
             self.tab = self.file_object.get_tab_by_name(tab_name)
+        self.tab_update = TabUpdate()
         self.optional_names_of_tab = optional_names_of_tab 
         self.first_line = first_line 
 
-    # ARRIVE ICI
-
+    def reinitialize_storing_attributes(self):
+        pass
+ 
+    #♥ ARRIVE ICI : A tester
     def column_cut_string_in_parts(self, sheet_name, column_to_cut,column_insertion,separator):
         """
         Fonction qui prend une colonne dont chaque cellule contient une grande chaîne de
@@ -163,118 +284,6 @@ class OneFileOneTabController(String):
                 sheet.cell(i,column_insertion + j).value = parts[j]
 
         self.updateCellFormulas(sheet,True,'column', modifications)         
-        #self.file.writebook.save(self.file.path + self.file.name_file) 
-
-    def delete_columns(self, sheet_name, columns):
-        """
-        Prend une séquence de colonnes sous forme de lettres qu'on souhaite supprimer.
-
-        Input : 
-            - columns (str): list of column of the form 'C-J,K,L-N,Z' 
-        """ 
-        sheet = self.file.writebook[sheet_name]
-
-        # Réordonner par les lettres les plus grandes pour supprimer de la droite vers la gauche dans l'excel  
-        columns_to_delete = Str.columns_from_strings(columns)
-        columns_to_delete.sort(reverse = True) 
-
-        for column in columns_to_delete: 
-            sheet.delete_cols(column_index_from_string(column)) 
-
-        self.updateCellFormulas(sheet, False, 'column', columns_to_delete)
-        #self.file.writebook.save(self.file.path + self.file.name_file) 
-
-    def delete_other_columns(self, sheet_name, columns):
-        """
-        Prend une séquence de colonnes sous forme de lettres à conserver et supprime les autres
-
-        Input : 
-            - columns (str): list of column of the form 'C-J,K,L-N,Z'
-        """
-        sheet = self.file.writebook[sheet_name]
-
-        columns_to_keep = Str.columns_from_strings(columns)
-        modifications = []
-
-        for column in range(sheet.max_column + 1, 0, -1):
-            column_letter = get_column_letter(column)
-            if column_letter not in columns_to_keep:
-                modifications.append(column_letter)
-                sheet.delete_cols(column)
-       
-        self.updateCellFormulas(sheet, False, 'column', modifications)
-        self.file.writebook.save(self.file.path + self.file.name_file) 
-        
-
-    def delete_lines_containing_str(self, sheet_name, column, *chaines):
-        """
-        Fonction qui parcourt une colonne et qui supprime la ligne si celle-ci contient une chaîne particulière.
-
-        Inputs : 
-            -column : la colonne à parcourir.
-            -chaines : les chaînes de caractères qui doivent engendrer la suppression de la ligne.
-        
-        Exemple d'utilisation : 
-    
-            sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.delete_lines(3, 'chaine1', 'chaine2', 'chaine3', 'chaine4') 
-        """
-        sheet = self.file.writebook[sheet_name]
-
-        column = column_index_from_string(column)  
-        
-        modifications = []
-        for i in range(sheet.max_row,0,-1):
-            value = Other.getCellNumericalValue(self.file.create_excel_compiler(), sheet_name, sheet.cell(i,column)) 
-            if str(value) in chaines:  
-                sheet.delete_rows(i) 
-                modifications.append(str(i))
- 
-        self.updateCellFormulas(sheet,False,'row',modifications)        
-        #self.file.writebook.save(self.file.path + self.file.name_file)
-
-    def delete_doublons(self, sheet_name, column_identifiant, line_beginning = 2, color = False):
-        """
-        Certains participants répondent plusieurs fois. Cette fonction supprime les premières réponses
-        des participants dans ce cas. Elle ne garde que leur dernière réponse. On repère les participants
-        par leur identifiant unique donné dans colum_identifiant.
-
-        Inputs:
-            column_identifiant : str: lettre de la colonne qui contient les identifiants des participants.
-            color : boolean : True si on veut que la ligne des participants qui ont répondu plusieurs fois soit colorée dans le datasetfinal.
-        
-        Exemple d'utilisation : 
-    
-        si on ne veut pas repérer les personnes qui étaient en doublon:
-            sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.delete_doublons('C')
-
-        si on veut les repérer :
-            sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.delete_doublons('C', color = True)
-        """
-        sheet = self.file.writebook[sheet_name]
-
-        column_identifiant = column_index_from_string(column_identifiant) 
-
-        participants = {} 
-        modifications = []
-
-        #On parcourt dans le sens inverse afin d'éviter que la suppression progressive impacte la position des lignes étudiées ensuite.
-        i = sheet.max_row 
-        while i != line_beginning:  
-            identifiant = Str(sheet.cell(i,column_identifiant).value).clean_string() 
-            if identifiant.chaine in participants.keys():
-                if color:
-                    self.color_line(sheet, '0000a933', participants[identifiant.chaine])
-                sheet.delete_rows(i)
-                modifications.append(str(i))
-                participants[identifiant.chaine] -= 1    
-            else:
-                participants[identifiant.chaine] = i 
-            i -= 1
-
-        self.updateCellFormulas(sheet,False,'row',modifications)        
         #self.file.writebook.save(self.file.path + self.file.name_file)
     
     def create_one_column_by_QCM_answer(self, sheet_name, column, column_insertion, list_string, *reponses, line_beggining = 2):

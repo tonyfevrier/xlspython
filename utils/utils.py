@@ -824,28 +824,24 @@ class RegularExpression():
 
 class TabUpdate():
     """Handles """
-    def __init__(self, tab=None, modification_object=None):
-        self.tab = tab 
+    def __init__(self, modification_object=None): 
         self.modification_object = modification_object
-
-    def choose_tab_with_formula_to_update(self, tab):
-        self.tab = tab
 
     def choose_modifications_to_apply(self, modification_object):
         self.modification_object = modification_object
 
-    def _get_cell_value(self, cell):
-        return self.tab.cell(cell.line_index, cell.column_index).value 
+    def _get_cell_value(self, tab, cell):
+        return tab.cell(cell.line_index, cell.column_index).value 
 
-    def update_cells_formulas(self):
+    def update_cells_formulas(self, tab):
         """
         Fonction qui met à jour les formules d'une feuille entière  
         """
-        for line_index in range(1, self.tab.max_row + 1):
-            for column_index in range(1, self.tab.max_column + 1): 
-                cell_value = self._get_cell_value(Cell(line_index, column_index))
+        for line_index in range(1, tab.max_row + 1):
+            for column_index in range(1, tab.max_column + 1): 
+                cell_value = self._get_cell_value(tab, Cell(line_index, column_index))
                 if self._is_cell_value_a_formula(cell_value): 
-                    self.tab.cell(line_index, column_index).value  = self.modification_object._update_a_cell(cell_value)
+                    tab.cell(line_index, column_index).value  = self.modification_object._update_a_cell(cell_value)
     
     @staticmethod
     def _is_cell_value_a_formula(cell_value):
@@ -1001,25 +997,38 @@ class LineDelete(RegularExpression):
         return line_letter > line_deleted
     
 
-class String():
+class String(): 
 
     @staticmethod
     def clean_string_from_spaces(string):
         """
         Fonction qui prend une chaîne de caractère et qui élimine tous les espaces de début et de fin.
-        Fonction qui nettoie également les espaces insécables \xa0 par un espace régulier.
-        Ceci rendra une chaîne de caractère qui remplacera l'attribut chaine de la classe.  
-        On pourra ainsi éviter les erreurs liées à une différence d'un seul espace.      
+        Fonction qui nettoie également les espaces insécables \xa0 par un espace régulier. 
         """
-        depart = 0
-        fin = len(string)
-        while string[depart] == ' ' or string[fin-1] == ' ':
-            if string[depart] == ' ':
-                depart += 1
-            if string[fin-1] == ' ':
-                fin -= 1
-        string = string[depart:fin]
- 
-        chaine2 = string.replace('\xa0', ' ')
-        string = chaine2
-        return string
+        return string.strip().replace('\xa0', ' ')
+    
+    def get_columns_from(self, string):
+        """
+        Fonction qui prend en entrée une chaîne de caractères de la forme "C-E,H,J" et qui retourne une liste de colonnes 
+        ['C','D','E','H','J']. 
+        """
+        substrings = string.split(',')
+        columns_list = []
+        for substring in substrings:
+            columns_list = self._add_to_list_columns_of_substring(columns_list, substring)
+        return columns_list
+    
+    def _add_to_list_columns_of_substring(self, columns_list, substring):
+        if '-' in substring:
+            columns_list += self.get_range_letter(substring)
+        else:
+            columns_list.append(substring)
+        return columns_list
+
+    @staticmethod
+    def get_range_letter(string):
+        """
+        Fonction qui prend une chaîne de la forme "D-G" et qui retourne la liste des lettres entre elles. 
+        """
+        L = string.split('-')
+        return get_column_interval(L[0], L[-1])

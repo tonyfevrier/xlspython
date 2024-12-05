@@ -43,16 +43,18 @@ class TwoFilesController(GetIndex):
         self._copy_cells_values_in_the_new_tab(cells_to_copy_by_identifier, column_insertion_index)
 
         modification_object = ColumnInsert(self.get_list_of_consecutive_column_letters(column_insertion_index, len(columns_to_copy))) 
-        self.tab_update.choose_modifications_to_apply(modification_object)
-        self.tab_update.choose_tab_with_formula_to_update(self.tabs_copy.tab_to)
-        self.tab_update.update_cells_formulas()       
+        self.update_cell_formulas(modification_object)   
         self.file_object_to.save_file()
+
+    def update_cell_formulas(self, modification_object): 
+        self.tab_update.choose_modifications_to_apply(modification_object) 
+        self.tab_update.update_cells_formulas(self.tabs_copy.tab_to) 
 
     def _create_a_dictionary_with_identifiers_and_indexes_of_cells_to_copy(self, columns_to_copy_indexes):
         tab_from = self.tabs_copy.tab_from
         dico = {}
         for line_index in range(1, tab_from.max_row + 1):
-            identifier = self.file_object_from.get_cell_value_from_a_tab(tab_from, Cell(line_index, self.column_with_identifiers_from))  
+            identifier = self.file_object_from.get_compiled_cell_value(tab_from, Cell(line_index, self.column_with_identifiers_from))  
             dico[identifier] = GetIndex.get_cells_indexes_of_one_line_and_some_columns(line_index, columns_to_copy_indexes)
         return dico
 
@@ -62,7 +64,7 @@ class TwoFilesController(GetIndex):
 
             # The identifiers of tab_to may not be present in tab_from so that it may not be a key of the dictionary created from tab_from
             try:
-                identifier = self.file_object_to.get_cell_value_from_a_tab(tab_to, Cell(line_index, self.column_with_identifiers_to))
+                identifier = self.file_object_to.get_compiled_cell_value(tab_to, Cell(line_index, self.column_with_identifiers_to))
                 cells_to_copy_indexes = cells_to_copy_indexes_by_identifier[identifier]
                 self._copy_cells_values_for_a_line_in_the_new_tab(line_index, cells_to_copy_indexes, column_insertion_index)
             except KeyError:
@@ -157,7 +159,7 @@ class OneFileCreatedController(GetIndex):
     def _create_or_complete_a_tab_by_identifier(self): 
         tab_names = self.new_writebook.sheetnames 
         column_to_read_by_index = column_index_from_string(self.optional_names_of_file.column_to_read)
-        identifier = self.file_object.get_cell_value_from_a_tab(self.tabs_copy.tab_from, Cell(self.current_line, column_to_read_by_index))
+        identifier = self.file_object.get_compiled_cell_value(self.tabs_copy.tab_from, Cell(self.current_line, column_to_read_by_index))
 
         if identifier not in tab_names:
             self._create_tab_called_identifier_and_fill_first_line(identifier)

@@ -1,12 +1,11 @@
 from utils.utils import GetIndex, TabsCopy, DisplayRunningInfos
-from openpyxl.utils import column_index_from_string
-from pycel import ExcelCompiler  
+from openpyxl.utils import column_index_from_string  
 from time import time 
 
 
 class MultipleSameTabController():
 
-    def __init__(self, file_object, tab_controller, optional_names_of_file=None, first_line=2):
+    def __init__(self, file_object, tab_controller, optional_names_of_file=None):
         """
         Attributs: 
             - file_object (object of class File) 
@@ -20,6 +19,10 @@ class MultipleSameTabController():
         self.optional_names_of_file = optional_names_of_file  
         self.display = DisplayRunningInfos() 
 
+    def reinitialize_tab_controller(self, tab_name):
+        self.tab_controller.tab = self.file_object.get_tab_by_name(tab_name)
+        self.tab_controller.reinitialize_storing_attributes()
+
     def apply_method_on_some_tabs(self, method_name, *args, **kwargs):
         """ 
         Vous avez un fichier contenant plusieurs onglets et vous souhaitez appliquer une même méthode de la 
@@ -31,8 +34,8 @@ class MultipleSameTabController():
         """  
         self.display.start_time = time()
         for tab_name in self.optional_names_of_file.names_of_tabs_to_modify:    
-            # Get the method from its name and apply it
-            self.tab_controller.tab = self.file_object.get_tab_by_name(tab_name)
+            # Get the method from its name and apply it  
+            self.reinitialize_tab_controller(tab_name)
             method = getattr(self.tab_controller, method_name)
             method(*args, **kwargs) 
 
@@ -70,9 +73,6 @@ class OneFileMultipleTabsController(GetIndex):
         self.display.method_name = method_name
         self.display.current_running_part = current_running_part
         self.display.list_of_running_parts = list_of_running_parts
-
-    def create_excel_compiler(self):
-        return ExcelCompiler(self.file_object.path + self.file_object.name_file) 
 
     def extract_a_column_from_all_tabs(self):
         """

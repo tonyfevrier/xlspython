@@ -2,12 +2,15 @@ import openpyxl
 import os   
 import yagmail
 
+from pycel import ExcelCompiler
+
 """ def display_run():
     def wrapper(method, *args, **kwargs):
         start = time()
         method(*args, **kwargs)
         Other.display_running_infos('sauvegarde', tab_name, self.sheets_name, start)
     return wrapper """
+
 
 class Path():
     def __init__(self, pathname = 'fichiers_xls/'):
@@ -25,6 +28,10 @@ class File():
         self.dataonly = dataonly 
         self.writebook = openpyxl.load_workbook(self.path + self.name_file, data_only = dataonly)
         self.sheets_name = self.writebook.sheetnames 
+        self.compiler = None
+    
+    def _create_excel_compiler(self):
+        return ExcelCompiler(self.path + self.name_file) 
         
     def create_and_return_new_tab(self, tab_name):
         return self.writebook.create_sheet(tab_name)
@@ -32,8 +39,30 @@ class File():
     def get_tab_by_name(self, tab_name):
         return self.writebook[tab_name]
     
-    def get_cell_value_from_a_tab(self, tab, cell):
-        return str(tab.cell(cell.line_index, cell.column_index).value)
+    def get_uncompiled_cell_value(self, tab, cell):
+        return tab.cell(cell.line_index, cell.column_index).value
+    
+    def evaluate_cell_formula(self, tab, cell):
+        """
+        Fonction qui calcule une valeur numérique liée à une formule
+        """  
+        self.compiler = self._create_excel_compiler()
+        return self.compiler.evaluate(tab.title + '!' + tab.cell(cell.line_index, cell.column_index).coordinate) 
+
+    def get_compiled_cell_value(self, tab, cell):
+        """
+        Fonction qui prend la valeur d'une cellule et qui, si c'est une formule, retourne sa valeur numérique
+        """  
+
+        cell_value = self.get_uncompiled_cell_value(tab, cell)
+        if self._is_cell_value_a_formula(cell_value):
+            return self.evaluate_cell_formula(tab, cell)
+        else:
+            return str(cell_value)
+    
+    @staticmethod
+    def _is_cell_value_a_formula(cell_value):
+        return isinstance(cell_value, str) and cell_value.startswith('=')
     
     def update_sheet_names(self):
         self.sheets_name = self.writebook.sheetnames 
