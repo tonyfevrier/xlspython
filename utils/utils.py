@@ -1032,3 +1032,5 @@ class String():
         """
         L = string.split('-')
         return get_column_interval(L[0], L[-1])
+    
+    

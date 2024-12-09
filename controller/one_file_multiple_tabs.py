@@ -5,18 +5,18 @@ from time import time
 
 class MultipleSameTabController():
 
-    def __init__(self, file_object, tab_controller, optional_names_of_file=None):
+    def __init__(self, file_object, tab_controller, file_options=None):
         """
         Attributs: 
             - file_object (object of class File) 
-            - optional_names_of_file (OptionalNamesOfFile object)
+            - file_options (FileOptions object)
             - first_line (optional int)  
             - tabs_copy (TabsCopy object): object to apply copy method from a tab to a new tab
             - display (DisplayRunningInfos object): to display the current state of the run
         """
         self.file_object = file_object
         self.tab_controller = tab_controller 
-        self.optional_names_of_file = optional_names_of_file  
+        self.file_options = file_options  
         self.display = DisplayRunningInfos() 
 
     def reinitialize_tab_controller(self, tab_name):
@@ -33,13 +33,13 @@ class MultipleSameTabController():
             - *args, **kwargs : arguments of the method associated with method_name
         """  
         self.display.start_time = time()
-        for tab_name in self.optional_names_of_file.names_of_tabs_to_modify:    
+        for tab_name in self.file_options.names_of_tabs_to_modify:    
             # Get the method from its name and apply it  
             self.reinitialize_tab_controller(tab_name)
             method = getattr(self.tab_controller, method_name)
             method(*args, **kwargs) 
 
-            self._update_display_infos(method_name, tab_name, self.optional_names_of_file.names_of_tabs_to_modify) 
+            self._update_display_infos(method_name, tab_name, self.file_options.names_of_tabs_to_modify) 
             self.display.display_running_infos() 
 
         self.file_object.save_file() 
@@ -54,17 +54,17 @@ class OneFileMultipleTabsController(GetIndex):
     """
     Handle methods involving multiple tabs of a file.
     """
-    def __init__(self, file_object, optional_names_of_file=None, first_line=2):
+    def __init__(self, file_object, file_options=None, first_line=2):
         """
         Attributs: 
             - file_object (object of class File) 
-            - optional_names_of_file (OptionalNamesOfFile object)
+            - file_options (FileOptions object)
             - first_line (optional int)  
             - tabs_copy (TabsCopy object): object to apply copy method from a tab to a new tab
             - display (DisplayRunningInfos object): to display the current state of the run
         """
         self.file_object = file_object
-        self.optional_names_of_file = optional_names_of_file  
+        self.file_options = file_options  
         self.first_line = first_line 
         self.tabs_copy = TabsCopy()
         self.display = DisplayRunningInfos() 
@@ -80,10 +80,10 @@ class OneFileMultipleTabsController(GetIndex):
         contenant toutes les colonnes. La première cellule de chaque colonne correspond alors 
         au nom de l'onglet. Attention, en l'état, il faut que tous les onglets aient la même structure.
         """ 
-        self.optional_names_of_file.column_to_read = column_index_from_string(self.optional_names_of_file.column_to_read)
-        new_tab = self.file_object.create_and_return_new_tab(f"gather_{self.optional_names_of_file.column_to_read}")
+        self.file_options.column_to_read = column_index_from_string(self.file_options.column_to_read)
+        new_tab = self.file_object.create_and_return_new_tab(f"gather_{self.file_options.column_to_read}")
         self.tabs_copy._choose_the_tab_to_write_in(new_tab)
-        self.optional_names_of_file.column_to_write = 1
+        self.file_options.column_to_write = 1
 
         self.display.start_time = time() 
         for tab_name in self.file_object.sheets_name: 
@@ -97,9 +97,9 @@ class OneFileMultipleTabsController(GetIndex):
         self.file_object.update_sheet_names()
     
     def _copy_column_from_a_tab_in_the_next_new_tab_column(self, tab_name): 
-        self.tabs_copy.copy_paste_column(self.optional_names_of_file.column_to_read, self.optional_names_of_file.column_to_write) 
+        self.tabs_copy.copy_paste_column(self.file_options.column_to_read, self.file_options.column_to_write) 
         self._choose_the_new_column_title(tab_name)  
-        self.optional_names_of_file.column_to_write = self.tabs_copy.tab_to.max_column + 1
+        self.file_options.column_to_write = self.tabs_copy.tab_to.max_column + 1
 
     def _choose_the_new_column_title(self, title):
         self.tabs_copy.tab_to.cell(1, self.tabs_copy.tab_to.max_column).value = title    
@@ -113,7 +113,7 @@ class OneFileMultipleTabsController(GetIndex):
         Input : 
             -column_list : int. les positions des colonnes où récupérer et coller
         """
-        columns_int_list = self.get_list_of_columns_indexes(self.optional_names_of_file.columns_to_read)
+        columns_int_list = self.get_list_of_columns_indexes(self.file_options.columns_to_read)
 
         self.display.start_time = time()
         self.tabs_copy._choose_the_tab_to_read(self.file_object.get_tab_by_name(self.file_object.sheets_name[0]))
@@ -162,11 +162,11 @@ class OneFileMultipleTabsController(GetIndex):
             - onglet (str) : nom de l'onglet d'où on importe les colonnes.
             - column_lists (list[list[str]]) : liste de groupes de colonnes. Chaque groupe est une liste de colonnes.
         """ 
-        tab_to_read = self.file_object.get_tab_by_name(self.optional_names_of_file.name_of_tab_to_read)
+        tab_to_read = self.file_object.get_tab_by_name(self.file_options.name_of_tab_to_read)
         self.tabs_copy._choose_the_tab_to_read(tab_to_read)
 
         for list_of_columns in lists_of_columns: 
-            self.optional_names_of_file.columns_to_read = list_of_columns
+            self.file_options.columns_to_read = list_of_columns
             tab_to = self._create_a_tab_for_a_list_of_columns()
             self.tabs_copy._choose_the_tab_to_write_in(tab_to) 
             self.copy_tags_and_values_of_a_list_of_columns()
@@ -174,12 +174,12 @@ class OneFileMultipleTabsController(GetIndex):
         self.file_object.save_file() 
     
     def _create_a_tab_for_a_list_of_columns(self):
-        string_of_columns = ''.join(self.optional_names_of_file.columns_to_read)
+        string_of_columns = ''.join(self.file_options.columns_to_read)
         tab_name = f"tab_column_gathered_{string_of_columns}"
         return self.file_object.writebook.create_sheet(tab_name) 
 
     def copy_tags_and_values_of_a_list_of_columns(self):
-        for column in self.optional_names_of_file.columns_to_read: 
+        for column in self.file_options.columns_to_read: 
             self.tabs_copy.copy_tag_and_values_of_a_column_at_tab_bottom(column_index_from_string(column))         
 
     def merge_cells_on_all_tabs(self, merged_cells_range):

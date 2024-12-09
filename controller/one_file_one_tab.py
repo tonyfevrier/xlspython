@@ -25,19 +25,19 @@ def create_empty_workbook():
 class ColorTabController(String):
     """Handle methods coloring a unique tab of a file."""
 
-    def __init__(self, file_object, tab_name=None, optional_names_of_tab=None, color=None, first_line=2):
+    def __init__(self, file_object, tab_name=None, tab_options=None, color=None, first_line=2):
         """
         Attributs:
             - file_object (file object)
             - tab_name (str)
             - tab (openpyxl.workbook.tab)            
-            - optional_names_of_tab (OptionalNamesOfTab object)
+            - tab_options (TabOptions object)
             - first_line (optional int)
         """ 
         self.file_object = file_object 
         if tab_name is not None:
             self.tab = self.file_object.get_tab_by_name(tab_name)
-        self.optional_names_of_tab = optional_names_of_tab 
+        self.tab_options = tab_options 
         self.first_line = first_line 
         self.color = color
 
@@ -48,7 +48,7 @@ class ColorTabController(String):
         """
         Fonction qui pour une colonne donnée colore les cases correspondant à certaines chaînes de caractères.
         """  
-        column_index = column_index_from_string(self.optional_names_of_tab.column_to_read) 
+        column_index = column_index_from_string(self.tab_options.column_to_read) 
         
         for i in range(self.first_line, self.tab.max_row + 1):
             cell = self.tab.cell(i, column_index) 
@@ -72,7 +72,7 @@ class ColorTabController(String):
         """  
 
         for j in range(1, self.tab.max_column + 1):
-            self.optional_names_of_tab.column_to_read = get_column_letter(j) 
+            self.tab_options.column_to_read = get_column_letter(j) 
             self.color_cases_in_column(map_string_to_color)
 
     def color_lines_containing_strings(self, *strings):
@@ -199,7 +199,8 @@ class DeleteController(String):
         #On parcourt dans le sens inverse afin d'éviter que la suppression progressive impacte la position des lignes étudiées ensuite. 
         for line_index in range(self.tab.max_row, 0, -1):
             cell_identifier = Cell(line_index, column_identifier)
-            self._delete_line_and_color_last_twin(cell_identifier, map_identifier_to_line, color) 
+            self._delete_line_and_color_last_twin(cell_identifier, map_identifier_to_line, color)
+             
         self.update_cell_formulas(LineDelete(self.lines_to_delete))       
 
     def _delete_line_and_color_last_twin(self, cell_identifier, map_identifier_to_line, color):
@@ -230,13 +231,13 @@ class DeleteController(String):
 class InsertController():
     """Handle methods inserting columns in a tab""" 
 
-    def __init__(self, file_object, tab_name=None, optional_names_of_tab=None, first_line=2):
+    def __init__(self, file_object, tab_name=None, tab_options=None, first_line=2):
         """
         Attributs:
             - file_object (file object)
             - tab_name (str)
             - tab (openpyxl.workbook.tab)            
-            - optional_names_of_tab (OptionalNamesOfTab object)
+            - tab_options (TabOptions object)
             - first_line (optional int)
         """ 
         self.file_object = file_object
@@ -244,47 +245,43 @@ class InsertController():
         if tab_name is not None:
             self.tab = self.file_object.get_tab_by_name(tab_name)
         self.tab_update = TabUpdate()
-        self.optional_names_of_tab = optional_names_of_tab 
+        self.tab_options = tab_options 
         self.first_line = first_line 
 
     def reinitialize_storing_attributes(self):
         pass
+
+    def update_cell_formulas(self, modification_object): 
+        self.tab_update.choose_modifications_to_apply(modification_object)  
+        self.tab_update.update_cells_formulas(self.tab) 
  
     #♥ ARRIVE ICI : A tester
-    def column_cut_string_in_parts(self, sheet_name, column_to_cut,column_insertion,separator):
+    def insert_splitted_strings_of(self, column_to_split, separator):
         """
         Fonction qui prend une colonne dont chaque cellule contient une grande chaîne de
           caractères. Toutes les chaînes sont composés du nombre de morceaux délimités par un séparateur,
         La fonction insère autant de colonnes que de morceaux et place un morceau par colonne dans l'ordre des morceaux.
-
-        Inputs :
-            - column_to_cut : colonne contenant les grandes str.
-            - column_insertion : où insérer les colonnes
-            - separator le séparateur 
-
-        Exemple d'utilisation : 
-    
-            sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.column_cut_string_in_parts('C', 'J', ';') 
+        """ 
+        column_to_split = column_index_from_string(column_to_split) 
+        self.tab_options.column_to_write = column_index_from_string(self.tab_options.column_to_write)
         
-        """
-        sheet = self.file.writebook[sheet_name]
+        for line_index in range(self.first_line, self.tab.max_row + 1): 
+            parts = self._get_string_and_split_it(Cell(line_index, column_to_split), separator)  
+            self._insert_splitted_string(line_index, parts)
 
-        column_to_cut = column_index_from_string(column_to_cut) 
-        column_insertion = column_index_from_string(column_insertion)
-        
-        for i in range(2, sheet.max_row + 1):
-            value = sheet.cell(i,column_to_cut).value
-            chaine_object = Str(value)
-            parts = chaine_object.cut_string_in_parts(separator)
-            modifications = [get_column_letter(column_insertion + i) for i in range(len(parts))]
-            if i == 2:
-                sheet.insert_cols(column_insertion,len(parts))
-            for j in range(len(parts)):
-                sheet.cell(i,column_insertion + j).value = parts[j]
+        modifications = [get_column_letter(column_to_split + index) for index in range(len(parts))]
+        self.update_cell_formulas(ColumnInsert(modifications))   
 
-        self.updateCellFormulas(sheet,True,'column', modifications)         
-        #self.file.writebook.save(self.file.path + self.file.name_file)
+    def _get_string_and_split_it(self, cell, separator):
+        cell_value = self.file_object.get_compiled_cell_value(self.tab, cell) 
+        return cell_value.split(separator)
+
+    def _insert_splitted_string(self, line_index, parts):
+        if line_index == self.first_line:
+            self.tab.insert_cols(self.tab_options.column_to_write, len(parts))
+
+        for part_index in range(len(parts)):
+            self.tab.cell(line_index, self.tab_options.column_to_write + part_index).value = parts[part_index]
     
     def create_one_column_by_QCM_answer(self, sheet_name, column, column_insertion, list_string, *reponses, line_beggining = 2):
         """

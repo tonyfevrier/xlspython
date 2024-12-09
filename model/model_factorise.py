@@ -92,7 +92,7 @@ class MergedCellsRange():
         self.end_line = end_line
         
 
-class OptionalNamesOfTab():
+class TabOptions():
     """Get all names of tabs, columns, lines which will be read or modified in methods """
     def __init__(self, column_to_read=None, columns_to_read=None,
                  column_to_write=None, columns_to_write=None): 
@@ -103,13 +103,13 @@ class OptionalNamesOfTab():
         self.columns_to_write = columns_to_write
 
 
-class OptionalNamesOfFile(OptionalNamesOfTab):
+class FileOptions(TabOptions):
     """Get all names of tabs, columns, lines which will be read or modified in methods """
     def __init__(self, name_of_tab_to_read=None, names_of_tabs_to_read=None,
                  name_of_tab_to_modify=None, names_of_tabs_to_modify=None, column_to_read=None, columns_to_read=None,
                  column_to_write=None, columns_to_write=None):
         
-        OptionalNamesOfTab.__init__(self, column_to_read, columns_to_read, column_to_write, columns_to_write)
+        TabOptions.__init__(self, column_to_read, columns_to_read, column_to_write, columns_to_write)
         self.name_of_tab_to_read = name_of_tab_to_read
         self.names_of_tabs_to_read = names_of_tabs_to_read
         self.name_of_tab_to_modify = name_of_tab_to_modify 

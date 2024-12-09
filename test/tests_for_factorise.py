@@ -1,6 +1,6 @@
 from unittest import TestCase, main 
-from model.model_factorise import File, OptionalNamesOfFile, OptionalNamesOfTab, MergedCellsRange
-from controller.one_file_one_tab import ColorTabController, DeleteController 
+from model.model_factorise import File, FileOptions, TabOptions, MergedCellsRange
+from controller.one_file_one_tab import ColorTabController, DeleteController, InsertController 
 from controller.one_file_multiple_tabs import OneFileMultipleTabsController, MultipleSameTabController
 from controller.two_files import OneFileCreatedController, TwoFilesController
 from utils.utils import Other, Str, ColumnDelete, ColumnInsert, LineDelete, LineInsert, TabUpdate
@@ -48,7 +48,7 @@ class TestFile(TestCase):
 
     def test_split_one_tab_in_multiple_tabs(self): 
         file = File('test_create_one_onglet_by_participant.xlsx') 
-        controler = OneFileCreatedController(file, OptionalNamesOfFile(name_of_tab_to_read='Stroops_test (7)', column_to_read='A'))
+        controler = OneFileCreatedController(file, FileOptions(name_of_tab_to_read='Stroops_test (7)', column_to_read='A'))
         controler.make_horodated_copy_of_a_file()
         controler.split_one_tab_in_multiple_tabs()  
         file2 = File('divided_test_create_one_onglet_by_participant.xlsx')
@@ -59,7 +59,7 @@ class TestFile(TestCase):
 
     def test_extract_a_column_from_all_tabs(self):
         file = File('test_extract_column.xlsx')
-        controler = OneFileMultipleTabsController(file, OptionalNamesOfFile(column_to_read='B'))
+        controler = OneFileMultipleTabsController(file, FileOptions(column_to_read='B'))
         controler.extract_a_column_from_all_tabs() 
         verify_files_identical(File('test_extract_column_ref.xlsx'),file)
 
@@ -68,13 +68,13 @@ class TestFile(TestCase):
 
     def test_apply_column_formula_on_all_tabs(self):
         file = File('dataset.xlsx', dataonly = False)
-        controler = OneFileMultipleTabsController(file, OptionalNamesOfFile(columns_to_read=['B','C']))
+        controler = OneFileMultipleTabsController(file, FileOptions(columns_to_read=['B','C']))
         controler.apply_columns_formula_on_all_tabs()
     
 
     def test_gather_groups_of_multiple_columns_in_tabs_of_two_columns_containing_tags_and_values(self):
         file = File("test_gather_columns_in_one.xlsx")
-        controler = OneFileMultipleTabsController(file, OptionalNamesOfFile(name_of_tab_to_read='test'))
+        controler = OneFileMultipleTabsController(file, FileOptions(name_of_tab_to_read='test'))
         controler.gather_groups_of_multiple_columns_in_tabs_of_two_columns_containing_tags_and_values(['C','D','E'], ['G','H','I'])
 
         file = File("test_gather_columns_in_one.xlsx")
@@ -244,17 +244,17 @@ class TestFile(TestCase):
     def test_color_column(self):
         file = File('test.xlsx')
         controler = MultipleSameTabController(file,
-                                              ColorTabController(file, optional_names_of_tab=OptionalNamesOfTab(column_to_read='D')), 
-                                              optional_names_of_file=OptionalNamesOfFile(names_of_tabs_to_modify=['cutinpartsbis']))  
-        #controler.tab_controller.optional_names_of_tab.column_to_read = 'D'#OptionalNamesOfTab(column_to_read='D')
+                                              ColorTabController(file, tab_options=TabOptions(column_to_read='D')), 
+                                              file_options=FileOptions(names_of_tabs_to_modify=['cutinpartsbis']))  
+        #controler.tab_controller.tab_options.column_to_read = 'D'#TabOptions(column_to_read='D')
         controler.apply_method_on_some_tabs('color_cases_in_column', 
                                             {' partie 2 : Vrai':'0000a933'}) 
          
     def test_color_cases_in_sheet(self):
         file = File('test.xlsx')
         controler = MultipleSameTabController(file,
-                                              ColorTabController(file, optional_names_of_tab=OptionalNamesOfTab()), 
-                                              optional_names_of_file=OptionalNamesOfFile(names_of_tabs_to_modify=['cutinpartsbis']))   
+                                              ColorTabController(file, tab_options=TabOptions()), 
+                                              file_options=FileOptions(names_of_tabs_to_modify=['cutinpartsbis']))   
         controler.apply_method_on_some_tabs('color_cases_in_sheet', 
                                             {'partie 1 : Vrai':'0000a933', 'Abbas':'0000a933'}) 
         
@@ -262,26 +262,28 @@ class TestFile(TestCase):
         file = File('test.xlsx')
         controler = MultipleSameTabController(file, 
                                               ColorTabController(file, color='0000a933'),
-                                              optional_names_of_file=OptionalNamesOfFile(names_of_tabs_to_modify=['color_line']))    
+                                              file_options=FileOptions(names_of_tabs_to_modify=['color_line']))    
         controler.apply_method_on_some_tabs('color_lines_containing_strings', '-', '+') 
         
-#     def test_column_cut_string_in_parts(self):
-#         file = File('test.xlsx')
-#         controler = FileControler(file)
-#         sheet = file.writebook['cutinparts']  
-#         controler.apply_method_on_some_tabs(['cutinparts'], 'column_cut_string_in_parts', 'B','C',';')
-#         #controler.column_cut_string_in_parts('cutinparts','B','C',';') 
-#         self.column_identical('test.xlsx','test.xlsx',7,8, 3, 3)
-#         self.column_identical('test.xlsx','test.xlsx',7,8, 4, 4)
-#         self.column_identical('test.xlsx','test.xlsx',7,8, 5, 5)
-#         self.column_identical('test.xlsx','test.xlsx',7,8, 6, 6)
-#         sheet.delete_cols(3,3)
-#         file.writebook.save(file.path + 'test.xlsx') 
+    def test_column_cut_string_in_parts(self):
+        file = File('test.xlsx')
+        controler = MultipleSameTabController(file,
+                                              InsertController(file, tab_options=TabOptions(column_to_write='C')),
+                                              file_options=FileOptions(names_of_tabs_to_modify=['cutinparts']))
+
+        controler.apply_method_on_some_tabs('insert_splitted_strings_of', 'B',';')
+        sheet = file.writebook['cutinparts'] 
+        self.column_identical('test.xlsx','test.xlsx',7,8, 3, 3)
+        self.column_identical('test.xlsx','test.xlsx',7,8, 4, 4)
+        self.column_identical('test.xlsx','test.xlsx',7,8, 5, 5)
+        self.column_identical('test.xlsx','test.xlsx',7,8, 6, 6)
+        sheet.delete_cols(3,3)
+        file.writebook.save(file.path + 'test.xlsx') 
 
     def test_delete_lines(self):
         file = File('test.xlsx')
         controler = MultipleSameTabController(file, tab_controller=DeleteController(file),
-                                              optional_names_of_file=OptionalNamesOfFile(names_of_tabs_to_modify=['delete_lines']))  
+                                              file_options=FileOptions(names_of_tabs_to_modify=['delete_lines']))  
         controler.apply_method_on_some_tabs('delete_lines_containing_strings_in_given_column', 'D', '0')
         controler.apply_method_on_some_tabs('delete_lines_containing_strings_in_given_column', 'D', 'p a') 
         self.column_identical('test.xlsx','test.xlsx',9,10, 1, 1)
@@ -294,7 +296,7 @@ class TestFile(TestCase):
     def test_delete_lines_with_formulas(self):
         file = File('listing_par_etape - Copie.xlsx')
         controler = MultipleSameTabController(file, tab_controller=DeleteController(file),
-                                              optional_names_of_file=OptionalNamesOfFile(names_of_tabs_to_modify=['Feuil1']))   
+                                              file_options=FileOptions(names_of_tabs_to_modify=['Feuil1']))   
         controler.apply_method_on_some_tabs('delete_lines_containing_strings_in_given_column', 'B', 'pas consenti') 
         self.column_identical('listing_par_etape - Copie.xlsx','listing_par_etape - Copie.xlsx',0, 1, 2, 2)
         self.column_identical('listing_par_etape - Copie.xlsx','listing_par_etape - Copie.xlsx',0, 1, 10, 10) 
@@ -303,7 +305,7 @@ class TestFile(TestCase):
         file = File('test_doublons.xlsx')
         controler = MultipleSameTabController(file, 
                                               tab_controller=DeleteController(file), 
-                                              optional_names_of_file=OptionalNamesOfFile(names_of_tabs_to_modify=['sheet2', 'sheet1', 'sheet3']))
+                                              file_options=FileOptions(names_of_tabs_to_modify=['sheet2', 'sheet1', 'sheet3']))
         sheet_result = file.writebook['result']  
         controler.apply_method_on_some_tabs('delete_twins_lines_and_color_last_twin', 'C', color = 'FFFFFF00') 
         sheet1 = file.writebook['sheet1']  
@@ -369,7 +371,7 @@ class TestFile(TestCase):
         # Fonctionnel une fois
         file = File('test_keep_only_columns.xlsx')
         controller = MultipleSameTabController(file, DeleteController(file, 'sheet1'), 
-                                  optional_names_of_file=OptionalNamesOfFile(names_of_tabs_to_modify=['sheet1']))  
+                                  file_options=FileOptions(names_of_tabs_to_modify=['sheet1']))  
                                    
         controller.apply_method_on_some_tabs('delete_columns', 'L,M,N-V')
 

@@ -78,11 +78,11 @@ class TwoFilesController(GetIndex):
 class OneFileCreatedController(GetIndex):
     """Handle methods creating a new file from an existing file"""
 
-    def __init__(self, file_object, optional_names_of_file=None, first_line=2):
+    def __init__(self, file_object, file_options=None, first_line=2):
         """
         Attributs: 
             - file_object (object of class File)
-            - optional_names_of_file (OptionalNamesOfFile object)
+            - file_options (FileOptions object)
             - first_line (optional int)
             - current_line (int): line likely to evolve in methods
             - new_writebook (openpyxl.WorkBook) : eventual workbook to complete
@@ -90,7 +90,7 @@ class OneFileCreatedController(GetIndex):
             - display (DisplayRunningInfos object): to display the current state of the run
         """
         self.file_object = file_object
-        self.optional_names_of_file = optional_names_of_file 
+        self.file_options = file_options 
         self.first_line = first_line
         self.current_line = 2
         self.new_writebook = None 
@@ -138,7 +138,7 @@ class OneFileCreatedController(GetIndex):
         new_file_name = f'divided_{self.file_object.name_file}'
         self._create_or_load_workbook(new_file_name)
         
-        tab_to_read_name = self.optional_names_of_file.name_of_tab_to_read
+        tab_to_read_name = self.file_options.name_of_tab_to_read
         self.tabs_copy._choose_the_tab_to_read(self.file_object.get_tab_by_name(tab_to_read_name)) 
 
         last_line = self.tabs_copy.tab_from.max_row + 1
@@ -158,7 +158,7 @@ class OneFileCreatedController(GetIndex):
     
     def _create_or_complete_a_tab_by_identifier(self): 
         tab_names = self.new_writebook.sheetnames 
-        column_to_read_by_index = column_index_from_string(self.optional_names_of_file.column_to_read)
+        column_to_read_by_index = column_index_from_string(self.file_options.column_to_read)
         identifier = self.file_object.get_compiled_cell_value(self.tabs_copy.tab_from, Cell(self.current_line, column_to_read_by_index))
 
         if identifier not in tab_names:
