@@ -315,20 +315,21 @@ class TestFile(TestCase):
         verify_sheets_identical(sheet2, sheet_result)
         verify_sheets_identical(sheet3, sheet_result)
 
-#     def test_create_one_column_by_QCM_answer(self):
-#         file = File('test_create_one_column.xlsx')
-#         controler = FileControler(file)
-#         sheet = file.writebook['sheet1']  
+    def test_create_one_column_by_QCM_answer(self):
+        file = File('test_create_one_column.xlsx')
+        controler = MultipleSameTabController(file, 
+                                              InsertController(file, tab_options=TabOptions(column_to_read='D', column_to_write='E')),
+                                              file_options=FileOptions(names_of_tabs_to_modify=['sheet1'])) 
 
-#         controler.apply_method_on_some_tabs(['sheet1'], 'create_one_column_by_QCM_answer', 'D','E',['OUI', 'NON'], 'Alain', 'Henri', 'Tony', 'Dulcinée')
-#         #controler.create_one_column_by_QCM_answer('sheet1','D','E',['OUI', 'NON'], 'Alain', 'Henri', 'Tony', 'Dulcinée') 
+        controler.apply_method_on_some_tabs('fill_one_column_by_QCM_answer', 'Alain', 'Henri', 'Tony', 'Dulcinée') 
         
-#         self.column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 5, 5)
-#         self.column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 6, 6) 
-#         self.column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 7, 7) 
-#         self.column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 8, 8) 
+        self.column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 5, 5)
+        self.column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 6, 6) 
+        self.column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 7, 7) 
+        self.column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 8, 8) 
 
-#         sheet.delete_cols(4,4)
+        sheet = file.writebook['sheet1'] 
+        sheet.delete_cols(4,4)
 
 #     def test_gather_multiple_answers(self):
 #         file = File('testongletbyparticipant.xlsx')

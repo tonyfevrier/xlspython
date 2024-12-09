@@ -255,7 +255,6 @@ class InsertController():
         self.tab_update.choose_modifications_to_apply(modification_object)  
         self.tab_update.update_cells_formulas(self.tab) 
  
-    #♥ ARRIVE ICI : A tester
     def insert_splitted_strings_of(self, column_to_split, separator):
         """
         Fonction qui prend une colonne dont chaque cellule contient une grande chaîne de
@@ -283,51 +282,38 @@ class InsertController():
         for part_index in range(len(parts)):
             self.tab.cell(line_index, self.tab_options.column_to_write + part_index).value = parts[part_index]
     
-    def create_one_column_by_QCM_answer(self, sheet_name, column, column_insertion, list_string, *reponses, line_beggining = 2):
+    def fill_one_column_by_QCM_answer(self, *answers):
         """
-        Fonction qui regarde si des réponses sont incluses dans les cellules d'une colonne.
-        Chaque cellule contient l'ensemble des réponses à une question de QCM du participant sous forme de str.
-        Elle regarde les cellules de column. Si une réponse est dans cette cellule, on l'indique dans la colonne
-        correspondante.
+        Fonction qui recoit des réponses et crée une colonne par réponse. Elle regarde ensuite dans une cellule si la réponse 
+        y est contenue. Si oui elle l'indique dans la colonne correspondante.
+        """ 
+        self.tab_options.column_to_read = column_index_from_string(self.tab_options.column_to_read) 
+        self.tab_options.column_to_write = column_index_from_string(self.tab_options.column_to_write) 
+        self._insert_answers_columns(answers)
 
-        Inputs : 
-            - column :  str : la colonne avec les réponses.
-            - column_insertion : str : l'endroit où on insère les colonnes.
-            - list_string : list : liste de deux str indiquant si la réponse est présente ou non.
-            - reponses : les réponses du QCM. 
-        
-        Exemple : 
-            sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.create_one_column_by_QCM_answer('C','D', ['oui', 'non'], 'reponse1', 'reponse2', 'reponse3')
+        for line_index in range(self.first_line, self.tab.max_row + 1):
+            self._check_columns_of_answers_contained(Cell(line_index, self.tab_options.column_to_read), answers)    
 
-        """
-        sheet = self.file.writebook[sheet_name]
+        modifications = [get_column_letter(self.tab_options.column_to_write + index) for index in range(len(answers))]
+        self.update_cell_formulas(ColumnInsert(modifications))  
 
-        column = column_index_from_string(column) 
-        column_insertion = column_index_from_string(column_insertion) 
-        
-        modifications = [get_column_letter(column_insertion + i) for i in range(len(reponses))]
+    def _insert_answers_columns(self, answers):
+        self.tab.insert_cols(self.tab_options.column_to_write, len(answers))
+        for index in range(0, len(answers)):
+            self.tab.cell(1, index + self.tab_options.column_to_write).value = answers[index]
 
-        #on crée les colonnes pour chaque réponse
-        sheet.insert_cols(column_insertion,len(reponses))
-        for j in range(0,len(reponses)):
-            sheet.cell(1,j + column_insertion).value = reponses[j]
+    def _check_columns_of_answers_contained(self, cell, answers):
+        try:
+            for index in range(0, len(answers)):  
+                self._check_column_if_answer_contained(cell, (index, answers[index]))
+        except TypeError:
+            pass
 
-        #on remplit les colonnes suivant que les réponses correspondantes sont ou non dans la cellule.
-        for i in range(line_beggining, sheet.max_row + 1):
-            if sheet.cell(i,column).value is None:
-                for j in range(0,len(reponses)):  
-                        sheet.cell(i,j + column_insertion).value = list_string[1]
-            else:
-                for j in range(0,len(reponses)):  
-                    if reponses[j] in sheet.cell(i,column).value:
-                        sheet.cell(i,j + column_insertion).value = list_string[0]
-                    else:
-                        sheet.cell(i,j + column_insertion).value = list_string[1]
+    def _check_column_if_answer_contained(self, cell, answer):
+        if answer[1] in self.tab.cell(cell.line_index, cell.column_index).value:
+            self.tab.cell(cell.line_index, answer[0] + self.tab_options.column_to_write).value = 'X'
 
-        self.updateCellFormulas(sheet,True,'column',modifications)        
-        #self.file.writebook.save(self.file.path + self.file.name_file)
-        
+    #♥ ARRIVE ICI : A tester
     def gather_multiple_answers(self, sheet_name, column_read, column_store, line_beggining = 2):
         """
         Dans un onglet, nous avons les réponses de participants qui ont pu répondre plusieurs fois à un questionnaire.
