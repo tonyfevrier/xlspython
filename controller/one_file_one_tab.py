@@ -360,25 +360,24 @@ class InsertController(GetIndex):
 
     #♥ ARRIVE ICI : A tester
     @act_on_columns
-    def column_get_part_of_str(self, sheet_name, column_read, column_insertion, separator, piece_number, line_beginning=2):
+    def write_piece_of_string_in_column(self, separator, piece_index):
         """
-        Vous avez une colonne qui contient une chaîne dont vous voulez prendre le début jusqu'à un certain séparateur.
-        Ce mot est inséré dans une nouvelle colonne.
-        
-        Inputs:
-            - column_read (str): lettre de la colonne de lecture.
-            - column_insertion (str): lettre de la colonne où l'insertion doit avoir lieu.
-            - separator (str): le symbole délimitant le début du mot
-            - piece_number (int): l'index du morceau à prendre (début : 0)
-            - line_beggining (int) : ligne où débute la recherche.
-        """
-        sheet = self.file.writebook[sheet_name] 
+        Vous avez une colonne qui contient une chaîne que vous couper en morceaux et en sélectionner un. 
+        """  
+        column_to_read = self.tab_options.column_to_read
+        column_to_write = column_index_from_string(self.tab_options.column_to_write)
 
-        # Fill cells of the new columns 
-        for i in range(line_beginning,sheet.max_row + 1): 
-            if sheet.cell(i, column_read).value is not None: 
-                sheet.cell(i, column_insertion).value = sheet.cell(i, column_read).value.split(separator)[piece_number]  
+        for line_index in range(self.first_line, self.tab.max_row + 1): 
+            self._write_piece_of_string_in_cell(Cell(line_index, column_to_read), Cell(line_index, column_to_write),
+                                             separator, piece_index)
+
+    def _write_piece_of_string_in_cell(self, cell_read, cell_write, separator, piece_index):
+        cell_value = self.file_object.get_compiled_cell_value(self.tab, cell_read)
+        if cell_value is not None: 
+            piece_of_string = cell_value.split(separator)[piece_index]
+            self.tab.cell(cell_write.line_index, cell_write.column_index).value = piece_of_string  
              
+
     @act_on_columns
     def column_for_prime_probe_congruence(self, sheet_name, columns_read, column_insertion, line_beginning=2):
         """
@@ -492,7 +491,7 @@ class InsertController(GetIndex):
                 sheet.cell(i,column_write).value = bool
 
     @act_on_columns 
-    def column_set_answer_in_group(self, sheet_name, column_read,column_write,groups_of_responses,line_beginning = 2):
+    def column_set_answer_in_group(self, sheet_name, column_read, column_write, groups_of_responses, line_beginning = 2):
         """
         Dans le cas où il y a des groupes de réponses, cette fonction qui prend une colonne de chaîne de caractères 
         et qui renvoie une colonne remplie de chaînes contenant pour chaque cellule le groupe associé.

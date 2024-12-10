@@ -375,19 +375,21 @@ class TestFile(TestCase):
 
         verify_sheets_identical(file.get_tab_by_name('sheet1'), File('test_keep_only_columns.xlsx').get_tab_by_name('Feuille2'))
 
-#     def test_column_get_part_of_str(self):
-#         file = File('test_colgetpartofstr.xlsx')
-#         controler = FileControler(file)
-#         sheet = file.writebook['Feuille2'] 
-#         controler.apply_method_on_some_tabs(['Feuille2'], 'column_get_part_of_str', 'C','D','_',0)
-#         controler.apply_method_on_some_tabs(['Feuille2'], 'column_get_part_of_str', 'F','G',';',1)
+    def test_column_get_part_of_str(self):
+        file = File('test_colgetpartofstr.xlsx')
+        controler = MultipleSameTabController(file, tab_controller=InsertController(file, tab_options=TabOptions(column_to_read='C', column_to_write='D')),
+                                              file_options=FileOptions(names_of_tabs_to_modify=['Feuille2']))
+
+        controler.apply_method_on_some_tabs('write_piece_of_string_in_column', '_', 0)
+
+        controler.tab_controller.tab_options = TabOptions(column_to_read='F', column_to_write='G')
+        controler.apply_method_on_some_tabs('write_piece_of_string_in_column', ';', 1)
         
-#         #controler.column_get_part_of_str('Feuille2','C','D','_',0)
-#         #controler.column_get_part_of_str('Feuille2','F','G',';',1)
-#         verify_sheets_identical(sheet, file.writebook['expected'])
-#         sheet.delete_cols(7)
-#         sheet.delete_cols(4)
-#         file.writebook.save(file.path + 'test_colgetpartofstr.xlsx') 
+        sheet = file.writebook['Feuille2'] 
+        verify_sheets_identical(sheet, file.writebook['expected'])
+        sheet.delete_cols(7)
+        sheet.delete_cols(4)
+        file.writebook.save(file.path + 'test_colgetpartofstr.xlsx') 
 
     def test_map_two_columns_to_a_third_column(self):
         file = File('test_maptwocolumns.xlsx')
