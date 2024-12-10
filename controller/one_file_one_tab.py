@@ -228,7 +228,7 @@ class DeleteController(String):
             self.tab.cell(line_index, column_index).fill = PatternFill(fill_type = 'solid', start_color = color)  
         
 
-class InsertController():
+class InsertController(GetIndex):
     """Handle methods inserting columns in a tab""" 
 
     def __init__(self, file_object, tab_name=None, tab_options=None, first_line=2):
@@ -312,33 +312,6 @@ class InsertController():
     def _check_column_if_answer_contained(self, cell, answer):
         if answer[1] in self.tab.cell(cell.line_index, cell.column_index).value:
             self.tab.cell(cell.line_index, answer[0] + self.tab_options.column_to_write).value = 'X'
-
-    #♥ ARRIVE ICI : A tester
-    def gather_multiple_answers(self, sheet_name, column_read, column_store, line_beggining = 2):
-        """
-        Dans un onglet, nous avons les réponses de participants qui ont pu répondre plusieurs fois à un questionnaire.
-        Cette fonction parcourt les noms et met dans un autre onglet. La ligne du participant est alors constituée des différentes valeurs
-         d'une même donnée récupérée.
-        
-        Inputs :
-            - column_read (str) : la colonne avec les identifiants des participants.
-            - column_store (str) : lettre de la colonne contenant la donnée qu'on veut stocker.
-            - line_beggining (int) : ligne où débute la recherche. 
-        """ 
-        sheet = self.file.writebook[sheet_name]
-
-        column_read = column_index_from_string(column_read) 
-        column_store = column_index_from_string(column_store) 
-
-        #we create a dictionary whose keys are the identifiers (of participants) and values are their number of answers and a list containing
-        #the data we want to store for each answer.
-        dico = self.create_dico_to_store_multiple_answers_of_participants(sheet, column_read,column_store,line_beggining)
-        
-        #we create the new sheet where we store participants answering multiple times and their data.
-        storesheet = self.file.writebook.create_sheet('severalAnswers')
-        self.create_newsheet_storing_multiple_answers(storesheet, dico)
-
-        self.file.writebook.save(self.file.path + self.file.name_file) 
     
     def act_on_columns(function):
         """
@@ -346,53 +319,46 @@ class InsertController():
         après l'insertion de la colonne et sauvegarde le fichier.
         """
         def wrapper(self, *args, **kwargs):
-            """
-            - args[0] (str): sheet name
-            - args[1] (list[str] or str): letters of columns to read
-            - args[2] (str): letter of column in which to write
-            """
-            # Transform all args corresponding to columns in indexes 
-            modifications = [args[2]]
-            if isinstance(args[1], list):
-                columns_read = [column_index_from_string(column) for column in args[1]]
-            else:
-                columns_read = column_index_from_string(args[1]) 
-            column_insertion = column_index_from_string(args[2]) 
+            self._get_indexes_of_columns_to_read()
+            column_insertion = column_index_from_string(self.tab_options.column_to_write) 
+            self.tab.insert_cols(column_insertion)
+            function(self, *args, **kwargs)
 
-            # Apply the function on column indexes
-            sheet = self.file.writebook[args[0]]
-            sheet.insert_cols(column_insertion)
-            function(self, args[0], columns_read, column_insertion, *args[3:], **kwargs)
-
-            # Update eventual formulas and save
-            self.updateCellFormulas(sheet, True, 'column', modifications)         
-            #self.file.writebook.save(self.file.path + self.file.name_file)
+            modifications = self.tab_options.column_to_write
+            self.update_cell_formulas(ColumnInsert(modifications)) 
         return wrapper
+
+    def _get_indexes_of_columns_to_read(self):
+        if self.tab_options.columns_to_read is not None:
+            self.tab_options.columns_to_read = self.get_list_of_columns_indexes(self.tab_options.columns_to_read)
+        if self.tab_options.column_to_read is not None:
+            self.tab_options.column_to_read = column_index_from_string(self.tab_options.column_to_read)
     
     @act_on_columns
-    def map_two_columns_to_a_third_column(self, sheet_name, columns_read, column_insertion, mapping, line_beginning=2):
+    def map_two_columns_to_a_third_column(self, mapping):
         """
-        Vous avez deux colonnes de lecture, suivant ce qui est écrit sur une ligne, vous voulez ou non insérer quelque chose 
-        dans une nouvelle colonne.
-
-        Inputs:
-            - columns_read (list[str]): liste de deux lettres contenant les colonnes de lecture.
-            - column_insertion (str): lettre de la colonne où l'insertion doit avoir lieu.
-            - mapping (dict): dictionnaire dont les clés sont les chaînes à écrire. Les valeurs sont dans l'ordre les 
-            str qui si elles sont présentes, entraînent l'écriture de ces chaînes.
-            - line_beggining (int) : ligne où débute la recherche.
+        Vous avez deux colonnes de lecture, si les valeurs des deux cellules correspondent à une clé du dictionnaire mapping,
+        on écrit la valeur associée dans une nouvelle colonne.
         """ 
-        sheet = self.file.writebook[sheet_name]
+        for line_index in range(self.first_line, self.tab.max_row + 1):
+            self._fill_one_third_column_cell(line_index, mapping)
 
-        for i in range(line_beginning, sheet.max_row + 1):
-            # Fill the new column if columns read contain some expected values
-            for key, value in mapping.items():
-                value1 = str(sheet.cell(i, columns_read[0]).value)
-                value2 = str(sheet.cell(i, columns_read[1]).value) 
-                if [value1, value2] == value:
-                    sheet.cell(i, column_insertion).value = key
-                    break
-    
+    def _fill_one_third_column_cell(self, line_index, mapping):
+        cells_values = self._get_cells_values(line_index)
+        column_to_write = column_index_from_string(self.tab_options.column_to_write)
+
+        for key, value in mapping.items(): 
+            if cells_values == value:
+                self.tab.cell(line_index, column_to_write).value = key
+                break
+
+    def _get_cells_values(self, line_index):
+        columns_to_read = self.tab_options.columns_to_read
+        cell_value1 = self.file_object.get_compiled_cell_value(self.tab, Cell(line_index, columns_to_read[0])) 
+        cell_value2 = self.file_object.get_compiled_cell_value(self.tab, Cell(line_index, columns_to_read[1]))
+        return [cell_value1, cell_value2]
+
+    #♥ ARRIVE ICI : A tester
     @act_on_columns
     def column_get_part_of_str(self, sheet_name, column_read, column_insertion, separator, piece_number, line_beginning=2):
         """

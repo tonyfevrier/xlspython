@@ -1,5 +1,6 @@
 from utils.utils import GetIndex, TabsCopy, DisplayRunningInfos
 from openpyxl.utils import column_index_from_string  
+from model.model_factorise import Cell
 from time import time 
 
 
@@ -217,3 +218,62 @@ class OneFileMultipleTabsController(GetIndex):
         if tab.max_row != number_of_lines:
             list_of_tab_names.append(tab_name)
         return list_of_tab_names
+    
+    def gather_multiple_answers(self, column_identifier, column_data):
+        """
+        Dans un onglet, nous avons les réponses de participants qui ont pu répondre plusieurs fois à un questionnaire.
+        Cette fonction parcourt les noms et écrit dans un autre onglet ceux qui ont répondu plusieurs fois.
+        La ligne du participant est alors constituée des différentes valeurs d'une même donnée récupérée.
+        
+        Inputs :
+            - column_read (str) : la colonne avec les identifiants des participants.
+            - column_store (str) : lettre de la colonne contenant la donnée qu'on veut stocker.
+            - line_beggining (int) : ligne où débute la recherche. 
+        """ 
+        tab_to_read = self.file_object.get_tab_by_name(self.file_options.name_of_tab_to_read)
+        self.tabs_copy._choose_the_tab_to_read(tab_to_read)
+        column_identifier = column_index_from_string(column_identifier) 
+        column_data = column_index_from_string(column_data) 
+
+        map_participants_to_data = self._store_multiple_answers_participants_data(column_identifier, column_data)
+        self._create_tab_storing_multiple_answers(map_participants_to_data)
+        self.file_object.save_file()
+
+    def _store_multiple_answers_participants_data(self, column_identifier, column_data):
+        """
+        Fonction qui crée un dictionnaire de clés les identifiants et de valeur la ou les valeurs
+        d'une même donnée associée à chaque identifiant. 
+        """
+        map_participant_to_data = {}
+        for line_index in range(self.first_line, self.tabs_copy.tab_from.max_row + 1):
+            self._store_one_participant_data(map_participant_to_data,
+                                                           Cell(line_index, column_identifier), 
+                                                           Cell(line_index, column_data))
+        return map_participant_to_data
+    
+    def _store_one_participant_data(self, map_participant_to_data, cell_identifier, cell_data):
+        tab_from = self.tabs_copy.tab_from
+        identifier = self.file_object.get_compiled_cell_value(tab_from, cell_identifier)
+        value_to_store = self.file_object.get_compiled_cell_value(tab_from, cell_data)
+        
+        if identifier in map_participant_to_data.keys(): 
+            map_participant_to_data[identifier].append(value_to_store)
+        else: 
+            map_participant_to_data[identifier] = [value_to_store]
+    
+    def _create_tab_storing_multiple_answers(self, map_participant_to_data):
+        new_tab = self.file_object.writebook.create_sheet('multiple_answers')
+        new_tab.cell(1, 1).value = 'Identifiers'
+        
+        for participant_item in map_participant_to_data.items(): 
+            values_to_store = participant_item[1]
+            if len(values_to_store) >= 2:
+                self._write_data_of_a_multiple_answers_participant(new_tab, participant_item) 
+    
+    def _write_data_of_a_multiple_answers_participant(self, new_tab, participant_item):
+        identifier = participant_item[0]
+        values_to_store = participant_item[1] 
+        new_tab.cell(new_tab.max_row + 1, 1).value = identifier
+        for index in range(len(values_to_store)):
+            new_tab.cell(new_tab.max_row + 1, index + 2).value = values_to_store[index]
+            

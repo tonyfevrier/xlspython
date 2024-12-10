@@ -331,21 +331,18 @@ class TestFile(TestCase):
         sheet = file.writebook['sheet1'] 
         sheet.delete_cols(4,4)
 
-#     def test_gather_multiple_answers(self):
-#         file = File('testongletbyparticipant.xlsx')
-#         controler = FileControler(file)
-#         #sheet = file.writebook['test']    
-#         controler.gather_multiple_answers('test','A','B')
-#         #del sheet
+    def test_gather_multiple_answers(self):
+        file = File('testongletbyparticipant.xlsx')
+        controler = OneFileMultipleTabsController(file, file_options=FileOptions(name_of_tab_to_read='test'))  
+        controler.gather_multiple_answers('A','B') 
 
-#         file2 = File('testongletbyparticipant-result.xlsx')
-#         sheet1, sheet2 = file.writebook['severalAnswers'], file2.writebook['Feuille2'] 
-#         verify_sheets_identical(sheet1, sheet2)
-#         del sheet1, sheet2
-        
-#         #del file.writebook[file.sheets_name[-1]]
-#         file.writebook.save(file.path + 'testongletbyparticipant.xlsx')
-#         del file
+        file2 = File('testongletbyparticipant-result.xlsx')
+        sheet1, sheet2 = file.writebook['severalAnswers'], file2.writebook['Feuille2'] 
+        verify_sheets_identical(sheet1, sheet2)
+        del sheet1, sheet2
+
+        file.writebook.save(file.path + 'testongletbyparticipant.xlsx')
+        del file
 
 #     def test_give_names_of_maximum(self):
 #         file = File('test_give_names.xlsx')
@@ -392,16 +389,18 @@ class TestFile(TestCase):
 #         sheet.delete_cols(4)
 #         file.writebook.save(file.path + 'test_colgetpartofstr.xlsx') 
 
-#     def test_map_two_columns_to_a_third_column(self):
-#         file = File('test_maptwocolumns.xlsx')
-#         controler = FileControler(file)
-#         sheet = file.writebook['Feuille2']  
-#         controler.apply_method_on_some_tabs(['Feuille2'], 'map_two_columns_to_a_third_column',  ['B', 'C'], 'D', {'cat1':['prime','1'], 'cat2':['probe','2']})
-
-#         #controler.map_two_columns_to_a_third_column('Feuille2', ['B', 'C'], 'D', {'cat1':['prime','1'], 'cat2':['probe','2']})
-#         verify_sheets_identical(sheet, file.writebook['expected'])
-#         sheet.delete_cols(4)
-#         file.writebook.save(file.path + 'test_maptwocolumns.xlsx')        
+    def test_map_two_columns_to_a_third_column(self):
+        file = File('test_maptwocolumns.xlsx')
+        controler = MultipleSameTabController(file,
+                                              tab_controller=InsertController(file, tab_options=TabOptions(columns_to_read=['B', 'C'], column_to_write='D')),
+                                              file_options=FileOptions(names_of_tabs_to_modify=['Feuille2']))
+         
+        controler.apply_method_on_some_tabs('map_two_columns_to_a_third_column', {'cat1':['prime','1'], 'cat2':['probe','2']})
+        
+        sheet = file.writebook['Feuille2']  
+        verify_sheets_identical(sheet, file.writebook['expected'])
+        sheet.delete_cols(4)
+        file.writebook.save(file.path + 'test_maptwocolumns.xlsx')        
 
 
 # class TestStr(TestCase, Other):
