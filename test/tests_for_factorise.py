@@ -1,9 +1,9 @@
 from unittest import TestCase, main 
 from model.model_factorise import File, FileOptions, TabOptions, MergedCellsRange
 from controller.one_file_one_tab import ColorTabController, DeleteController, InsertController 
-from controller.one_file_multiple_tabs import OneFileMultipleTabsController, MultipleSameTabController
+from controller.one_file_multiple_tabs import OneTabCreatedController, MultipleSameTabController, EvenTabsController
 from controller.two_files import OneFileCreatedController, TwoFilesController
-from utils.utils import Other, Str, ColumnDelete, ColumnInsert, LineDelete, LineInsert, TabUpdate
+from utils.utils import Other, Str, ColumnDelete, ColumnInsert, LineDelete, LineInsert, TabUpdateFormula
  
 import os
  
@@ -59,7 +59,7 @@ class TestFile(TestCase):
 
     def test_extract_a_column_from_all_tabs(self):
         file = File('test_extract_column.xlsx')
-        controler = OneFileMultipleTabsController(file, FileOptions(column_to_read='B'))
+        controler = OneTabCreatedController(file, FileOptions(column_to_read='B'))
         controler.extract_a_column_from_all_tabs() 
         verify_files_identical(File('test_extract_column_ref.xlsx'),file)
 
@@ -68,13 +68,13 @@ class TestFile(TestCase):
 
     def test_apply_column_formula_on_all_tabs(self):
         file = File('dataset.xlsx', dataonly = False)
-        controler = OneFileMultipleTabsController(file, FileOptions(columns_to_read=['B','C']))
+        controler = EvenTabsController(file, FileOptions(columns_to_read=['B','C']))
         controler.apply_columns_formula_on_all_tabs()
     
 
     def test_gather_groups_of_multiple_columns_in_tabs_of_two_columns_containing_tags_and_values(self):
         file = File("test_gather_columns_in_one.xlsx")
-        controler = OneFileMultipleTabsController(file, FileOptions(name_of_tab_to_read='test'))
+        controler = OneTabCreatedController(file, FileOptions(name_of_tab_to_read='test'))
         controler.gather_groups_of_multiple_columns_in_tabs_of_two_columns_containing_tags_and_values(['C','D','E'], ['G','H','I'])
 
         file = File("test_gather_columns_in_one.xlsx")
@@ -102,7 +102,7 @@ class TestFile(TestCase):
 
     def test_merge_cells_on_all_tabs(self): 
         file = File("test_merging.xlsx")
-        controler = OneFileMultipleTabsController(file)
+        controler = EvenTabsController(file)
         controler.merge_cells_on_all_tabs(MergedCellsRange('C', 'D', 12, 15))
 
         #voir comment tester le fait qu'une cellule est mergée : comprendre l'objet mergedcells
@@ -118,7 +118,7 @@ class TestFile(TestCase):
         
     def test_apply_cell_formula_on_all_sheets(self):
         file = File("test_merging.xlsx")
-        controler = OneFileMultipleTabsController(file)
+        controler = EvenTabsController(file)
         controler.apply_cells_formula_on_all_tabs('A10','B10','C10')
 
         for tab in file.sheets_name[1:]:
@@ -129,7 +129,7 @@ class TestFile(TestCase):
     
     def test_check_linenumber_of_tabs(self):
         file = File('test.xlsx')
-        controler = OneFileMultipleTabsController(file)
+        controler = EvenTabsController(file)
         tabs = controler.list_tabs_with_different_number_of_lines(14)
         self.assertListEqual(tabs, ['cutinparts', 'cutinpartsbis', 'delete_lines', 'delete_lines_bis'])
 
@@ -238,7 +238,7 @@ class TestFile(TestCase):
         self.column_identical('test.xlsx','test.xlsx',4,5,8,8)
         
         sheet2.delete_cols(5,2)
-        TabUpdate(ColumnDelete(['E','F'])).update_cells_formulas(sheet2)
+        TabUpdateFormula(ColumnDelete(['E','F'])).update_cells_formulas(sheet2)
         file2.writebook.save(file2.path + 'test.xlsx')
 
     def test_color_column(self):
@@ -333,7 +333,7 @@ class TestFile(TestCase):
 
     def test_gather_multiple_answers(self):
         file = File('testongletbyparticipant.xlsx')
-        controler = OneFileMultipleTabsController(file, file_options=FileOptions(name_of_tab_to_read='test'))  
+        controler = OneTabCreatedController(file, file_options=FileOptions(name_of_tab_to_read='test'))  
         controler.gather_multiple_answers('A','B') 
 
         file2 = File('testongletbyparticipant-result.xlsx')

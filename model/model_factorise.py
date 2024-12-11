@@ -19,10 +19,8 @@ class Path():
         
 
 class File(): 
-    def __init__(self, name_file, path = 'fichiers_xls/', dataonly = False):
-        """
-        Handle methods modifying a tab
-        """ 
+    """Classe permettant de récupérer et mettre à jour les données d'un fichier"""
+    def __init__(self, name_file, path = 'fichiers_xls/', dataonly = False): 
         self.name_file = name_file  
         self.path = path
         self.dataonly = dataonly 
@@ -71,14 +69,7 @@ class File():
         self.writebook.save(self.path + self.name_file) 
 
 
-class Tab():
-    """Handle methods modifying a tab"""
-    def __init__(self, tab_name):   
-        self.tab_name = tab_name 
-
-
 class Cell():
-    """Handle methods modifying a cell"""
     def __init__(self, line_index, column_index):  
         self.line_index = line_index
         self.column_index = column_index

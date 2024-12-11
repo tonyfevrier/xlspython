@@ -768,7 +768,7 @@ class TabsCopy():
             self.tab_to.merge_cells(start_row=start_row, start_column=start_column, end_row=end_row, end_column=end_column)
 
 
-class GetIndex():
+class MapIndexLetter():
     """Handle methods to transform cell, columns in indexes"""
 
     @staticmethod
@@ -822,8 +822,9 @@ class RegularExpression():
         return ''.join(cells_expression_list)
     
 
-class TabUpdate():
-    """Handles """
+class TabUpdateFormula():
+    """Update cells formula of a tab after columns/lines are inserted/deleted. Modification_object 
+    is one of the following interfaces."""
     def __init__(self, modification_object=None): 
         self.modification_object = modification_object
 
@@ -849,6 +850,7 @@ class TabUpdate():
     
 
 class ColumnInsert(RegularExpression):
+    """Interface aiming at modifying a cell formula after column(s) insertion(s)"""
     def __init__(self, columns_inserted):   
         self.columns_inserted = columns_inserted
 
@@ -998,7 +1000,7 @@ class LineDelete(RegularExpression):
     
 
 class String(): 
-
+    """Handle useful methods carrying on strings"""
     @staticmethod
     def clean_string_from_spaces(string):
         """

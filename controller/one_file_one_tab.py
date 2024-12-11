@@ -11,7 +11,7 @@ import re
 from openpyxl.styles import PatternFill
 from openpyxl.utils import column_index_from_string, get_column_letter, coordinate_to_tuple
 from time import time
-from utils.utils import Other, String, UtilsForFile, Str, DisplayRunningInfos, TabsCopy, GetIndex, TabUpdate, ColumnDelete, ColumnInsert, LineDelete, LineInsert
+from utils.utils import Other, String, UtilsForFile, Str, DisplayRunningInfos, TabsCopy, MapIndexLetter, TabUpdateFormula, ColumnDelete, ColumnInsert, LineDelete, LineInsert
 from copy import copy
 from model.model_factorise import Cell 
 
@@ -114,7 +114,7 @@ class DeleteController(String):
         self.tab = None
         if tab_name is not None:
             self.tab = self.file_object.get_tab_by_name(tab_name)  
-        self.tab_update = TabUpdate()
+        self.tab_update = TabUpdateFormula()
         self.columns_to_delete = []
         self.lines_to_delete = []
         self.first_line = first_line  
@@ -123,7 +123,7 @@ class DeleteController(String):
         self.columns_to_delete = []
         self.lines_to_delete = []
 
-    def update_cell_formulas(self, modification_object): 
+    def _update_cell_formulas(self, modification_object): 
         self.tab_update.choose_modifications_to_apply(modification_object)  
         self.tab_update.update_cells_formulas(self.tab) 
     
@@ -139,7 +139,7 @@ class DeleteController(String):
         for column_letter in self.columns_to_delete:  
             self.tab.delete_cols(column_index_from_string(column_letter)) 
 
-        self.update_cell_formulas(ColumnDelete(self.columns_to_delete)) 
+        self._update_cell_formulas(ColumnDelete(self.columns_to_delete)) 
 
     def delete_other_columns(self, string_of_columns):
         """
@@ -154,7 +154,7 @@ class DeleteController(String):
         for column_letter in list_all_columns: 
             self._delete_column_not_to_keep(column_letter, columns_to_keep)
        
-        self.update_cell_formulas(ColumnDelete(self.columns_to_delete))
+        self._update_cell_formulas(ColumnDelete(self.columns_to_delete))
         self.file_object.save_file() 
 
     def _delete_column_not_to_keep(self, column_letter, columns_to_keep):
@@ -178,7 +178,7 @@ class DeleteController(String):
             cell_value = self.file_object.get_compiled_cell_value(self.tab, Cell(line_index,column_index)) 
             self._delete_line_containing_strings(line_index, cell_value, *strings)
  
-        self.update_cell_formulas(LineDelete(self.lines_to_delete))   
+        self._update_cell_formulas(LineDelete(self.lines_to_delete))   
 
     def _delete_line_containing_strings(self, line_index, cell_value, *strings):
         if str(cell_value) in strings:  
@@ -201,7 +201,7 @@ class DeleteController(String):
             cell_identifier = Cell(line_index, column_identifier)
             self._delete_line_and_color_last_twin(cell_identifier, map_identifier_to_line, color)
              
-        self.update_cell_formulas(LineDelete(self.lines_to_delete))       
+        self._update_cell_formulas(LineDelete(self.lines_to_delete))       
 
     def _delete_line_and_color_last_twin(self, cell_identifier, map_identifier_to_line, color):
         """
@@ -228,7 +228,7 @@ class DeleteController(String):
             self.tab.cell(line_index, column_index).fill = PatternFill(fill_type = 'solid', start_color = color)  
         
 
-class InsertController(GetIndex):
+class InsertController(MapIndexLetter):
     """Handle methods inserting columns in a tab""" 
 
     def __init__(self, file_object, tab_name=None, tab_options=None, first_line=2):
@@ -244,14 +244,14 @@ class InsertController(GetIndex):
         self.tab_name = tab_name
         if tab_name is not None:
             self.tab = self.file_object.get_tab_by_name(tab_name)
-        self.tab_update = TabUpdate()
+        self.tab_update = TabUpdateFormula()
         self.tab_options = tab_options 
         self.first_line = first_line 
 
     def reinitialize_storing_attributes(self):
         pass
 
-    def update_cell_formulas(self, modification_object): 
+    def _update_cell_formulas(self, modification_object): 
         self.tab_update.choose_modifications_to_apply(modification_object)  
         self.tab_update.update_cells_formulas(self.tab) 
  
@@ -269,7 +269,7 @@ class InsertController(GetIndex):
             self._insert_splitted_string(line_index, parts)
 
         modifications = [get_column_letter(column_to_split + index) for index in range(len(parts))]
-        self.update_cell_formulas(ColumnInsert(modifications))   
+        self._update_cell_formulas(ColumnInsert(modifications))   
 
     def _get_string_and_split_it(self, cell, separator):
         cell_value = self.file_object.get_compiled_cell_value(self.tab, cell) 
@@ -295,7 +295,7 @@ class InsertController(GetIndex):
             self._check_columns_of_answers_contained(Cell(line_index, self.tab_options.column_to_read), answers)    
 
         modifications = [get_column_letter(self.tab_options.column_to_write + index) for index in range(len(answers))]
-        self.update_cell_formulas(ColumnInsert(modifications))  
+        self._update_cell_formulas(ColumnInsert(modifications))  
 
     def _insert_answers_columns(self, answers):
         self.tab.insert_cols(self.tab_options.column_to_write, len(answers))
@@ -325,7 +325,7 @@ class InsertController(GetIndex):
             function(self, *args, **kwargs)
 
             modifications = self.tab_options.column_to_write
-            self.update_cell_formulas(ColumnInsert(modifications)) 
+            self._update_cell_formulas(ColumnInsert(modifications)) 
         return wrapper
 
     def _get_indexes_of_columns_to_read(self):

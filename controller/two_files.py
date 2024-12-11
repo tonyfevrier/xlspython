@@ -1,7 +1,7 @@
 import openpyxl
 import os
 
-from utils.utils import GetIndex, TabsCopy, DisplayRunningInfos, TabUpdate, ColumnInsert, Str
+from utils.utils import MapIndexLetter, TabsCopy, DisplayRunningInfos, TabUpdateFormula, ColumnInsert, Str
 from model.model_factorise import Cell 
 from controller.one_file_one_tab import create_empty_workbook
 from openpyxl.utils import column_index_from_string
@@ -9,7 +9,7 @@ from datetime import datetime
 from time import time
 
 
-class TwoFilesController(GetIndex):
+class TwoFilesController(MapIndexLetter):
     """Handle methods linking two existing files"""
     def __init__(self, file_object_from, file_object_to, tab_name_from, tab_name_to,
                  column_with_identifiers_from=None, column_with_identifiers_to=None, first_line=2):
@@ -18,7 +18,7 @@ class TwoFilesController(GetIndex):
         self.first_line = first_line
         self.tabs_copy = TabsCopy(file_object_from.get_tab_by_name(tab_name_from),
                                   file_object_to.get_tab_by_name(tab_name_to))
-        self.tab_update = TabUpdate()
+        self.tab_update = TabUpdateFormula()
         self._get_columns_identifiers_indexes(column_with_identifiers_from, column_with_identifiers_to)
 
     def _get_columns_identifiers_indexes(self, column_with_identifiers_from, column_with_identifiers_to):
@@ -43,10 +43,10 @@ class TwoFilesController(GetIndex):
         self._copy_cells_values_in_the_new_tab(cells_to_copy_by_identifier, column_insertion_index)
 
         modification_object = ColumnInsert(self.get_list_of_consecutive_column_letters(column_insertion_index, len(columns_to_copy))) 
-        self.update_cell_formulas(modification_object)   
+        self._update_cell_formulas(modification_object)   
         self.file_object_to.save_file()
 
-    def update_cell_formulas(self, modification_object): 
+    def _update_cell_formulas(self, modification_object): 
         self.tab_update.choose_modifications_to_apply(modification_object) 
         self.tab_update.update_cells_formulas(self.tabs_copy.tab_to) 
 
@@ -55,7 +55,7 @@ class TwoFilesController(GetIndex):
         dico = {}
         for line_index in range(1, tab_from.max_row + 1):
             identifier = self.file_object_from.get_compiled_cell_value(tab_from, Cell(line_index, self.column_with_identifiers_from))  
-            dico[identifier] = GetIndex.get_cells_indexes_of_one_line_and_some_columns(line_index, columns_to_copy_indexes)
+            dico[identifier] = MapIndexLetter.get_cells_indexes_of_one_line_and_some_columns(line_index, columns_to_copy_indexes)
         return dico
 
     def _copy_cells_values_in_the_new_tab(self, cells_to_copy_indexes_by_identifier, column_insertion_index):
@@ -75,7 +75,7 @@ class TwoFilesController(GetIndex):
             self.tabs_copy.deep_copy_of_a_cell(Cell(*cells_to_copy_indexes[column_index]), Cell(line_index, column_insertion_index + column_index))
  
 
-class OneFileCreatedController(GetIndex):
+class OneFileCreatedController(MapIndexLetter):
     """Handle methods creating a new file from an existing file"""
 
     def __init__(self, file_object, file_options=None, first_line=2):

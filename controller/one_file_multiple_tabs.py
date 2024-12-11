@@ -1,10 +1,11 @@
-from utils.utils import GetIndex, TabsCopy, DisplayRunningInfos
+from utils.utils import MapIndexLetter, TabsCopy, DisplayRunningInfos
 from openpyxl.utils import column_index_from_string  
 from model.model_factorise import Cell
 from time import time 
 
 
 class MultipleSameTabController():
+    """Handle methods to apply one same tab method to multiple tabs in a file """
 
     def __init__(self, file_object, tab_controller, file_options=None):
         """
@@ -20,23 +21,15 @@ class MultipleSameTabController():
         self.file_options = file_options  
         self.display = DisplayRunningInfos() 
 
-    def reinitialize_tab_controller(self, tab_name):
-        self.tab_controller.tab = self.file_object.get_tab_by_name(tab_name)
-        self.tab_controller.reinitialize_storing_attributes()
-
     def apply_method_on_some_tabs(self, method_name, *args, **kwargs):
         """ 
         Vous avez un fichier contenant plusieurs onglets et vous souhaitez appliquer une même méthode de la 
-        classe Sheet sur une liste de ces onglets du fichier. On s'attend à ce que tous les onglets aient une structure identique.
-
-        Inputs:
-            - method_name (str): the name of the method to execute 
-            - *args, **kwargs : arguments of the method associated with method_name
+        classe TabController sur une liste d'onglets de structures identiques du fichier. 
         """  
         self.display.start_time = time()
         for tab_name in self.file_options.names_of_tabs_to_modify:    
             # Get the method from its name and apply it  
-            self.reinitialize_tab_controller(tab_name)
+            self._reinitialize_tab_controller(tab_name)
             method = getattr(self.tab_controller, method_name)
             method(*args, **kwargs) 
 
@@ -44,6 +37,10 @@ class MultipleSameTabController():
             self.display.display_running_infos() 
 
         self.file_object.save_file() 
+
+    def _reinitialize_tab_controller(self, tab_name):
+        self.tab_controller.tab = self.file_object.get_tab_by_name(tab_name)
+        self.tab_controller.reinitialize_storing_attributes()
     
     def _update_display_infos(self, method_name, current_running_part, list_of_running_parts):
         self.display.method_name = method_name
@@ -51,7 +48,7 @@ class MultipleSameTabController():
         self.display.list_of_running_parts = list_of_running_parts
 
 
-class OneFileMultipleTabsController(GetIndex):
+class OneTabCreatedController(MapIndexLetter):
     """
     Handle methods involving multiple tabs of a file.
     """
@@ -105,55 +102,6 @@ class OneFileMultipleTabsController(GetIndex):
     def _choose_the_new_column_title(self, title):
         self.tabs_copy.tab_to.cell(1, self.tabs_copy.tab_to.max_column).value = title    
 
-    def apply_columns_formula_on_all_tabs(self):
-        """
-        Fonction qui reproduit les formules d'une colonne ou plusieurs colonnes
-          du premier onglet sur toutes les colonnes situées à la même position dans les 
-          autres onglets.
-
-        Input : 
-            -column_list : int. les positions des colonnes où récupérer et coller
-        """
-        columns_int_list = self.get_list_of_columns_indexes(self.file_options.columns_to_read)
-
-        self.display.start_time = time()
-        self.tabs_copy._choose_the_tab_to_read(self.file_object.get_tab_by_name(self.file_object.sheets_name[0]))
-
-        # on applique les copies des formules dans tous les onglets sauf le premier duquel viennent ces formules
-        for tab_name in self.file_object.sheets_name[1:]:
-            self.tabs_copy._choose_the_tab_to_write_in(self.file_object.get_tab_by_name(tab_name))
-            self.tabs_copy.copy_paste_multiple_columns(columns_int_list) 
-
-            self._update_display_infos('apply_column_formula_on_all_sheets', tab_name, self.file_object.sheets_name[1:])
-            self.display.display_running_infos()
-            
-        self.file_object.save_file() 
-
-    def apply_cells_formula_on_all_tabs(self, *cells):
-        """
-        Fonction qui reproduit les formules d'une cellule ou plusieurs cellules
-          du premier onglet sur toutes les cellules situées à la même position dans les 
-          autres onglets.
-
-        Input : 
-            -cells : string. les positions des cellule où récupérer et coller 
-        """
-        cells_list = GetIndex.get_list_of_cells_coordinates(cells) 
-
-        self.display.start_time = time()
-        tab_to_read = self.file_object.get_tab_by_name(self.file_object.sheets_name[0])
-        self.tabs_copy._choose_the_tab_to_read(tab_to_read)
-
-        # on applique les copies de formules dans tous les onglets sauf le premier duquel proviennent les formules
-        for tab_name in self.file_object.sheets_name[1:]: 
-            self.tabs_copy._choose_the_tab_to_write_in(self.file_object.get_tab_by_name(tab_name))  
-            self.tabs_copy.deep_copy_multiple_cells(cells_list)  
-            
-            self._update_display_infos('apply_cells_formula_on_all_sheets', tab_name, self.file_object.sheets_name[1:])
-            self.display.display_running_infos()
-
-        self.file_object.save_file() 
-
     def gather_groups_of_multiple_columns_in_tabs_of_two_columns_containing_tags_and_values(self, *lists_of_columns):
         """
         Vous avez des groupes de colonnes de valeurs avec une étiquette en première cellule. Pour chaque groupe, vous souhaitez former deux colonnes de valeurs : l'une qui contient
@@ -177,58 +125,17 @@ class OneFileMultipleTabsController(GetIndex):
     def _create_a_tab_for_a_list_of_columns(self):
         string_of_columns = ''.join(self.file_options.columns_to_read)
         tab_name = f"tab_column_gathered_{string_of_columns}"
-        return self.file_object.writebook.create_sheet(tab_name) 
+        return self.file_object.create_and_return_new_tab(tab_name) 
 
     def copy_tags_and_values_of_a_list_of_columns(self):
         for column in self.file_options.columns_to_read: 
             self.tabs_copy.copy_tag_and_values_of_a_column_at_tab_bottom(column_index_from_string(column))         
-
-    def merge_cells_on_all_tabs(self, merged_cells_range):
-        """
-        Fonction qui merge les mêmes cellules sur tous les onglets d'un fichier 
-        """
-        
-        merged_cells_range.start_column = column_index_from_string(merged_cells_range.start_column)
-        merged_cells_range.end_column = column_index_from_string(merged_cells_range.end_column)
-
-        self.display.start_time = time()
-
-        for tab_name in self.file_object.sheets_name: 
-            self.tabs_copy._choose_the_tab_to_write_in(self.file_object.get_tab_by_name(tab_name)) 
-            self.tabs_copy.tab_to.merge_cells(start_row=merged_cells_range.start_line, 
-                                              start_column=merged_cells_range.start_column, 
-                                              end_row=merged_cells_range.end_line, 
-                                              end_column=merged_cells_range.end_column)
-            self._update_display_infos('merge_cells_on_all_tabs', tab_name, self.file_object.sheets_name)
-            self.display.display_running_infos()
-
-        self.file_object.save_file() 
-
-    def list_tabs_with_different_number_of_lines(self, number_of_lines):
-        """
-        Fonction qui prend un fichier et qui contrôle si tous les onglets ont un nombre de lignes égal à l'argument
-        """
-        list_of_tab_names = []
-        for tab_name in self.file_object.sheets_name:
-            list_of_tab_names = self.add_tab_to_list_if_different_number_of_lines(tab_name, list_of_tab_names, number_of_lines)
-        return list_of_tab_names
-    
-    def add_tab_to_list_if_different_number_of_lines(self, tab_name, list_of_tab_names, number_of_lines):
-        tab = self.file_object.get_tab_by_name(tab_name)
-        if tab.max_row != number_of_lines:
-            list_of_tab_names.append(tab_name)
-        return list_of_tab_names
     
     def gather_multiple_answers(self, column_identifier, column_data):
         """
         Dans un onglet, nous avons les réponses de participants qui ont pu répondre plusieurs fois à un questionnaire.
         Cette fonction parcourt les noms et écrit dans un autre onglet ceux qui ont répondu plusieurs fois.
         La ligne du participant est alors constituée des différentes valeurs d'une même donnée récupérée.
-        
-        Inputs :
-            - column_read (str) : la colonne avec les identifiants des participants.
-            - column_store (str) : lettre de la colonne contenant la donnée qu'on veut stocker.
-            - line_beggining (int) : ligne où débute la recherche. 
         """ 
         tab_to_read = self.file_object.get_tab_by_name(self.file_options.name_of_tab_to_read)
         self.tabs_copy._choose_the_tab_to_read(tab_to_read)
@@ -262,7 +169,7 @@ class OneFileMultipleTabsController(GetIndex):
             map_participant_to_data[identifier] = [value_to_store]
     
     def _create_tab_storing_multiple_answers(self, map_participant_to_data):
-        new_tab = self.file_object.writebook.create_sheet('multiple_answers')
+        new_tab = self.file_object.create_and_return_new_tab('multiple_answers')
         new_tab.cell(1, 1).value = 'Identifiers'
         
         for participant_item in map_participant_to_data.items(): 
@@ -276,4 +183,100 @@ class OneFileMultipleTabsController(GetIndex):
         new_tab.cell(new_tab.max_row + 1, 1).value = identifier
         for index in range(len(values_to_store)):
             new_tab.cell(new_tab.max_row + 1, index + 2).value = values_to_store[index]
+
+
+class EvenTabsController(MapIndexLetter):
+    """Handle methods which tends to make tabs even"""
+
+    def __init__(self, file_object, file_options=None):
+        self.file_object = file_object
+        self.file_options = file_options   
+        self.tabs_copy = TabsCopy()
+        self.display = DisplayRunningInfos() 
+
+    def _update_display_infos(self, method_name, current_running_part, list_of_running_parts):
+        self.display.method_name = method_name
+        self.display.current_running_part = current_running_part
+        self.display.list_of_running_parts = list_of_running_parts
+
+    def apply_columns_formula_on_all_tabs(self):
+        """
+        Fonction qui reproduit les formules d'une colonne ou plusieurs colonnes
+          du premier onglet sur toutes les colonnes situées à la même position dans les 
+          autres onglets.
+        """
+        columns_int_list = self.get_list_of_columns_indexes(self.file_options.columns_to_read)
+
+        self.display.start_time = time()
+        self.tabs_copy._choose_the_tab_to_read(self.file_object.get_tab_by_name(self.file_object.sheets_name[0]))
+
+        # on applique les copies des formules dans tous les onglets sauf le premier duquel viennent ces formules
+        for tab_name in self.file_object.sheets_name[1:]:
+            self.tabs_copy._choose_the_tab_to_write_in(self.file_object.get_tab_by_name(tab_name))
+            self.tabs_copy.copy_paste_multiple_columns(columns_int_list) 
+
+            self._update_display_infos('apply_column_formula_on_all_sheets', tab_name, self.file_object.sheets_name[1:])
+            self.display.display_running_infos()
+            
+        self.file_object.save_file() 
+
+    def apply_cells_formula_on_all_tabs(self, *cells):
+        """
+        Fonction qui reproduit les formules d'une cellule ou plusieurs cellules
+          du premier onglet sur toutes les cellules situées à la même position dans les 
+          autres onglets.
+        """
+        cells_list = MapIndexLetter.get_list_of_cells_coordinates(cells) 
+
+        self.display.start_time = time()
+        tab_to_read = self.file_object.get_tab_by_name(self.file_object.sheets_name[0])
+        self.tabs_copy._choose_the_tab_to_read(tab_to_read)
+
+        # on applique les copies de formules dans tous les onglets sauf le premier duquel proviennent les formules
+        for tab_name in self.file_object.sheets_name[1:]: 
+            self.tabs_copy._choose_the_tab_to_write_in(self.file_object.get_tab_by_name(tab_name))  
+            self.tabs_copy.deep_copy_multiple_cells(cells_list)  
+            
+            self._update_display_infos('apply_cells_formula_on_all_sheets', tab_name, self.file_object.sheets_name[1:])
+            self.display.display_running_infos()
+
+        self.file_object.save_file() 
+
+    def merge_cells_on_all_tabs(self, merged_cells_range):
+        """
+        Fonction qui merge les mêmes cellules sur tous les onglets d'un fichier 
+        """
+        
+        merged_cells_range.start_column = column_index_from_string(merged_cells_range.start_column)
+        merged_cells_range.end_column = column_index_from_string(merged_cells_range.end_column)
+
+        self.display.start_time = time()
+
+        for tab_name in self.file_object.sheets_name: 
+            self.tabs_copy._choose_the_tab_to_write_in(self.file_object.get_tab_by_name(tab_name)) 
+            self.tabs_copy.tab_to.merge_cells(start_row=merged_cells_range.start_line, 
+                                              start_column=merged_cells_range.start_column, 
+                                              end_row=merged_cells_range.end_line, 
+                                              end_column=merged_cells_range.end_column)
+            self._update_display_infos('merge_cells_on_all_tabs', tab_name, self.file_object.sheets_name)
+            self.display.display_running_infos()
+
+        self.file_object.save_file() 
+
+    def list_tabs_with_different_number_of_lines(self, number_of_lines):
+        """
+        Fonction qui prend un fichier et qui contrôle si tous les onglets ont un nombre de lignes égal à l'argument
+        """
+        list_of_tab_names = []
+        for tab_name in self.file_object.sheets_name:
+            list_of_tab_names = self._add_tab_to_list_if_different_number_of_lines(tab_name, list_of_tab_names, number_of_lines)
+        return list_of_tab_names
+    
+    def _add_tab_to_list_if_different_number_of_lines(self, tab_name, list_of_tab_names, number_of_lines):
+        tab = self.file_object.get_tab_by_name(tab_name)
+        if tab.max_row != number_of_lines:
+            list_of_tab_names.append(tab_name)
+        return list_of_tab_names
+
+
             
