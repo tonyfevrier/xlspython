@@ -49,7 +49,7 @@ class TestFile(TestCase):
     def test_split_one_tab_in_multiple_tabs(self): 
         file = File('test_create_one_onglet_by_participant.xlsx') 
         controler = OneFileCreatedController(file, FileOptions(name_of_tab_to_read='Stroops_test (7)', column_to_read='A'))
-        controler.make_horodated_copy_of_a_file()
+        #controler.make_horodated_copy_of_a_file()
         controler.split_one_tab_in_multiple_tabs()  
         file2 = File('divided_test_create_one_onglet_by_participant.xlsx')
         verify_files_identical(File('test_create_one_onglet_by_participant_before.xlsx'),
@@ -131,7 +131,7 @@ class TestFile(TestCase):
         file = File('test.xlsx')
         controler = EvenTabsController(file)
         tabs = controler.list_tabs_with_different_number_of_lines(14)
-        self.assertListEqual(tabs, ['cutinparts', 'cutinpartsbis', 'delete_lines', 'delete_lines_bis'])
+        self.assertListEqual(tabs, ['cutinparts', 'cutinpartsbis', 'delete_lines', 'delete_lines_bis', 'time_min', 'time_min_expected'])
 
     def test_extract_cells_from_all_tabs(self):
         file = File('test_extract_cells_from_all_sheets.xlsx')
@@ -176,33 +176,51 @@ class TestFile(TestCase):
         for i in range(2,sheet1.max_row + 1): 
             self.assertEqual(sheet1.cell(i,column1).value,sheet2.cell(i,column2).value)
 
-#     def test_column_transform_string_in_binary(self): 
-#         file = File('test.xlsx')
-#         controler = FileControler(file)
-#         sheet2 = file.writebook['Feuille2']
+    def test_column_transform_string_in_binary(self): 
+        file = File('test.xlsx')
+        controler = MultipleSameTabController(file,
+                                              tab_controller=InsertController(file, tab_options=TabOptions(column_to_read='F', column_to_write='G')),
+                                              file_options=FileOptions(names_of_tabs_to_modify=['Feuille2']))
         
-#         controler.apply_method_on_some_tabs(['Feuille2'], 'column_transform_string_in_binary', 'F','G','partie 12 : Faux',1) 
-#         #controler.column_transform_string_in_binary('Feuille2','F','G','partie 12 : Faux',1)
-#         self.column_identical('test.xlsx','test.xlsx', 1, 1, 7,8)
-#         sheet2.delete_cols(7) #sinon à chaque lancement de test.py il insère une colonne en plus.
-#         file.writebook.save(file.path + 'test.xlsx') 
+        controler.apply_method_on_some_tabs('transform_string_in_binary_in_column', 'partie 12 : Faux', 1) 
+        self.column_identical('test.xlsx','test.xlsx', 1, 1, 7,8)
 
-#     def test_column_set_answer_in_group(self):
-#         file = File('test_column_set_answer.xlsx')
-#         sheet = file.writebook['sheet1']
-#         controler = FileControler(file)  
+        sheet2 = file.writebook['Feuille2']
+        sheet2.delete_cols(7) #sinon à chaque lancement de test.py il insère une colonne en plus.
+        file.writebook.save(file.path + 'test.xlsx') 
+
+    def test_convert_time_in_minutes_in_columns(self): 
+        file = File('test.xlsx')
+        controler = MultipleSameTabController(file,
+                                              tab_controller=InsertController(file, tab_options=TabOptions(column_to_read='E', column_to_write='F')),
+                                              file_options=FileOptions(names_of_tabs_to_modify=['time_min']))
         
-#         groups_of_response = {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']}  
+        controler.apply_method_on_some_tabs('convert_time_in_minutes_in_columns') 
+        self.column_identical('test.xlsx','test.xlsx', 11, 12, 6, 6)
 
-#         controler.apply_method_on_some_tabs(['sheet1'], 'column_set_answer_in_group', 'B','C', groups_of_response) 
-#         #controler.column_set_answer_in_group('sheet1','B','C',groups_of_response)
+        sheet2 = file.writebook['time_min']
+        sheet2.delete_cols(6)
+        file.writebook.save(file.path + 'test.xlsx') 
+
+    def test_column_set_answer_in_group(self):
+        file = File('test_column_set_answer.xlsx')
+        controler = MultipleSameTabController(file,
+                                              tab_controller=InsertController(file, tab_options=TabOptions(column_to_read='B', column_to_write='C')),
+                                              file_options=FileOptions(names_of_tabs_to_modify=['sheet1']))  
+        
+        map_groups_to_answers = {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']}  
+
+        controler.apply_method_on_some_tabs('insert_group_associated_with_answer', map_groups_to_answers)  
  
-#         self.column_identical('test_column_set_answer.xlsx','test_column_set_answer.xlsx',0,1,3,3)
-#         self.column_identical('test_column_set_answer.xlsx','test_column_set_answer.xlsx',0,1,4,4)
+        self.column_identical('test_column_set_answer.xlsx','test_column_set_answer.xlsx',0,1,3,3)
+        self.column_identical('test_column_set_answer.xlsx','test_column_set_answer.xlsx',0,1,4,4)
 
-#         sheet.delete_cols(3)
-#         file.updateCellFormulas(sheet,False,'column',['C'])
-#         file.writebook.save(file.path + 'test_column_set_answer.xlsx') 
+        sheet = file.writebook['sheet1']
+        sheet.delete_cols(3)
+
+        modification_object = ColumnDelete(['C'])
+        controler.tab_controller._update_cell_formulas(modification_object) 
+        file.writebook.save(file.path + 'test_column_set_answer.xlsx') 
         
 
 #     def test_column_security(self):
@@ -344,18 +362,18 @@ class TestFile(TestCase):
         file.writebook.save(file.path + 'testongletbyparticipant.xlsx')
         del file
 
-#     def test_give_names_of_maximum(self):
-#         file = File('test_give_names.xlsx')
-#         controler = FileControler(file)
-#         sheet = file.writebook['sheet1']  
+    def test_give_names_of_maximum(self):
+        file = File('test_give_names.xlsx')
+        controler = MultipleSameTabController(file,
+                                              tab_controller=InsertController(file, tab_options=TabOptions(columns_to_read=['A', 'B', 'C'], column_to_write='D')),
+                                              file_options=FileOptions(names_of_tabs_to_modify=['sheet1'])) 
 
-#         controler.apply_method_on_some_tabs(['sheet1'], 'give_names_of_maximum',  ['A', 'B', 'C'], 'D')
-#         #controler.give_names_of_maximum('sheet1', ['A', 'B', 'C'], 'D') 
+        controler.apply_method_on_some_tabs('insert_tags_of_maximum_of_column_list') 
 
-#         verify_sheets_identical(sheet, file.writebook['Feuille2'])
-
-#         sheet.delete_cols(4)
-#         file.writebook.save(file.path + 'test_give_names.xlsx') 
+        sheet = file.writebook['sheet1']  
+        verify_sheets_identical(sheet, file.writebook['Feuille2'])
+        sheet.delete_cols(4)
+        file.writebook.save(file.path + 'test_give_names.xlsx') 
         
     """ def test_delete_other_columns(self):
         # Fonctionnel une fois
@@ -402,8 +420,20 @@ class TestFile(TestCase):
         sheet = file.writebook['Feuille2']  
         verify_sheets_identical(sheet, file.writebook['expected'])
         sheet.delete_cols(4)
-        file.writebook.save(file.path + 'test_maptwocolumns.xlsx')        
+        file.writebook.save(file.path + 'test_maptwocolumns.xlsx')  
 
+    def test_insert_column_for_prime_probe_congruence(self):      
+        file = File('test_prime_probe.xlsx')
+        controler = MultipleSameTabController(file,
+                                              tab_controller=InsertController(file, tab_options=TabOptions(columns_to_read=['B', 'C', 'D'], column_to_write='E')),
+                                              file_options=FileOptions(names_of_tabs_to_modify=['Feuille2']))
+         
+        controler.apply_method_on_some_tabs('insert_column_for_prime_probe_congruence')
+        
+        sheet = file.writebook['Feuille2']  
+        verify_sheets_identical(sheet, file.writebook['expected'])
+        sheet.delete_cols(5)
+        file.writebook.save(file.path + 'test_prime_probe.xlsx')  
 
 # class TestStr(TestCase, Other):
 #     def test_transform_string_in_binary(self):

@@ -821,6 +821,18 @@ class RegularExpression():
         """ Get 'C5+D$6' from ['C5', '+', 'D$6']"""
         return ''.join(cells_expression_list)
     
+    @staticmethod
+    def get_word_jpg_name_file(string):
+        """Get Mot from Motnb_.jpg"""
+        return re.sub(r'([A-Z-a-z]+)\d+_[A-Z-a-z].jpg', r'\1', string)
+    
+    @staticmethod
+    def map_time_unity_to_value_from(time_string):
+        """Get a dictionary corresponding to a string of the form 1 jour 10min 5s or '10min 5s'. 
+        Example of return value : {'jour':1, 'min':10, 's': 5] from 1 jour 10 min 5 s. """
+        time_values = re.findall(r'\d+', time_string)
+        unities = re.findall(r'[A-Za-z]+', time_string)
+        return dict(zip(unities, time_values))
 
 class TabUpdateFormula():
     """Update cells formula of a tab after columns/lines are inserted/deleted. Modification_object 
@@ -1001,6 +1013,7 @@ class LineDelete(RegularExpression):
 
 class String(): 
     """Handle useful methods carrying on strings"""
+
     @staticmethod
     def clean_string_from_spaces(string):
         """
@@ -1009,7 +1022,8 @@ class String():
         """
         return string.strip().replace('\xa0', ' ')
     
-    def get_columns_from(self, string):
+    @classmethod
+    def get_columns_from(cls, string):
         """
         Fonction qui prend en entrée une chaîne de caractères de la forme "C-E,H,J" et qui retourne une liste de colonnes 
         ['C','D','E','H','J']. 
@@ -1017,12 +1031,13 @@ class String():
         substrings = string.split(',')
         columns_list = []
         for substring in substrings:
-            columns_list = self._add_to_list_columns_of_substring(columns_list, substring)
+            columns_list = cls._add_to_list_columns_of_substring(columns_list, substring)
         return columns_list
     
-    def _add_to_list_columns_of_substring(self, columns_list, substring):
+    @classmethod
+    def _add_to_list_columns_of_substring(cls, columns_list, substring):
         if '-' in substring:
-            columns_list += self.get_range_letter(substring)
+            columns_list += cls.get_range_letter(substring)
         else:
             columns_list.append(substring)
         return columns_list
@@ -1035,4 +1050,66 @@ class String():
         L = string.split('-')
         return get_column_interval(L[0], L[-1])
     
+    @staticmethod
+    def transform_string_in_binary(string, *args):
+        """
+        Fonction qui prend un str et qui le transforme en 0 ou 1
+
+        Inputs : args : des chaînes de caractère devant renvoyer 1 
+        Outputs : bool : 0 ou 1.
+        """
+        binary = 0 
+        if string in args:
+            binary = 1
+        return binary
+    
+    @classmethod
+    def convert_time_in_minutes(cls, time_string):
+        """
+        Function which takes a str of the form "10 jour 5 heures" and return a string giving the conversion in unity.
+
+        Output : str
+        """
+        map_time_unity_to_value = RegularExpression.map_time_unity_to_value_from(time_string)
+
+        duration = 0
+        for unity in map_time_unity_to_value.keys():
+            duration = cls._add_time_value_to_duration(unity, map_time_unity_to_value, duration)
+    
+        conversion = str(duration).replace('.',',')
+        return conversion
+    
+    @classmethod
+    def _add_time_value_to_duration(cls, unity, map_time_unity_to_value, duration):
+        time_value = float(map_time_unity_to_value[unity])
+        if unity in ["jour","jours"]:
+            duration += 24 * 60 * time_value
+        elif unity in ['heure', 'heures']:
+            duration += time_value * 60
+        elif unity == 'min':
+            duration += time_value
+        else:
+            duration += round(time_value/60, 2)
+        return duration
+
+    @staticmethod
+    def set_answer_in_group(answer, map_answers_to_groups):
+        if answer in map_answers_to_groups.keys():
+            return map_answers_to_groups[answer]
+        else:
+            return ""
+
+
+class Dictionary():
+    @staticmethod
+    def reverse_dictionary(dictionary):
+        """
+        Function taking a dictionary of the form {'group1':['a','b'],'group2':['c','d','e']} and returning the dictionary
+        {'a':'group1','b':'group1','c':'group2','d':'group2','e':'group2'}
+        """
+        reverse_dictionary= {}
+        for key, value in dictionary.items():
+            for reponse in value:
+                reverse_dictionary[reponse] = key
+        return reverse_dictionary
     

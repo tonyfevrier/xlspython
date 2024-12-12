@@ -3,16 +3,11 @@
 # Ce que j'ai fait pr les classes. 
 # Attributs : initiaux, mais aussi transitoires pour éviter de créer des arguments dans les fonctions
 
-import os
-import openpyxl
-import json
-import re
+import openpyxl 
 
 from openpyxl.styles import PatternFill
-from openpyxl.utils import column_index_from_string, get_column_letter, coordinate_to_tuple
-from time import time
-from utils.utils import Other, String, UtilsForFile, Str, DisplayRunningInfos, TabsCopy, MapIndexLetter, TabUpdateFormula, ColumnDelete, ColumnInsert, LineDelete, LineInsert
-from copy import copy
+from openpyxl.utils import column_index_from_string, get_column_letter 
+from utils.utils import String, MapIndexLetter, TabUpdateFormula, ColumnDelete, ColumnInsert, LineDelete, RegularExpression, Dictionary
 from model.model_factorise import Cell 
 
 
@@ -228,7 +223,7 @@ class DeleteController(String):
             self.tab.cell(line_index, column_index).fill = PatternFill(fill_type = 'solid', start_color = color)  
         
 
-class InsertController(MapIndexLetter):
+class InsertController(MapIndexLetter, RegularExpression, String):
     """Handle methods inserting columns in a tab""" 
 
     def __init__(self, file_object, tab_name=None, tab_options=None, first_line=2):
@@ -358,7 +353,6 @@ class InsertController(MapIndexLetter):
         cell_value2 = self.file_object.get_compiled_cell_value(self.tab, Cell(line_index, columns_to_read[1]))
         return [cell_value1, cell_value2]
 
-    #♥ ARRIVE ICI : A tester
     @act_on_columns
     def write_piece_of_string_in_column(self, separator, piece_index):
         """
@@ -377,309 +371,131 @@ class InsertController(MapIndexLetter):
             piece_of_string = cell_value.split(separator)[piece_index]
             self.tab.cell(cell_write.line_index, cell_write.column_index).value = piece_of_string  
              
-
     @act_on_columns
-    def column_for_prime_probe_congruence(self, sheet_name, columns_read, column_insertion, line_beginning=2):
+    def insert_column_for_prime_probe_congruence(self):
         """
         Vous avez trois colonnes l'une contient des chaines de caractères particulières qui sont prime, probe, croix de fixation ...
           Les deux autres contiennent des chaines de la forme MOTnb_.jpg où MOT peut 
         être congruent, neutre, incongruent et nb est un nombre. Vous souhaitez insérer une colonne contenant soit rien, soit prime
         suivi du MOT de la deuxième colonne si la chaîne de la première colonne est prime, soit probe suivi du MOT de la troisième 
-        colonne si la chaîne de la première colonne est probe.
+        colonne si la chaîne de la première colonne est probe. 
+        """  
 
-        Inputs:
-            - columns_read (list[str]): the three columns, the two lasts contains MOTnb_.jpg and the first contains prime, probe.
-            - column_insertion (str): lettre de la colonne où l'insertion doit avoir lieu. 
-            - line_beggining (int) : ligne où débute la recherche.
-        """ 
-        sheet = self.file.writebook[sheet_name] 
+        mapping = self._map_prime_probe_to_column()
 
-        for i in range(line_beginning, sheet.max_row + 1):
+        for line_index in range(self.first_line, self.tab.max_row + 1):
+            self._insert_cell_for_prime_probe_congruence(line_index, mapping)
 
-            # Adjonction de la chaine de first_column à MOT
-            if sheet.cell(i, columns_read[0]).value in ["prime", "Prime"]:
-                mot = re.sub(r'([A-Z-a-z]+)\d+_[A-Z-a-z].jpg', r'\1', sheet.cell(i, columns_read[1]).value)
-                sheet.cell(i,column_insertion).value = sheet.cell(i, columns_read[0]).value + "_" + mot 
+    def _map_prime_probe_to_column(self):
+        """Permet de choisir quelle colonne choisir suivant le mot présent dans la première colonne"""
+        return {'prime': self.tab_options.columns_to_read[1],
+                'Prime': self.tab_options.columns_to_read[1],
+                'probe': self.tab_options.columns_to_read[2], 
+                'Probe': self.tab_options.columns_to_read[2]}
+    
+    def _insert_cell_for_prime_probe_congruence(self, line_index, mapping):
+        try:
+            first_cell_value = self.file_object.get_compiled_cell_value(self.tab, Cell(line_index, self.tab_options.columns_to_read[0]))
+            second_cell_value = self.file_object.get_compiled_cell_value(self.tab, Cell(line_index, mapping[first_cell_value]))
+            word = self.get_word_jpg_name_file(second_cell_value) 
+            column_to_write = column_index_from_string(self.tab_options.column_to_write)
+            self.tab.cell(line_index, column_to_write).value = first_cell_value + "_" + word 
+        except KeyError:
+            pass
 
-            elif sheet.cell(i, columns_read[0]).value in ["probe", "Probe"]:
-                mot = re.sub(r'([A-Z-a-z]+)\d+_[A-Z-a-z].jpg', r'\1', sheet.cell(i, columns_read[2]).value)
-                sheet.cell(i,column_insertion).value = sheet.cell(i, columns_read[0]).value + "_" + mot 
+    #♥ ARRIVE ICI : A tester
 
     @act_on_columns
-    def give_names_of_maximum(self, sheet_name, column_list, column_insertion, line_beggining = 2):
+    def insert_tags_of_maximum_of_column_list(self):
         """
         Vous avez une liste de colonnes avec des chiffres, chaque colonne a un nom dans sa première cellule. 
         Cette fonction crée une colonne dans laquelle on entre pour chaque ligne le nom de la colonne ou des colonnes qui contient le max.
-
-        Inputs : 
-            - column_insertion : 
-            - columnlist :
-        """ 
-        sheet = self.file.writebook[sheet_name] 
-        sheet.cell(1, column_insertion).value = "Colonne de(s) maximum(s)"
-
-        #dico qui à une colonne associe le nom de la colonne
-        dico = {}
-        for column in column_list:
-            dico[column] = sheet.cell(1,column).value
- 
-        for line in range(line_beggining, sheet.max_row + 1):
-            #pour une ligne donnée, on récupère le nom de la colonne associé aux maximum(s).
-            maximum = -1
-            chaine = ""
-            for column in column_list:
-                cellvalue = sheet.cell(line, column).value
-                if cellvalue > maximum:
-                    maximum = cellvalue
-                    chaine = dico[column]
-                elif cellvalue == maximum:
-                    chaine += "_" + dico[column]
-            sheet.cell(line, column_insertion).value = chaine 
-
-    @act_on_columns 
-    def column_transform_string_in_binary(self, sheet_name, column_read, column_write,*good_answers,line_beginning = 2):
-        """
-        Fonction qui prend une colonne de chaîne de caractères et qui renvoie une colonne de 0 ou de 1
-        L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où mettre les 0 ou 1.
-
-        Inputs :
-                column_read : l'étiquette de la colonne de lecture des réponses.
-                colum_write : l'étiquette de la colonne d'écriture des 0 et 1. Par défaut, une colonne est insérée à cette position.
-                good_answers : une séquence d'un nombre quelconque de bonnes réponses qui valent 1pt. Chaque mot ne doit pas contenir d'espace ni au début ni à la fin.
-                line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction. 
-
-        Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
-
-        Exemple d'utilisation : 
-        
-            sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.column_transform_string_in_binary('A','B','reponse1','reponse2') 
-
-            #Bien mettre les réponses de good_answers entre ''. 
         """  
-        sheet = self.file.writebook[sheet_name] 
+        
+        self._write_new_column_title()
+        map_columns_to_tags = self._map_columns_to_tags() 
+ 
+        for line_index in range(self.first_line, self.tab.max_row + 1): 
+            self._insert_tags_of_maximum_in_cell(line_index, map_columns_to_tags) 
+    
+    def _write_new_column_title(self):
+        column_to_write = column_index_from_string(self.tab_options.column_to_write)
+        self.tab.cell(1, column_to_write).value = "Colonne de(s) maximum(s)"
 
-        for i in range(line_beginning, sheet.max_row + 1):
-            chaine_object = Str(sheet.cell(i,column_read).value)   
-            bool = chaine_object.clean_string().transform_string_in_binary(*good_answers) 
-            sheet.cell(i,column_write).value = bool
+    def _map_columns_to_tags(self):
+        #Les tags sont situés dans la première cellule de chaque colonne.
+        map_columns_to_tags = {}
+
+        for column_index in self.tab_options.columns_to_read:
+            map_columns_to_tags[column_index] = self.tab.cell(1, column_index).value
+        return map_columns_to_tags
+    
+    def _insert_tags_of_maximum_in_cell(self, line_index, map_columns_to_tags):
+        maximum = -1
+        tags = "" 
+        
+        for column_index in self.tab_options.columns_to_read: 
+            cell_value = self.tab.cell(line_index, column_index).value 
+            if cell_value > maximum:
+                maximum = cell_value
+                tags = map_columns_to_tags[column_index]
+            elif cell_value == maximum: # On adjoint le tag au tag déjà construit en cas d'égalité
+                tags += "_" + map_columns_to_tags[column_index]
+
+        column_to_write = column_index_from_string(self.tab_options.column_to_write)
+        self.tab.cell(line_index, column_to_write).value = tags 
 
     @act_on_columns 
-    def column_convert_in_minutes(self, sheet_name, column_read,column_write,line_beginning = 2):
+    def transform_string_in_binary_in_column(self, *good_answers):
+        """
+        Fonction qui prend une colonne de chaîne de caractères et qui renvoie une colonne de 0 ou de 1. On renvoit 1
+        si la cellule contient un élément de good_answers.
+        """  
+        column_to_read = self.tab_options.column_to_read
+        column_to_write = column_index_from_string(self.tab_options.column_to_write)
+
+        for line_index in range(self.first_line, self.tab.max_row + 1):
+            cell_read = Cell(line_index, column_to_read)
+            cell_value = self.file_object.get_compiled_cell_value(self.tab, cell_read)  
+            cleaned_cell_value = self.clean_string_from_spaces(cell_value)
+            binary = self.transform_string_in_binary(cleaned_cell_value, *good_answers) 
+            self.tab.cell(line_index, column_to_write).value = binary
+
+    @act_on_columns 
+    def convert_time_in_minutes_in_columns(self):
         """
         Fonction qui prend une colonne de chaines de caractères de la forme "10 jours 5 heures" 
-        ou "5 heures 10 min" ou "10 min 5s" ou "5s" et qui renvoie le temps en minutes.
-        L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne à remplir.
-        Input : column_read : l'étiquette de la colonne de lecture des réponses.
-                colum_write : l'étiquette de la colonne d'écriture. 
-                line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction. 
+        ou "5 heures 10 min" ou "10 min 5s" ou "5s" et qui renvoie le temps en minutes. 
+        """   
+        for line_index in range(self.first_line, self.tab.max_row + 1):
+            self._convert_filled_cell_in_minutes(line_index)
 
-        Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
-        
-        Exemple d'utilisation : 
-        
-            sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.column_convert_in_minutes('A','B',line_beggining = 3) 
+    def _convert_filled_cell_in_minutes(self, line_index):
+        column_to_read = self.tab_options.column_to_read
+        column_to_write = column_index_from_string(self.tab_options.column_to_write)
 
-        """  
-        sheet = self.file.writebook[sheet_name] 
+        cell_read = Cell(line_index, column_to_read)
+        cell_value = self.file_object.get_compiled_cell_value(self.tab, cell_read) 
 
-        for i in range(line_beginning, sheet.max_row + 1):
-            chaine_object = Str(sheet.cell(i,column_read).value) 
-            if chaine_object.chaine != "None": 
-                bool = chaine_object.clean_string().convert_time_in_minutes() 
-                sheet.cell(i,column_write).value = bool
+        if cell_value != "None":
+            cleaned_cell_value = self.clean_string_from_spaces(cell_value)
+            time_in_min = self.convert_time_in_minutes(cleaned_cell_value) 
+            self.tab.cell(line_index, column_to_write).value = time_in_min
 
     @act_on_columns 
-    def column_set_answer_in_group(self, sheet_name, column_read, column_write, groups_of_responses, line_beginning = 2):
+    def insert_group_associated_with_answer(self, map_groups_to_answers):
         """
-        Dans le cas où il y a des groupes de réponses, cette fonction qui prend une colonne de chaîne de caractères 
-        et qui renvoie une colonne remplie de chaînes contenant pour chaque cellule le groupe associé.
-        L'utilisateur doit indiquer un numéro de colonne de lecture et un numéro de colonne où écrire.
-
-        Input : 
-                column_read : l'étiquette de la colonne de lecture des réponses.
-                colum_write : l'étiquette de la colonne d'écriture. 
-                groups_of_response : dictionnary which keys are response groups and which values are a list of responses 
-        associated to this group.
-                line_beggining: (optionnel par défaut égaux à 2) : ligne où débute l'application de la fonction. 
-
-        Output : rien sauf si la security est enclenchée et que l'on écrit dans une colonne déjà remplie.
+        Cette fonction qui prend une colonne de chaîne de caractères 
+        et qui renvoie une colonne contenant pour chaque cellule le groupe associé à la chaîne de caractères.
+        """  
+        column_to_read = self.tab_options.column_to_read
+        column_to_write = column_index_from_string(self.tab_options.column_to_write)
         
-        Exemple d'utilisation : 
-        
-            sheet = Sheet('dataset.xlsx','onglet1')
-            sheet.column_set_answer_in_group('A', 'B', {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']} ,line_beggining = 3) 
+        map_answers_to_groups = Dictionary.reverse_dictionary(map_groups_to_answers)
 
-        """ 
-        sheet = self.file.writebook[sheet_name] 
-        reversed_group_of_responses = Other.reverse_dico_for_set_answer_in_group(groups_of_responses)
-
-        for i in range(line_beginning,sheet.max_row + 1): 
-            chaine_object = Str(sheet.cell(i,column_read).value)  
-            group = chaine_object.clean_string().set_answer_in_group(reversed_group_of_responses) 
-            sheet.cell(i,column_write).value = group 
-
-
-# class PathControler(FileControler):
-#     def __init__(self, path):
-#         """Input : path (object of the class Path)"""
-#         self.path = path
-    
-    # DANS LA FONCTION CI-DESSOUS, IL NE RESTE QU A ECRIRE LENVOI DES FICHIERS PAR MAIL.
-    #  def create_one_file_by_tab_and_send_by_mail(self, send = False, adressjson = "", objet = "", message = ""):
-    #     """
-    #     Vous souhaitez fabriquer un fichier par onglet. Chaque fichier aura le nom de l'onglet. 
-    #     Vous souhaitez éventuellement envoyer chaque fichier à la personne associée.
-    #     Attention, pour utiliser cette fonction, les onglets doivent être de la forme "prenom nom" sans caractère spéciaux. 
-
-    #     Inputs : 
-    #         send(optional boolean) : True si on veut envoyer le mail, False si on veut juste couper en fichiers.
-    #         adressjson(str) : nom du fichier xlsx qui contient deux colonnes la première avec les noms des onglets, la seconde avec l'adresse mail. Ce fichier doit être mis dans le dossier fichier_xls. 
-    #         objet(optional str) : Objet du message.
-    #         message (optional str) : Contenu du message.
-    #     """ 
-    #     if adressjson != "":
-    #         file = open(self.file.path + adressjson, 'r')
-    #         mailinglist = json.load(file)
-    #         file.close()
-
-    #     start = time()
-
-    #     for tab in self.file.sheets_name: 
-
-    #         file_to_send = self.build_file_from_tab(tab)
-    #         if send:
-    #             if adressjson == "":
-    #                 prenom = tab.split(" ")[0]
-    #                 nom = tab.split(" ")[1]
-    #                 self.envoi_mail(prenom + "." + nom + "@universite-paris-saclay.fr", file_to_send, "tony.fevrier62@gmail.com", "qkxqzhlvsgdssboh", objet, message)
-    #             else: 
-    #                 self.envoi_mail(mailinglist[tab], file_to_send, "tony.fevrier62@gmail.com", "qkxqzhlvsgdssboh", objet, message) 
-    #         Other.display_running_infos('one_file_by_tab_sendmail', tab, self.file.sheets_name, start)
-
-#     def apply_method_on_homononymous_files(self, filename, method_name, *args, **kwargs):
-#         """ 
-#         Vous avez plusieurs dossiers contenant un fichier ayant le même nom.
-#         Fonction qui prend tous les fichiers d'un même nom et qui lui applique une même méthode.  
-
-#         Inputs:
-#             - filename (str)
-#             - method_name (str): the name of the method to execute 
-#             - *args, **kwargs : arguments of the method associated with method_name
-#         """
-#         start = time()
-
-#         # Récupérer tous les dossiers d'un dossier  
-#         for directory in self.path.directories:
-#             file = File(filename, self.path.pathname + directory + '/')
-#             controler = FileControler(file)
-#             method = getattr(controler, method_name)
-#             method(*args, **kwargs) 
-#             Other.display_running_infos(method_name, directory, self.path.directories, start)
-
-#     def apply_method_on_homononymous_sheets(self, filename, sheetname, method_name, *args, **kwargs):
-#         """ 
-#         Vous avez plusieurs dossiers contenant un fichier ayant le même nom.
-#         Fonction qui prend tous les fichiers d'un même nom et qui lui applique une même méthode.  
-
-#         Inputs:
-#             - filename (str)
-#             - method_name (str): the name of the method to execute 
-#             - *args, **kwargs : arguments of the method associated with method_name
-#         """
-#         start = time()
-
-#         # Récupérer tous les dossiers d'un dossier  
-#         for directory in self.path.directories: 
-#             file = File(filename, self.path.pathname + directory + '/')
-#             controler = FileControler(file) 
-#             method = getattr(controler, method_name)
-#             method(sheetname, *args, **kwargs) 
-#             Other.display_running_infos(method_name, directory, self.path.directories, start)
-           
-#     def gather_files_in_different_directories(self, name_file, name_sheet, values_only=False):
-#         """
-#         Vous avez plusieurs dossiers contenant un fichier ayant le même nom. Vous souhaitez créer un seul fichier regroupant 
-#         toutes les lignes de ces fichiers.
-
-#         Inputs:
-#             - name_file(str)
-#             - name_sheet(str)
-#             - values_only(bool): to decide whether or not copying only the values and not formulas
-#         """
-#         # Récupérer tous les dossiers d'un dossier
-#         directories = [f for f in os.listdir(self.path.pathname) if os.path.isdir(os.path.join(self.path.pathname, f))]
-
-#         # Créer un nouveau fichier
-#         new_file = openpyxl.Workbook() 
-#         new_sheet = new_file.worksheets[0] 
-
-#         start = time()
-
-#         # Récupérer le fichier dans chacun des dossiers
-#         for directory in directories: 
-#             sheet_to_copy = File(name_file, self.path.pathname + directory + '/').writebook[name_sheet]
-
-#             # Copier une fois la première ligne
-#             if directory == directories[0]:
-#                 self.copy_paste_line(sheet_to_copy, 1, new_sheet, 1, values_only=values_only)
-
-#             # Copier son contenu à la suite du fichier
-#             for line in range(2, sheet_to_copy.max_row + 1): 
-#                 if line % 200 == 0:
-#                     print(line, sheet_to_copy.max_row + 1)
-#                 self.add_line_at_bottom(sheet_to_copy, line, new_sheet, values_only=values_only)
-
-#             # save at the end of each directory not to use too much memory
-#             new_file.save(self.path.pathname  + "gathered_" + name_file)
-#             Other.display_running_infos('gather_files_in_different_directories', directory, directories, start)
-
-#     def create_one_onglet_by_participant(self, name_file, onglet_from, column_read, first_line=2):
-#         """
-#         VERSION ALTERNATIVE A APPLYHOMOGENEOUSFILES DOC OBSOLETE
-#         Fonction qui prend un onglet dont une colonne contient des chaînes de caractères comme par exemple un nom.
-#         Chaque chaîne de caractères peut apparaître plusieurs fois dans cette colonne (exe : quand un participant répond plusieurs fois)
-#         La fonction retourne un fichier contenant un onglet par chaîne de caractères.
-#           Chaque onglet contient toutes les lignes correspondant à cette chaîne de caractères.
-
-#         Input : 
-#             name_file (str): name of the file to divide
-#             onglet_from : onglet de référence.
-#             column_read : l'étiquette de la colonne qui contient les chaînes de caractères.
-#             first_line : ligne où commencer à parcourir.
-#             last_line : ligne de fin de parcours 
- 
-#         Exemple d'utilisation : 
-    
-#             file = File('dataset.xlsx')
-#             file.create_one_onglet_by_participant('onglet1', 'A') 
-#         """ 
-#         directories = [f for f in os.listdir(self.path.pathname) if os.path.isdir(os.path.join(self.path.pathname, f))]
-
-#         # Créer un nouveau fichier
-#         new_file = openpyxl.Workbook()  
-#         onglets = new_file.sheetnames
-#         column_read = column_index_from_string(column_read)  
-#         start = time()
-
-#         for directory in directories:
-#             file = File(name_file, self.path.pathname + directory + '/')
-#             sheet = file.writebook[onglet_from] 
-
-#             # Create one tab by identifiant containing all its lines
-#             for i in range(first_line, sheet.max_row + 1):
-#                 onglet = str(sheet.cell(i,column_read).value)
-
-#                 # Prepare a new tab
-#                 if onglet not in onglets:
-#                     new_file.create_sheet(onglet)
-#                     self.copy_paste_line(sheet, 1,  new_file[onglet], 1)
-#                     onglets.append(onglet) 
-
-#                 self.add_line_at_bottom(sheet, i, new_file[onglet]) 
-#             Other.display_running_infos('create_one_onglet_by_participant', directory, directories, start)
-            
-#         # Deletion of the first tab 
-#         del new_file[new_file.sheetnames[0]]
-#         new_file.save(self.path.pathname + f'divided_{name_file}')
+        for line_index in range(self.first_line, self.tab.max_row + 1):
+            cell_read = Cell(line_index, column_to_read)
+            cell_value = self.file_object.get_compiled_cell_value(self.tab, cell_read)  
+            answer = self.clean_string_from_spaces(cell_value)
+            group = self.set_answer_in_group(answer, map_answers_to_groups) 
+            self.tab.cell(line_index, column_to_write).value = group 
