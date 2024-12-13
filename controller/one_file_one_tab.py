@@ -1,26 +1,15 @@
 """Handle methods reading and modifying a unique tab of a file."""
 
-# Ce que j'ai fait pr les classes. 
-# Attributs : initiaux, mais aussi transitoires pour éviter de créer des arguments dans les fonctions
-
-import openpyxl 
-
 from openpyxl.styles import PatternFill
 from openpyxl.utils import column_index_from_string, get_column_letter 
-from utils.utils import String, MapIndexLetter, TabUpdateFormula, ColumnDelete, ColumnInsert, LineDelete, RegularExpression, Dictionary
+from utils.utils_factorise import String, MapIndexLetter, TabUpdateFormula, ColumnDelete, ColumnInsert, LineDelete, RegularExpression, Dictionary
 from model.model_factorise import Cell 
-
-
-def create_empty_workbook():
-    workbook = openpyxl.Workbook()
-    del workbook[workbook.active.title]
-    return workbook
 
 
 class ColorTabController(String):
     """Handle methods coloring a unique tab of a file."""
 
-    def __init__(self, file_object, tab_name=None, tab_options=None, color=None, first_line=2):
+    def __init__(self, file_object=None, tab_name=None, tab_options=None, color=None, first_line=2, save=False):
         """
         Attributs:
             - file_object (file object)
@@ -30,15 +19,24 @@ class ColorTabController(String):
             - first_line (optional int)
         """ 
         self.file_object = file_object 
-        if tab_name is not None:
+        if file_object is not None and tab_name is not None:
             self.tab = self.file_object.get_tab_by_name(tab_name)
         self.tab_options = tab_options 
         self.first_line = first_line 
         self.color = color
+        self.save = save
+
+    def save_file(fonction):
+        def wrapper(self, *args, **kwargs):
+            fonction(self, *args, **kwargs)
+            if self.save:
+                self.file_object.save_file()
+        return wrapper
 
     def reinitialize_storing_attributes(self):
         pass
 
+    @save_file
     def color_cases_in_column(self, map_string_to_color):
         """
         Fonction qui pour une colonne donnée colore les cases correspondant à certaines chaînes de caractères.
@@ -48,6 +46,7 @@ class ColorTabController(String):
         for i in range(self.first_line, self.tab.max_row + 1):
             cell = self.tab.cell(i, column_index) 
             self._color_cell_if_contains_string(cell, map_string_to_color) 
+        
 
     def _color_cell_if_contains_string(self, cell, map_string_to_color):
         cleaned_cell_value = self._get_cleaned_cell_value(cell)
@@ -61,6 +60,7 @@ class ColorTabController(String):
             cleaned_cell_value = cell.value
         return cleaned_cell_value
 
+    @save_file
     def color_cases_in_sheet(self, map_string_to_color): 
         """
         Fonction qui colore les cases contenant à certaines chaînes de caractères d'une feuille 
@@ -70,13 +70,14 @@ class ColorTabController(String):
             self.tab_options.column_to_read = get_column_letter(j) 
             self.color_cases_in_column(map_string_to_color)
 
+    @save_file
     def color_lines_containing_strings(self, *strings):
         """
         Fonction qui colore les lignes dont une des cases contient une str particulière.
         """ 
 
         lines_indexes = self._list_lines_containing_strings(*strings)
-        self.color_lines(lines_indexes) 
+        self._color_lines(lines_indexes) 
 
     def _list_lines_containing_strings(self, *strings):
         lines_indexes = []
@@ -95,7 +96,7 @@ class ColorTabController(String):
                 break
         return lines_indexes
     
-    def color_lines(self, list_of_lines):
+    def _color_lines(self, list_of_lines):
         for line_index in list_of_lines:
             self._color_line(line_index) 
     
@@ -103,16 +104,24 @@ class ColorTabController(String):
 class DeleteController(String):
     """Handle methods deleting lines or columns of a tab"""
 
-    def __init__(self, file_object, tab_name=None, first_line=2):
+    def __init__(self, file_object=None, tab_name=None, first_line=2, save=False):
         self.file_object = file_object
         self.tab_name = tab_name
         self.tab = None
-        if tab_name is not None:
+        if file_object is not None and tab_name is not None:
             self.tab = self.file_object.get_tab_by_name(tab_name)  
         self.tab_update = TabUpdateFormula()
         self.columns_to_delete = []
         self.lines_to_delete = []
         self.first_line = first_line  
+        self.save = save
+
+    def save_file(fonction):
+        def wrapper(self, *args, **kwargs):
+            fonction(self, *args, **kwargs)
+            if self.save:
+                self.file_object.save_file()
+        return wrapper
     
     def reinitialize_storing_attributes(self):
         self.columns_to_delete = []
@@ -122,6 +131,7 @@ class DeleteController(String):
         self.tab_update.choose_modifications_to_apply(modification_object)  
         self.tab_update.update_cells_formulas(self.tab) 
     
+    @save_file
     def delete_columns(self, string_of_columns):
         """
         Prend une séquence de colonnes sous la forme 'C-J,K,L-N,Z' qu'on souhaite supprimer. 
@@ -135,7 +145,8 @@ class DeleteController(String):
             self.tab.delete_cols(column_index_from_string(column_letter)) 
 
         self._update_cell_formulas(ColumnDelete(self.columns_to_delete)) 
-
+    
+    @save_file
     def delete_other_columns(self, string_of_columns):
         """
         Prend une séquence de colonnes sous la forme 'C-J,K,L-N,Z' et supprime les autres 
@@ -160,6 +171,7 @@ class DeleteController(String):
     def _get_list_of_columns(self):
         return [get_column_letter(column_index) for column_index in range(1, self.tab.max_column + 1)]
 
+    @save_file
     def delete_lines_containing_strings_in_given_column(self, column_letter, *strings):
         """
         Fonction qui parcourt une colonne et qui supprime la ligne si celle-ci contient une chaîne particulière.
@@ -180,6 +192,7 @@ class DeleteController(String):
             self.tab.delete_rows(line_index) 
             self.lines_to_delete.append(str(line_index))     
 
+    @save_file
     def delete_twins_lines_and_color_last_twin(self, column_identifier, color = 'FFFFFF00'):
         """
         Certains participants répondent plusieurs fois à une étude. Cette fonction supprime les premières lignes réponses
@@ -226,7 +239,7 @@ class DeleteController(String):
 class InsertController(MapIndexLetter, RegularExpression, String):
     """Handle methods inserting columns in a tab""" 
 
-    def __init__(self, file_object, tab_name=None, tab_options=None, first_line=2):
+    def __init__(self, file_object=None, tab_name=None, tab_options=None, first_line=2, save=False):
         """
         Attributs:
             - file_object (file object)
@@ -237,11 +250,19 @@ class InsertController(MapIndexLetter, RegularExpression, String):
         """ 
         self.file_object = file_object
         self.tab_name = tab_name
-        if tab_name is not None:
+        if file_object is not None and tab_name is not None:
             self.tab = self.file_object.get_tab_by_name(tab_name)
         self.tab_update = TabUpdateFormula()
         self.tab_options = tab_options 
         self.first_line = first_line 
+        self.save = save
+
+    def save_file(fonction):
+        def wrapper(self, *args, **kwargs):
+            fonction(self, *args, **kwargs)
+            if self.save:
+                self.file_object.save_file()
+        return wrapper
 
     def reinitialize_storing_attributes(self):
         pass
@@ -250,6 +271,7 @@ class InsertController(MapIndexLetter, RegularExpression, String):
         self.tab_update.choose_modifications_to_apply(modification_object)  
         self.tab_update.update_cells_formulas(self.tab) 
  
+    @save_file
     def insert_splitted_strings_of(self, column_to_split, separator):
         """
         Fonction qui prend une colonne dont chaque cellule contient une grande chaîne de
@@ -277,6 +299,7 @@ class InsertController(MapIndexLetter, RegularExpression, String):
         for part_index in range(len(parts)):
             self.tab.cell(line_index, self.tab_options.column_to_write + part_index).value = parts[part_index]
     
+    @save_file
     def fill_one_column_by_QCM_answer(self, *answers):
         """
         Fonction qui recoit des réponses et crée une colonne par réponse. Elle regarde ensuite dans une cellule si la réponse 
@@ -323,12 +346,13 @@ class InsertController(MapIndexLetter, RegularExpression, String):
             self._update_cell_formulas(ColumnInsert(modifications)) 
         return wrapper
 
-    def _get_indexes_of_columns_to_read(self):
+    def _get_indexes_of_columns_to_read(self): 
         if self.tab_options.columns_to_read is not None:
             self.tab_options.columns_to_read = self.get_list_of_columns_indexes(self.tab_options.columns_to_read)
         if self.tab_options.column_to_read is not None:
             self.tab_options.column_to_read = column_index_from_string(self.tab_options.column_to_read)
     
+    @save_file
     @act_on_columns
     def map_two_columns_to_a_third_column(self, mapping):
         """
@@ -353,6 +377,7 @@ class InsertController(MapIndexLetter, RegularExpression, String):
         cell_value2 = self.file_object.get_compiled_cell_value(self.tab, Cell(line_index, columns_to_read[1]))
         return [cell_value1, cell_value2]
 
+    @save_file
     @act_on_columns
     def write_piece_of_string_in_column(self, separator, piece_index):
         """
@@ -371,6 +396,7 @@ class InsertController(MapIndexLetter, RegularExpression, String):
             piece_of_string = cell_value.split(separator)[piece_index]
             self.tab.cell(cell_write.line_index, cell_write.column_index).value = piece_of_string  
              
+    @save_file
     @act_on_columns
     def insert_column_for_prime_probe_congruence(self):
         """
@@ -403,8 +429,7 @@ class InsertController(MapIndexLetter, RegularExpression, String):
         except KeyError:
             pass
 
-    #♥ ARRIVE ICI : A tester
-
+    @save_file
     @act_on_columns
     def insert_tags_of_maximum_of_column_list(self):
         """
@@ -445,6 +470,7 @@ class InsertController(MapIndexLetter, RegularExpression, String):
         column_to_write = column_index_from_string(self.tab_options.column_to_write)
         self.tab.cell(line_index, column_to_write).value = tags 
 
+    @save_file
     @act_on_columns 
     def transform_string_in_binary_in_column(self, *good_answers):
         """
@@ -461,6 +487,7 @@ class InsertController(MapIndexLetter, RegularExpression, String):
             binary = self.transform_string_in_binary(cleaned_cell_value, *good_answers) 
             self.tab.cell(line_index, column_to_write).value = binary
 
+    @save_file
     @act_on_columns 
     def convert_time_in_minutes_in_columns(self):
         """
@@ -482,6 +509,7 @@ class InsertController(MapIndexLetter, RegularExpression, String):
             time_in_min = self.convert_time_in_minutes(cleaned_cell_value) 
             self.tab.cell(line_index, column_to_write).value = time_in_min
 
+    @save_file
     @act_on_columns 
     def insert_group_associated_with_answer(self, map_groups_to_answers):
         """

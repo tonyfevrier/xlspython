@@ -1,9 +1,9 @@
-import openpyxl
-import os
+import openpyxl 
 
-from utils.utils import MapIndexLetter, TabsCopy, DisplayRunningInfos, TabUpdateFormula, ColumnInsert, Str
-from model.model_factorise import Cell 
-from controller.one_file_one_tab import create_empty_workbook
+import openpyxl.workbook
+
+from utils.utils_factorise import MapIndexLetter, TabsCopy, DisplayRunningInfos, TabUpdateFormula, ColumnInsert, Workbook, String
+from model.model_factorise import Cell  
 from openpyxl.utils import column_index_from_string
 from datetime import datetime 
 from time import time
@@ -11,7 +11,7 @@ from time import time
 
 class TwoFilesController(MapIndexLetter):
     """Handle methods linking two existing files"""
-    def __init__(self, file_object_from, file_object_to, tab_name_from, tab_name_to,
+    def __init__(self, file_object_from=None, file_object_to=None, tab_name_from=None, tab_name_to=None,
                  column_with_identifiers_from=None, column_with_identifiers_to=None, first_line=2):
         self.file_object_from = file_object_from
         self.file_object_to = file_object_to
@@ -78,7 +78,7 @@ class TwoFilesController(MapIndexLetter):
 class OneFileCreatedController(MapIndexLetter):
     """Handle methods creating a new file from an existing file"""
 
-    def __init__(self, file_object, file_options=None, first_line=2):
+    def __init__(self, file_object=None, file_options=None, first_line=2, new_path=None):
         """
         Attributs: 
             - file_object (object of class File)
@@ -94,11 +94,12 @@ class OneFileCreatedController(MapIndexLetter):
         self.first_line = first_line
         self.current_line = 2
         self.new_writebook = None 
+        self.new_path = new_path 
         self.tabs_copy = TabsCopy()
         self.display = DisplayRunningInfos()
 
     def make_horodated_copy_of_a_file(self):
-        self.new_writebook = create_empty_workbook()
+        self.new_writebook = Workbook.create_empty_workbook()
         self._copy_tabs_in_new_workbook()
         self._save_horodated_file()            
                      
@@ -110,7 +111,7 @@ class OneFileCreatedController(MapIndexLetter):
             self._update_old_file_tab_and_new_file_tab(tab_name) 
             self.tabs_copy.copy_old_file_tab_in_new_file_tab()
 
-            self._update_display_infos('make_horodated_copy_of_a_file', tab_name, self.file_object.sheets_name)
+            self.display._update_display_infos('make_horodated_copy_of_a_file', tab_name, self.file_object.sheets_name)
             self.display.display_running_infos() 
 
     def _update_old_file_tab_and_new_file_tab(self, tab_name): 
@@ -118,14 +119,9 @@ class OneFileCreatedController(MapIndexLetter):
         self.tabs_copy._choose_the_tab_to_write_in(self.new_writebook[tab_name])
 
     def _save_horodated_file(self):
-        name_file_without_extension = Str(self.file_object.name_file).del_extension() 
+        name_file_without_extension = String.del_extension(self.file_object.name_file) 
         file_to_save_name = self.file_object.path  + name_file_without_extension + '_date_' + datetime.now().strftime("%Y-%m-%d_%Hh%M") + '.xlsx'
         self.new_writebook.save(file_to_save_name) 
-
-    def _update_display_infos(self, method_name, current_running_part, list_of_running_parts):
-        self.display.method_name = method_name
-        self.display.current_running_part = current_running_part
-        self.display.list_of_running_parts = list_of_running_parts
 
     def split_one_tab_in_multiple_tabs(self):
         """
@@ -136,7 +132,9 @@ class OneFileCreatedController(MapIndexLetter):
         """ 
         
         new_file_name = f'divided_{self.file_object.name_file}'
-        self._create_or_load_workbook(new_file_name)
+
+        # The method may be used for a single file or for multiple files. In this case, data are registered in a same folder.
+        self._create_or_load_empty_workbook(new_file_name)
         
         tab_to_read_name = self.file_options.name_of_tab_to_read
         self.tabs_copy._choose_the_tab_to_read(self.file_object.get_tab_by_name(tab_to_read_name)) 
@@ -146,15 +144,13 @@ class OneFileCreatedController(MapIndexLetter):
             self.current_line = line_index
             self._create_or_complete_a_tab_by_identifier()
 
-        # The first tab automatically created when opening the new workbook is useless
-        self._delete_first_tab_of_new_workbook(new_file_name)
-        self.new_writebook.save(self.file_object.path + new_file_name)
+        self._save_writebook_in_good_path(new_file_name)
 
-    def _create_or_load_workbook(self, new_file_name): 
+    def _create_or_load_empty_workbook(self, new_file_name): 
         try:
-            self.new_writebook = openpyxl.load_workbook(self.file_object.path + new_file_name)
-        except OSError:
-            self.new_writebook = openpyxl.Workbook()
+            self.new_writebook = openpyxl.load_workbook(self.new_path + new_file_name)
+        except (OSError, TypeError):
+            self.new_writebook = Workbook.create_empty_workbook()
     
     def _create_or_complete_a_tab_by_identifier(self): 
         tab_names = self.new_writebook.sheetnames 
@@ -172,11 +168,12 @@ class OneFileCreatedController(MapIndexLetter):
         self.new_writebook.create_sheet(identifier)
         self.tabs_copy._choose_the_tab_to_write_in(self.new_writebook[identifier])
         self.tabs_copy.copy_paste_line(1, 1)
-         
-    def _delete_first_tab_of_new_workbook(self, new_file_name):
-        if new_file_name not in os.listdir(self.file_object.path):
-            first_tab_name = self.new_writebook.sheetnames[0]
-            del self.new_writebook[first_tab_name] 
+
+    def _save_writebook_in_good_path(self, new_file_name):
+        if self.new_path:
+            self.new_writebook.save(self.new_path + new_file_name)
+        else:
+            self.new_writebook.save(self.file_object.path + new_file_name)
 
     def extract_cells_from_all_tabs(self, *cells):
         """
@@ -198,7 +195,7 @@ class OneFileCreatedController(MapIndexLetter):
             self.tabs_copy._choose_the_tab_to_read(self.file_object.get_tab_by_name(tab_name))   
             self._fill_the_line_corresponding_to_one_tab(cells_list, tab_name)
             
-            self._update_display_infos('extract_cells_from_all_sheets', tab_name, self.file_object.sheets_name)
+            self.display._update_display_infos('extract_cells_from_all_sheets', tab_name, self.file_object.sheets_name)
             self.display.display_running_infos()
  
         self.new_writebook.save(self.file_object.path + 'gathered_data_' + self.file_object.name_file) 
@@ -230,7 +227,7 @@ class OneFileCreatedController(MapIndexLetter):
 
         for tab_name in self.file_object.sheets_name: 
             self._create_a_file_from_a_tab(tab_name)
-            self._update_display_infos('one_file_by_tab_sendmail', tab_name, self.file_object.sheets_name)
+            self.display._update_display_infos('one_file_by_tab_sendmail', tab_name, self.file_object.sheets_name)
             self.display.display_running_infos()
 
     def _create_a_file_from_a_tab(self, tab_name):
@@ -241,3 +238,17 @@ class OneFileCreatedController(MapIndexLetter):
         self._create_workbook_and_choose_first_tab_to_write_in() 
         self.tabs_copy.deep_copy_of_a_tab() 
         self.new_writebook.save('multifiles/' + tab_name + '.xlsx') 
+
+    def copy_a_tab_in_new_workbook(self, tab_name): 
+        new_file_name = f'gathered_{self.file_object.name_file}'
+        self._create_or_load_workbook(new_file_name) 
+        self.tabs_copy._choose_the_tab_to_read(self.file_object.get_tab_by_name(tab_name))
+        self.tabs_copy._choose_the_tab_to_write_in(self.new_writebook[self.new_writebook.active.title])
+        self.tabs_copy.copy_old_file_tab_in_new_file_tab() 
+        self._save_writebook_in_good_path(new_file_name)
+
+    def _create_or_load_workbook(self, new_file_name): 
+        try:
+            self.new_writebook = openpyxl.load_workbook(self.new_path + new_file_name)
+        except (OSError, TypeError):
+            self.new_writebook = openpyxl.Workbook()

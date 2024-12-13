@@ -1,4 +1,4 @@
-from utils.utils import MapIndexLetter, TabsCopy, DisplayRunningInfos
+from utils.utils_factorise import MapIndexLetter, TabsCopy, DisplayRunningInfos
 from openpyxl.utils import column_index_from_string  
 from model.model_factorise import Cell
 from time import time 
@@ -7,13 +7,12 @@ from time import time
 class MultipleSameTabController():
     """Handle methods to apply one same tab method to multiple tabs in a file """
 
-    def __init__(self, file_object, tab_controller, file_options=None):
+    def __init__(self, file_object=None, tab_controller=None, file_options=None):
         """
         Attributs: 
             - file_object (object of class File) 
             - file_options (FileOptions object)
             - first_line (optional int)  
-            - tabs_copy (TabsCopy object): object to apply copy method from a tab to a new tab
             - display (DisplayRunningInfos object): to display the current state of the run
         """
         self.file_object = file_object
@@ -33,7 +32,7 @@ class MultipleSameTabController():
             method = getattr(self.tab_controller, method_name)
             method(*args, **kwargs) 
 
-            self._update_display_infos(method_name, tab_name, self.file_options.names_of_tabs_to_modify) 
+            self.display._update_display_infos(method_name, tab_name, self.file_options.names_of_tabs_to_modify) 
             self.display.display_running_infos() 
 
         self.file_object.save_file() 
@@ -41,18 +40,13 @@ class MultipleSameTabController():
     def _reinitialize_tab_controller(self, tab_name):
         self.tab_controller.tab = self.file_object.get_tab_by_name(tab_name)
         self.tab_controller.reinitialize_storing_attributes()
-    
-    def _update_display_infos(self, method_name, current_running_part, list_of_running_parts):
-        self.display.method_name = method_name
-        self.display.current_running_part = current_running_part
-        self.display.list_of_running_parts = list_of_running_parts
 
 
 class OneTabCreatedController(MapIndexLetter):
     """
     Handle methods involving multiple tabs of a file.
     """
-    def __init__(self, file_object, file_options=None, first_line=2):
+    def __init__(self, file_object=None, file_options=None, first_line=2):
         """
         Attributs: 
             - file_object (object of class File) 
@@ -66,11 +60,6 @@ class OneTabCreatedController(MapIndexLetter):
         self.first_line = first_line 
         self.tabs_copy = TabsCopy()
         self.display = DisplayRunningInfos() 
-
-    def _update_display_infos(self, method_name, current_running_part, list_of_running_parts):
-        self.display.method_name = method_name
-        self.display.current_running_part = current_running_part
-        self.display.list_of_running_parts = list_of_running_parts
 
     def extract_a_column_from_all_tabs(self):
         """
@@ -88,7 +77,7 @@ class OneTabCreatedController(MapIndexLetter):
             self.tabs_copy._choose_the_tab_to_read(self.file_object.get_tab_by_name(tab_name))
             self._copy_column_from_a_tab_in_the_next_new_tab_column(tab_name)
 
-            self._update_display_infos('extract_column_from_all_sheets', tab_name, self.file_object.sheets_name)
+            self.display._update_display_infos('extract_column_from_all_sheets', tab_name, self.file_object.sheets_name)
             self.display.display_running_infos()
 
         self.file_object.save_file()  
@@ -188,16 +177,11 @@ class OneTabCreatedController(MapIndexLetter):
 class EvenTabsController(MapIndexLetter):
     """Handle methods which tends to make tabs even"""
 
-    def __init__(self, file_object, file_options=None):
+    def __init__(self, file_object=None, file_options=None):
         self.file_object = file_object
         self.file_options = file_options   
         self.tabs_copy = TabsCopy()
         self.display = DisplayRunningInfos() 
-
-    def _update_display_infos(self, method_name, current_running_part, list_of_running_parts):
-        self.display.method_name = method_name
-        self.display.current_running_part = current_running_part
-        self.display.list_of_running_parts = list_of_running_parts
 
     def apply_columns_formula_on_all_tabs(self):
         """
@@ -215,7 +199,7 @@ class EvenTabsController(MapIndexLetter):
             self.tabs_copy._choose_the_tab_to_write_in(self.file_object.get_tab_by_name(tab_name))
             self.tabs_copy.copy_paste_multiple_columns(columns_int_list) 
 
-            self._update_display_infos('apply_column_formula_on_all_sheets', tab_name, self.file_object.sheets_name[1:])
+            self.display._update_display_infos('apply_column_formula_on_all_sheets', tab_name, self.file_object.sheets_name[1:])
             self.display.display_running_infos()
             
         self.file_object.save_file() 
@@ -237,7 +221,7 @@ class EvenTabsController(MapIndexLetter):
             self.tabs_copy._choose_the_tab_to_write_in(self.file_object.get_tab_by_name(tab_name))  
             self.tabs_copy.deep_copy_multiple_cells(cells_list)  
             
-            self._update_display_infos('apply_cells_formula_on_all_sheets', tab_name, self.file_object.sheets_name[1:])
+            self.display._update_display_infos('apply_cells_formula_on_all_sheets', tab_name, self.file_object.sheets_name[1:])
             self.display.display_running_infos()
 
         self.file_object.save_file() 
@@ -258,7 +242,7 @@ class EvenTabsController(MapIndexLetter):
                                               start_column=merged_cells_range.start_column, 
                                               end_row=merged_cells_range.end_line, 
                                               end_column=merged_cells_range.end_column)
-            self._update_display_infos('merge_cells_on_all_tabs', tab_name, self.file_object.sheets_name)
+            self.display._update_display_infos('merge_cells_on_all_tabs', tab_name, self.file_object.sheets_name)
             self.display.display_running_infos()
 
         self.file_object.save_file() 

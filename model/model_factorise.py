@@ -93,6 +93,9 @@ class TabOptions():
         self.column_to_write = column_to_write
         self.columns_to_write = columns_to_write
 
+    def __repr__(self):
+        return f'TabOptions(column_to_read={self.column_to_read}, columns_to_read={self.columns_to_read}, column_to_write={self.column_to_write}, columns_to_write={self.columns_to_write})'
+
 
 class FileOptions(TabOptions):
     """Get all names of tabs, columns, lines which will be read or modified in methods """
