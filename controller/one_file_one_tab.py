@@ -272,14 +272,13 @@ class InsertController(MapIndexLetter, RegularExpression, String):
         self.tab_update.update_cells_formulas(self.tab) 
  
     @save_file
-    def insert_splitted_strings_of(self, column_to_split, separator):
+    def insert_splitted_strings_of(self, separator):
         """
         Fonction qui prend une colonne dont chaque cellule contient une grande chaîne de
           caractères. Toutes les chaînes sont composés du nombre de morceaux délimités par un séparateur,
         La fonction insère autant de colonnes que de morceaux et place un morceau par colonne dans l'ordre des morceaux.
         """ 
-        column_to_split = column_index_from_string(column_to_split) 
-        self.tab_options.column_to_write = column_index_from_string(self.tab_options.column_to_write)
+        column_to_split = column_index_from_string(self.tab_options.column_to_read) 
         
         for line_index in range(self.first_line, self.tab.max_row + 1): 
             parts = self._get_string_and_split_it(Cell(line_index, column_to_split), separator)  
@@ -293,11 +292,13 @@ class InsertController(MapIndexLetter, RegularExpression, String):
         return cell_value.split(separator)
 
     def _insert_splitted_string(self, line_index, parts):
+        column_to_write = column_index_from_string(self.tab_options.column_to_write)
+
         if line_index == self.first_line:
-            self.tab.insert_cols(self.tab_options.column_to_write, len(parts))
+            self.tab.insert_cols(column_to_write, len(parts))
 
         for part_index in range(len(parts)):
-            self.tab.cell(line_index, self.tab_options.column_to_write + part_index).value = parts[part_index]
+            self.tab.cell(line_index, column_to_write + part_index).value = parts[part_index]
     
     @save_file
     def fill_one_column_by_QCM_answer(self, *answers):

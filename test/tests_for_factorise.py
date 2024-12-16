@@ -4,7 +4,7 @@ from controller.one_file_one_tab import ColorTabController, DeleteController, In
 from controller.one_file_multiple_tabs import OneTabCreatedController, MultipleSameTabController, EvenTabsController
 from controller.two_files import OneFileCreatedController, TwoFilesController
 from controller.path import PathController
-from utils.utils_factorise import ColumnDelete, ColumnInsert, LineDelete, LineInsert, TabUpdateFormula
+from utils.utils_factorise import ColumnDelete, ColumnInsert, LineDelete, LineInsert, TabUpdateFormula, MapIndexLetter
 from openpyxl.utils import column_index_from_string
 
  
@@ -156,60 +156,122 @@ import os
 #         verify_sheets_identical(file2.writebook['Sheet'], File('test_extract_cells_from_all_sheets - after.xlsx').writebook['gathered_data'])  
 
 
-class TestTab(TestCase):
+class TestColumnInsertion(TestCase):
 
     def setUp(self):
-        self.assert_object = AssertIdentical()
+        self.assert_object = AssertIdentical() 
+        self.controller = None
+        self.file_data = None
+        self.file_data_compare = None
+        self.method_data = None 
+        self.columns_to_compare = []
 
+    def apply_compare_columns_restore(fonction):
+        def wrapper(self):
+            fonction(self) 
+            self._apply_the_method_to_test() 
+            self._compare_new_columns()
+            self._restore_file_state_before_modification()
+        return wrapper 
+    
+    def apply_compare_tabs_restore(fonction):
+        def wrapper(self):
+            fonction(self) 
+            self._apply_the_method_to_test() 
+            self._compare_tabs()
+            self._restore_file_state_before_modification()
+        return wrapper 
+    
+    def _apply_the_method_to_test(self):
+        tab_controller = InsertController(self.file_data.file_object, tab_options=self.method_data.tab_options)  
+        file_options = FileOptions(names_of_tabs_to_modify=[self.file_data.tab_name])
+        self.controller = MultipleSameTabController(self.file_data.file_object, tab_controller, file_options)
+        self.controller.apply_method_on_some_tabs(self.method_data.method_name, *self.method_data.args, **self.method_data.kwargs) 
+
+    def _compare_new_columns(self):
+        self.assert_object.file_data1 = self.file_data
+        self.assert_object.file_data2 = self.file_data_compare 
+        columns_to_compare = MapIndexLetter.get_list_of_columns_indexes(self.columns_to_compare)
+        for column in columns_to_compare:
+            self.assert_object.verify_columns_identical(column, column)
+
+    def _compare_tabs(self):
+        self.assert_object.file_data1 = self.file_data
+        self.assert_object.file_data2 = self.file_data_compare 
+        self.assert_object.verify_tabs_identical()
+    
+    def _restore_file_state_before_modification(self):
+        tab = self.file_data.file_object.writebook[self.file_data.tab_name]  
+        tab.delete_cols(column_index_from_string(self.columns_to_compare[0]), len(self.columns_to_compare))
+        modification_object = ColumnDelete(self.columns_to_compare)
+        self.controller.tab_controller._update_cell_formulas(modification_object) 
+        self.file_data.file_object.writebook.save(self.file_data.file_object.path + self.file_data.name_file) 
+
+    @apply_compare_columns_restore
     def test_column_transform_string_in_binary(self): 
-        file = File('test.xlsx')
-        controler = MultipleSameTabController(file,
-                                              tab_controller=InsertController(file, tab_options=TabOptions(column_to_read='F', column_to_write='G')),
-                                              file_options=FileOptions(names_of_tabs_to_modify=['Feuille2']))
+        self.file_data = FileData('test.xlsx', 'Feuille2')
+        self.file_data_compare = FileData('test.xlsx', 'Feuille2')
+        self.method_data = MethodData('transform_string_in_binary_in_column', 'F', 'G', 'partie 12 : Faux', 1) 
+        self.columns_to_compare = ['G']
+
+    @apply_compare_columns_restore
+    def test_convert_time_in_minutes_in_columns(self): 
+        self.file_data = FileData('test.xlsx', 'time_min')
+        self.file_data_compare = FileData('test.xlsx', 'time_min_expected')
+        self.method_data = MethodData('convert_time_in_minutes_in_columns', 'E', 'F') 
+        self.columns_to_compare = ['F']
+
+    @apply_compare_columns_restore
+    def test_column_set_answer_in_group(self):
+        self.file_data = FileData('test_column_set_answer.xlsx', 'sheet1')
+        self.file_data_compare = FileData('test_column_set_answer.xlsx', 'Feuille2')
+        map_groups_to_answers = {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']}  
+        self.method_data = MethodData('insert_group_associated_with_answer', 'B', 'C', map_groups_to_answers)
+        self.columns_to_compare = ['C']
+
+    @apply_compare_columns_restore
+    def test_column_cut_string_in_parts(self):
+        self.file_data = FileData('test.xlsx', 'cutinparts')
+        self.file_data_compare = FileData('test.xlsx', 'cutinpartsbis') 
+        self.method_data = MethodData('insert_splitted_strings_of', 'B', 'C', ';')
+        self.columns_to_compare = ['C', 'D', 'E']
+
+    @apply_compare_columns_restore
+    def test_create_one_column_by_QCM_answer(self):
+        self.file_data = FileData('test_create_one_column.xlsx', 'sheet1')
+        self.file_data_compare = FileData('test_create_one_column.xlsx', 'Feuille2') 
+        self.method_data = MethodData('fill_one_column_by_QCM_answer', 'D', 'E', 'Alain', 'Henri', 'Tony', 'Dulcinée')
+        self.columns_to_compare = ['E', 'F', 'G', 'H']
+
+    @apply_compare_columns_restore
+    def test_column_get_part_of_str_1(self):
+        self.file_data = FileData('test_colgetpartofstr.xlsx', 'Feuille2')
+        self.file_data_compare = FileData('test_colgetpartofstr.xlsx', 'expected') 
+        self.method_data = MethodData('write_piece_of_string_in_column', 'C', 'D', '_', 0)
+        self.columns_to_compare = ['D']
+
+    @apply_compare_columns_restore
+    def test_column_get_part_of_str_2(self):
+        self.file_data = FileData('test_colgetpartofstr.xlsx', 'Feuille2')
+        self.file_data_compare = FileData('test_colgetpartofstr.xlsx', 'expected2') 
+        self.method_data = MethodData('write_piece_of_string_in_column', 'E', 'F', ';', 1)
+        self.columns_to_compare = ['F']
+
+
+        # file = File('test_colgetpartofstr.xlsx')
+        # controler = MultipleSameTabController(file, tab_controller=InsertController(file, tab_options=TabOptions(column_to_read='C', column_to_write='D')),
+        #                                       file_options=FileOptions(names_of_tabs_to_modify=['Feuille2']))
+
+        # controler.apply_method_on_some_tabs('write_piece_of_string_in_column', '_', 0)
+
+        # controler.tab_controller.tab_options = TabOptions(column_to_read='F', column_to_write='G')
+        # controler.apply_method_on_some_tabs('write_piece_of_string_in_column', ';', 1)
         
-        controler.apply_method_on_some_tabs('transform_string_in_binary_in_column', 'partie 12 : Faux', 1) 
-
-        self.assert_object.file_data1 = FileCharacteristics(file, 'Feuille2', 'G')
-        self.assert_object.file_data2 = FileCharacteristics(file, 'Feuille2', 'G')
-        self.assert_object.verify_columns_identical()
-        #column_identical('test.xlsx','test.xlsx', 1, 1, 7,8)
-
-        sheet2 = file.writebook['Feuille2']
-        sheet2.delete_cols(7) #sinon à chaque lancement de test.py il insère une colonne en plus.
-        file.writebook.save(file.path + 'test.xlsx') 
-
-#     def test_convert_time_in_minutes_in_columns(self): 
-#         file = File('test.xlsx')
-#         controler = MultipleSameTabController(file,
-#                                               tab_controller=InsertController(file, tab_options=TabOptions(column_to_read='E', column_to_write='F')),
-#                                               file_options=FileOptions(names_of_tabs_to_modify=['time_min']))
-        
-#         controler.apply_method_on_some_tabs('convert_time_in_minutes_in_columns') 
-#         column_identical('test.xlsx','test.xlsx', 11, 12, 6, 6)
-
-#         sheet2 = file.writebook['time_min']
-#         sheet2.delete_cols(6)
-#         file.writebook.save(file.path + 'test.xlsx') 
-
-#     def test_column_set_answer_in_group(self):
-#         file = File('test_column_set_answer.xlsx')
-#         controler = MultipleSameTabController(file,
-#                                               tab_controller=InsertController(file, tab_options=TabOptions(column_to_read='B', column_to_write='C')),
-#                                               file_options=FileOptions(names_of_tabs_to_modify=['sheet1']))  
-        
-#         map_groups_to_answers = {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']}  
-
-#         controler.apply_method_on_some_tabs('insert_group_associated_with_answer', map_groups_to_answers)  
- 
-#         column_identical('test_column_set_answer.xlsx','test_column_set_answer.xlsx',0,1,3,3)
-#         column_identical('test_column_set_answer.xlsx','test_column_set_answer.xlsx',0,1,4,4)
-
-#         sheet = file.writebook['sheet1']
-#         sheet.delete_cols(3)
-
-#         modification_object = ColumnDelete(['C'])
-#         controler.tab_controller._update_cell_formulas(modification_object) 
-#         file.writebook.save(file.path + 'test_column_set_answer.xlsx') 
+        # sheet = file.writebook['Feuille2'] 
+        # verify_sheets_identical(sheet, file.writebook['expected'])
+        # sheet.delete_cols(7)
+        # sheet.delete_cols(4)
+        # file.writebook.save(file.path + 'test_colgetpartofstr.xlsx') 
     
 #     def test_add_column_in_sheet_differently_sorted(self):
 #         file1 = File('test.xlsx', dataonly=True)
@@ -251,20 +313,7 @@ class TestTab(TestCase):
 #                                               file_options=FileOptions(names_of_tabs_to_modify=['color_line']))    
 #         controler.apply_method_on_some_tabs('color_lines_containing_strings', '-', '+') 
         
-#     def test_column_cut_string_in_parts(self):
-#         file = File('test.xlsx')
-#         controler = MultipleSameTabController(file,
-#                                               InsertController(file, tab_options=TabOptions(column_to_write='C')),
-#                                               file_options=FileOptions(names_of_tabs_to_modify=['cutinparts']))
 
-#         controler.apply_method_on_some_tabs('insert_splitted_strings_of', 'B',';')
-#         sheet = file.writebook['cutinparts'] 
-#         column_identical('test.xlsx','test.xlsx',7,8, 3, 3)
-#         column_identical('test.xlsx','test.xlsx',7,8, 4, 4)
-#         column_identical('test.xlsx','test.xlsx',7,8, 5, 5)
-#         column_identical('test.xlsx','test.xlsx',7,8, 6, 6)
-#         sheet.delete_cols(3,3)
-#         file.writebook.save(file.path + 'test.xlsx') 
 
 #     def test_delete_lines(self):
 #         file = File('test.xlsx')
@@ -301,21 +350,7 @@ class TestTab(TestCase):
 #         verify_sheets_identical(sheet2, sheet_result)
 #         verify_sheets_identical(sheet3, sheet_result)
 
-#     def test_create_one_column_by_QCM_answer(self):
-#         file = File('test_create_one_column.xlsx')
-#         controler = MultipleSameTabController(file, 
-#                                               InsertController(file, tab_options=TabOptions(column_to_read='D', column_to_write='E')),
-#                                               file_options=FileOptions(names_of_tabs_to_modify=['sheet1'])) 
 
-#         controler.apply_method_on_some_tabs('fill_one_column_by_QCM_answer', 'Alain', 'Henri', 'Tony', 'Dulcinée') 
-        
-#         column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 5, 5)
-#         column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 6, 6) 
-#         column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 7, 7) 
-#         column_identical('test_create_one_column.xlsx','test_create_one_column.xlsx',0, 1, 8, 8) 
-
-#         sheet = file.writebook['sheet1'] 
-#         sheet.delete_cols(4,4)
 
 #     def test_gather_multiple_answers(self):
 #         file = File('testongletbyparticipant.xlsx')
@@ -361,21 +396,6 @@ class TestTab(TestCase):
 
 #         verify_sheets_identical(file.get_tab_by_name('sheet1'), File('test_keep_only_columns.xlsx').get_tab_by_name('Feuille2'))
 
-#     def test_column_get_part_of_str(self):
-#         file = File('test_colgetpartofstr.xlsx')
-#         controler = MultipleSameTabController(file, tab_controller=InsertController(file, tab_options=TabOptions(column_to_read='C', column_to_write='D')),
-#                                               file_options=FileOptions(names_of_tabs_to_modify=['Feuille2']))
-
-#         controler.apply_method_on_some_tabs('write_piece_of_string_in_column', '_', 0)
-
-#         controler.tab_controller.tab_options = TabOptions(column_to_read='F', column_to_write='G')
-#         controler.apply_method_on_some_tabs('write_piece_of_string_in_column', ';', 1)
-        
-#         sheet = file.writebook['Feuille2'] 
-#         verify_sheets_identical(sheet, file.writebook['expected'])
-#         sheet.delete_cols(7)
-#         sheet.delete_cols(4)
-#         file.writebook.save(file.path + 'test_colgetpartofstr.xlsx') 
 
 #     def test_map_two_columns_to_a_third_column(self):
 #         file = File('test_maptwocolumns.xlsx')
@@ -508,8 +528,6 @@ class AssertIdentical(TestCase):
         self.file_object2 = self.file_data2.file_object
         self.tab1 = self.file_object1.writebook[self.file_data1.tab_name]
         self.tab2 = self.file_object2.writebook[self.file_data2.tab_name]
-        self.column1 = column_index_from_string(self.file_data1.column)
-        self.column2 = column_index_from_string(self.file_data2.column)
 
     def verify_files_identical(self): 
         self._set_attributes()
@@ -522,25 +540,41 @@ class AssertIdentical(TestCase):
 
     def verify_tabs_identical(self): 
         self._set_attributes()  
-        self.assertEqual(self.tab1.max_row,self.tab2.max_row)
-        self.assertEqual(self.tab1.max_column,self.tab2.max_column)
+        self.assertEqual(self.tab1.max_row, self.tab2.max_row)
+        self.assertEqual(self.tab1.max_column, self.tab2.max_column)
 
         for i in range(1,self.tab1.max_row+1):
             for j in range(1,self.tab1.max_column+1):
                 self.assertEqual(self.tab1.cell(i,j).value,self.tab2.cell(i,j).value)
 
-    def verify_columns_identical(self): 
+    def verify_columns_identical(self, column1, column2): 
         self._set_attributes()
         self.assertEqual(self.tab1.max_row, self.tab2.max_row) 
             
         for i in range(2, self.tab1.max_row + 1): 
-            self.assertEqual(self.tab1.cell(i, self.column1).value,self.tab2.cell(i, self.column2).value)
+            self.assertEqual(self.tab1.cell(i, column1).value,self.tab2.cell(i, column2).value)
 
-class FileCharacteristics():
-    def __init__(self, file_object=None, tab_name=None, column=None):
-        self.file_object = file_object
-        self.tab_name = tab_name
-        self.column = column
+
+class FileData():
+    def __init__(self, name_file, tab_name):
+        self.name_file = name_file
+        self.file_object = File(self.name_file)
+        self.tab_name = tab_name 
+
+
+class MethodData():
+    def __init__(self, method_name, column_to_read, column_to_write, *args, **kwargs):
+        self.method_name = method_name 
+        self.args = args
+        self.kwargs = kwargs
+        self.tab_options = TabOptions(column_to_read=column_to_read, column_to_write=column_to_write)
+
+
+class TestData():
+    def __init__(self, file_data, file_data_compare, method_data):
+        self.file_data = file_data
+        self.file_data_compare = file_data_compare
+        self.method_data = method_data
     
 
 if __name__== "__main__":
