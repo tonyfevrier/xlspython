@@ -60,17 +60,7 @@ import os
         
 
 # class TestFile(TestCase):
-
-#     def test_split_one_tab_in_multiple_tabs(self): 
-#         file = File('test_create_one_onglet_by_participant.xlsx') 
-#         controler = OneFileCreatedController(file, FileOptions(name_of_tab_to_read='Stroops_test (7)', column_to_read='A'))
-#         #controler.make_horodated_copy_of_a_file()
-#         controler.split_one_tab_in_multiple_tabs()  
-#         file2 = File('divided_test_create_one_onglet_by_participant.xlsx')
-#         verify_files_identical(File('test_create_one_onglet_by_participant_before.xlsx'),
-#                                file2)
-        
-#         os.remove("fichiers_xls/divided_test_create_one_onglet_by_participant.xlsx")
+ 
 
 #     def test_extract_a_column_from_all_tabs(self):
 #         file = File('test_extract_column.xlsx')
@@ -101,19 +91,7 @@ import os
 #         del file
 
 
-#     def test_one_file_by_tab(self):
-#         file = File("test_onefile_sendmail.xlsx")
-#         controler = OneFileCreatedController(file)
-#         controler.create_one_file_by_tab()
- 
-#         sheet1 = File("tony fevrier.xlsx", "multifiles/").writebook["Sheet"]
-#         sheet2 = File("Marine Moyon.xlsx", "multifiles/").writebook["Sheet"] 
 
-#         sheet1o = File("test_onefile_sendmail.xlsx").writebook["tony fevrier"] 
-#         sheet2o = File("test_onefile_sendmail.xlsx").writebook["Marine Moyon"]
-
-#         verify_sheets_identical(sheet1, sheet1o)
-#         verify_sheets_identical(sheet2, sheet2o) 
 
 #     def test_merge_cells_on_all_tabs(self): 
 #         file = File("test_merging.xlsx")
@@ -148,22 +126,81 @@ import os
 #         tabs = controler.list_tabs_with_different_number_of_lines(14)
 #         self.assertListEqual(tabs, ['cutinparts', 'cutinpartsbis', 'delete_lines', 'delete_lines_bis', 'time_min', 'time_min_expected'])
 
-#     def test_extract_cells_from_all_tabs(self):
-#         file = File('test_extract_cells_from_all_sheets.xlsx')
+
+class TestOneFileCreatedController(TestCase):
+
+    def setUp(self): 
+        self.file_object = None
+        self.controller = None
+        self.file_data_compare_1 = None
+        self.file_data_compare_2 = None
+        self.file_options = None
+
+    def _compare_tabs(self):
+        self.file_data_compare_2.create_file_object()
+        self.assert_object = AssertIdentical(self.file_data_compare_1, self.file_data_compare_2) 
+        self.assert_object.verify_tabs_identical()
+
+    def _compare_files(self):
+        self.file_data_compare_2.create_file_object()
+        self.assert_object = AssertIdentical(self.file_data_compare_1, self.file_data_compare_2) 
+        self.assert_object.verify_files_identical()
+
+    def _delete_created_file(self):
+        os.remove(self.file_data_compare_2.file_object.path + self.file_data_compare_2.name_file)
+
+    def test_extract_cells_from_all_tabs(self): 
+        self._build_extract_cells_from_all_tabs_data()
+
+        self.controller = OneFileCreatedController(self.file_object)
+        self.controller.extract_cells_from_all_tabs('C7','D7','C8','D8') 
+
+        self._compare_tabs()
+        self._delete_created_file() 
+    
+    def _build_extract_cells_from_all_tabs_data(self):
+        self.file_object = File('test_extract_cells_from_all_sheets.xlsx')  
+        self.file_data_compare_1 = FileData('test_extract_cells_from_all_sheets - after.xlsx', 'gathered_data') 
+        self.file_data_compare_2 = FileData('gathered_data_test_extract_cells_from_all_sheets.xlsx', 'Sheet') 
+
+    def test_split_one_tab_in_multiple_tabs(self): 
+        self._build_split_one_tab_in_multiple_tabs_data() 
+
+        self.controller = OneFileCreatedController(self.file_object, file_options=self.file_options)
+        self.controller.split_one_tab_in_multiple_tabs() 
+
+        self._compare_files()
+        self._delete_created_file()
+    
+    def _build_split_one_tab_in_multiple_tabs_data(self):
+        self.file_object = File('test_create_one_onglet_by_participant.xlsx')  
+        self.file_data_compare_1 = FileData('test_create_one_onglet_by_participant_before.xlsx')
+        self.file_options = FileOptions(name_of_tab_to_read='Stroops_test (7)', column_to_read='A')
+        self.file_data_compare_2 = FileData('divided_test_create_one_onglet_by_participant.xlsx')
+
+#     def test_one_file_by_tab(self):
+#         file = File("test_onefile_sendmail.xlsx")
 #         controler = OneFileCreatedController(file)
-#         controler.extract_cells_from_all_tabs('C7','D7','C8','D8') 
-#         file2 = File('gathered_data_test_extract_cells_from_all_sheets.xlsx')
-#         verify_sheets_identical(file2.writebook['Sheet'], File('test_extract_cells_from_all_sheets - after.xlsx').writebook['gathered_data'])  
+#         controler.create_one_file_by_tab()
+ 
+#         sheet1 = File("tony fevrier.xlsx", "multifiles/").writebook["Sheet"]
+#         sheet2 = File("Marine Moyon.xlsx", "multifiles/").writebook["Sheet"] 
+
+#         sheet1o = File("test_onefile_sendmail.xlsx").writebook["tony fevrier"] 
+#         sheet2o = File("test_onefile_sendmail.xlsx").writebook["Marine Moyon"]
+
+#         verify_sheets_identical(sheet1, sheet1o)
+#         verify_sheets_identical(sheet2, sheet2o) 
 
 
 class TestColumnInsertion(TestCase):
 
-    def setUp(self):
-        self.assert_object = AssertIdentical() 
+    def setUp(self): 
         self.controller = None
         self.file_data = None
         self.file_data_compare = None
         self.method_data = None 
+        self.tab_options = None
         self.columns_to_compare = []
         self.columns_to_delete = []
 
@@ -184,21 +221,19 @@ class TestColumnInsertion(TestCase):
         return wrapper 
     
     def _apply_the_method_to_test(self):
-        tab_controller = InsertController(self.file_data.file_object, tab_options=self.method_data.tab_options)  
+        tab_controller = InsertController(self.file_data.file_object, tab_options=self.tab_options)  
         file_options = FileOptions(names_of_tabs_to_modify=[self.file_data.tab_name])
         self.controller = MultipleSameTabController(self.file_data.file_object, tab_controller, file_options)
         self.controller.apply_method_on_some_tabs(self.method_data.method_name, *self.method_data.args, **self.method_data.kwargs) 
 
     def _compare_new_columns(self):
-        self.assert_object.file_data1 = self.file_data
-        self.assert_object.file_data2 = self.file_data_compare 
+        self.assert_object = AssertIdentical(self.file_data, self.file_data_compare) 
         columns_to_compare = MapIndexLetter.get_list_of_columns_indexes(self.columns_to_compare)
         for column in columns_to_compare:
             self.assert_object.verify_columns_identical(column, column)
 
     def _compare_tabs(self):
-        self.assert_object.file_data1 = self.file_data
-        self.assert_object.file_data2 = self.file_data_compare 
+        self.assert_object = AssertIdentical(self.file_data, self.file_data_compare) 
         self.assert_object.verify_tabs_identical()
     
     def _restore_file_state_before_modification(self):
@@ -212,9 +247,8 @@ class TestColumnInsertion(TestCase):
     def test_transform_string_in_binary_in_column(self): 
         self.file_data = FileData('test.xlsx', 'Feuille2')
         self.file_data_compare = FileData('test.xlsx', 'Feuille2')
-        self.method_data = MethodData('transform_string_in_binary_in_column', 
-                                       TabOptions(column_to_read='F', column_to_write='G'), 
-                                       'partie 12 : Faux', 1) 
+        self.tab_options = TabOptions(column_to_read='F', column_to_write='G')
+        self.method_data = MethodData('transform_string_in_binary_in_column', 'partie 12 : Faux', 1) 
         self.columns_to_compare = ['G']
         self.columns_to_delete = self.columns_to_compare
 
@@ -222,8 +256,8 @@ class TestColumnInsertion(TestCase):
     def test_convert_time_in_minutes_in_columns(self): 
         self.file_data = FileData('test.xlsx', 'time_min')
         self.file_data_compare = FileData('test.xlsx', 'time_min_expected')
-        self.method_data = MethodData('convert_time_in_minutes_in_columns', 
-                                       TabOptions(column_to_read='E', column_to_write='F')) 
+        self.tab_options = TabOptions(column_to_read='E', column_to_write='F')
+        self.method_data = MethodData('convert_time_in_minutes_in_columns') 
         self.columns_to_compare = ['F']
         self.columns_to_delete = self.columns_to_compare
 
@@ -231,10 +265,9 @@ class TestColumnInsertion(TestCase):
     def test_insert_group_associated_with_answer(self):
         self.file_data = FileData('test_column_set_answer.xlsx', 'sheet1')
         self.file_data_compare = FileData('test_column_set_answer.xlsx', 'Feuille2')
+        self.tab_options = TabOptions(column_to_read='B', column_to_write='C')
         map_groups_to_answers = {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']}  
-        self.method_data = MethodData('insert_group_associated_with_answer', 
-                                       TabOptions(column_to_read='B', column_to_write='C'), 
-                                       map_groups_to_answers)
+        self.method_data = MethodData('insert_group_associated_with_answer', map_groups_to_answers)
         self.columns_to_compare = ['C']
         self.columns_to_delete = self.columns_to_compare
 
@@ -242,8 +275,8 @@ class TestColumnInsertion(TestCase):
     def test_insert_splitted_strings_of(self):
         self.file_data = FileData('test.xlsx', 'cutinparts')
         self.file_data_compare = FileData('test.xlsx', 'cutinpartsbis') 
-        self.method_data = MethodData('insert_splitted_strings_of', 
-                                    TabOptions(column_to_read='B', column_to_write='C'),';')
+        self.tab_options = TabOptions(column_to_read='B', column_to_write='C')
+        self.method_data = MethodData('insert_splitted_strings_of', ';')
         self.columns_to_compare = ['C', 'D', 'E']
         self.columns_to_delete = self.columns_to_compare
 
@@ -251,9 +284,8 @@ class TestColumnInsertion(TestCase):
     def test_fill_one_column_by_QCM_answer(self):
         self.file_data = FileData('test_create_one_column.xlsx', 'sheet1')
         self.file_data_compare = FileData('test_create_one_column.xlsx', 'Feuille2') 
-        self.method_data = MethodData('fill_one_column_by_QCM_answer', 
-                                       TabOptions(column_to_read='D', column_to_write='E'), 
-                                       'Alain', 'Henri', 'Tony', 'Dulcinée')
+        self.tab_options = TabOptions(column_to_read='D', column_to_write='E')
+        self.method_data = MethodData('fill_one_column_by_QCM_answer', 'Alain', 'Henri', 'Tony', 'Dulcinée')
         self.columns_to_compare = ['E', 'F', 'G', 'H']
         self.columns_to_delete = self.columns_to_compare
 
@@ -261,8 +293,8 @@ class TestColumnInsertion(TestCase):
     def test_write_piece_of_string_in_column_1(self):
         self.file_data = FileData('test_colgetpartofstr.xlsx', 'Feuille2')
         self.file_data_compare = FileData('test_colgetpartofstr.xlsx', 'expected') 
-        self.method_data = MethodData('write_piece_of_string_in_column', 
-                                       TabOptions(column_to_read='C', column_to_write='D'), '_', 0)
+        self.tab_options = TabOptions(column_to_read='C', column_to_write='D')
+        self.method_data = MethodData('write_piece_of_string_in_column', '_', 0)
         self.columns_to_compare = ['D']
         self.columns_to_delete = self.columns_to_compare
 
@@ -270,8 +302,8 @@ class TestColumnInsertion(TestCase):
     def test_write_piece_of_string_in_column_2(self):
         self.file_data = FileData('test_colgetpartofstr.xlsx', 'Feuille2')
         self.file_data_compare = FileData('test_colgetpartofstr.xlsx', 'expected2') 
-        self.method_data = MethodData('write_piece_of_string_in_column', 
-                                       TabOptions(column_to_read='E', column_to_write='F'), ';', 1)
+        self.tab_options = TabOptions(column_to_read='E', column_to_write='F')
+        self.method_data = MethodData('write_piece_of_string_in_column', ';', 1)
         self.columns_to_compare = ['F']
         self.columns_to_delete = self.columns_to_compare
 
@@ -279,9 +311,8 @@ class TestColumnInsertion(TestCase):
     def test_map_two_columns_to_a_third_column(self):
         self.file_data = FileData('test_maptwocolumns.xlsx', 'Feuille2')
         self.file_data_compare = FileData('test_maptwocolumns.xlsx', 'expected') 
-        self.method_data = MethodData('map_two_columns_to_a_third_column', 
-                                      TabOptions(columns_to_read=['B', 'C'], column_to_write='D'), 
-                                      {'cat1':['prime','1'], 'cat2':['probe','2']})
+        self.tab_options = TabOptions(columns_to_read=['B', 'C'], column_to_write='D')
+        self.method_data = MethodData('map_two_columns_to_a_third_column', {'cat1':['prime','1'], 'cat2':['probe','2']})
         self.columns_to_compare = ['D']
         self.columns_to_delete = self.columns_to_compare
 
@@ -289,25 +320,24 @@ class TestColumnInsertion(TestCase):
     def test_verify_tabs_when_map_two_columns_to_a_third_column(self):
         self.file_data = FileData('test_maptwocolumns.xlsx', 'Feuille2')
         self.file_data_compare = FileData('test_maptwocolumns.xlsx', 'expected') 
-        self.method_data = MethodData('map_two_columns_to_a_third_column', 
-                                      TabOptions(columns_to_read=['B', 'C'], column_to_write='D'), 
-                                      {'cat1':['prime','1'], 'cat2':['probe','2']})
+        self.tab_options = TabOptions(columns_to_read=['B', 'C'], column_to_write='D')
+        self.method_data = MethodData('map_two_columns_to_a_third_column', {'cat1':['prime','1'], 'cat2':['probe','2']})
         self.columns_to_delete = ['D']
 
     @apply_compare_tabs_restore
     def test_insert_column_for_prime_probe_congruence(self):   
         self.file_data = FileData('test_prime_probe.xlsx', 'Feuille2')
         self.file_data_compare = FileData('test_prime_probe.xlsx', 'expected') 
-        self.method_data = MethodData('insert_column_for_prime_probe_congruence', 
-                                      TabOptions(columns_to_read=['B', 'C', 'D'], column_to_write='E'))
+        self.tab_options = TabOptions(columns_to_read=['B', 'C', 'D'], column_to_write='E')
+        self.method_data = MethodData('insert_column_for_prime_probe_congruence')
         self.columns_to_delete = ['E']
 
     @apply_compare_tabs_restore
     def test_insert_tags_of_maximum_of_column_list(self):
         self.file_data = FileData('test_give_names.xlsx', 'sheet1')
         self.file_data_compare = FileData('test_give_names.xlsx', 'Feuille2') 
-        self.method_data = MethodData('insert_tags_of_maximum_of_column_list', 
-                                      TabOptions(columns_to_read=['A', 'B', 'C'], column_to_write='D'))
+        self.tab_options = TabOptions(columns_to_read=['A', 'B', 'C'], column_to_write='D')
+        self.method_data = MethodData('insert_tags_of_maximum_of_column_list')
         self.columns_to_delete = ['D']
         
     
@@ -504,19 +534,23 @@ class TestTabUpdate(TestCase, TabUpdateFormula):
 
 class AssertIdentical(TestCase):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, file_data1, file_data2, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.file_data1 = None
-        self.file_data2 = None
-
-    def _set_attributes(self):
+        self.file_data1 = file_data1
+        self.file_data2 = file_data2
         self.file_object1 = self.file_data1.file_object
         self.file_object2 = self.file_data2.file_object
-        self.tab1 = self.file_object1.writebook[self.file_data1.tab_name]
-        self.tab2 = self.file_object2.writebook[self.file_data2.tab_name]
+        self._initialize_tabs_attributes()
+
+    def _initialize_tabs_attributes(self): 
+        try:
+            self.tab1 = self.file_object1.writebook[self.file_data1.tab_name]
+            self.tab2 = self.file_object2.writebook[self.file_data2.tab_name]
+        except KeyError:
+            self.tab1 = None
+            self.tab2 = None
 
     def verify_files_identical(self): 
-        self._set_attributes()
         self.assertEqual(self.file_object1.sheets_name, self.file_object2.sheets_name)
 
         for tab_name in self.file_object1.sheets_name: 
@@ -524,8 +558,7 @@ class AssertIdentical(TestCase):
             self.tab2 = self.file_object2.writebook[tab_name]
             self.verify_tabs_identical()
 
-    def verify_tabs_identical(self): 
-        self._set_attributes()  
+    def verify_tabs_identical(self):  
         self.assertEqual(self.tab1.max_row, self.tab2.max_row)
         self.assertEqual(self.tab1.max_column, self.tab2.max_column)
 
@@ -533,8 +566,7 @@ class AssertIdentical(TestCase):
             for j in range(1,self.tab1.max_column+1):
                 self.assertEqual(self.tab1.cell(i,j).value,self.tab2.cell(i,j).value)
 
-    def verify_columns_identical(self, column1, column2): 
-        self._set_attributes()
+    def verify_columns_identical(self, column1, column2):  
         self.assertEqual(self.tab1.max_row, self.tab2.max_row) 
             
         for i in range(2, self.tab1.max_row + 1): 
@@ -542,25 +574,26 @@ class AssertIdentical(TestCase):
 
 
 class FileData():
-    def __init__(self, name_file, tab_name):
+    def __init__(self, name_file, tab_name=None):
         self.name_file = name_file
+        self.tab_name = tab_name
+        self.initialize_file_object()
+
+    def initialize_file_object(self):
+        try:
+            self.create_file_object()
+        except FileNotFoundError:
+            self.file_object = None            
+
+    def create_file_object(self):
         self.file_object = File(self.name_file)
-        self.tab_name = tab_name 
 
 
 class MethodData():
-    def __init__(self, method_name, tab_options, *args, **kwargs):
+    def __init__(self, method_name, *args, **kwargs):
         self.method_name = method_name 
         self.args = args
         self.kwargs = kwargs
-        self.tab_options = tab_options
-
-
-class TestData():
-    def __init__(self, file_data, file_data_compare, method_data):
-        self.file_data = file_data
-        self.file_data_compare = file_data_compare
-        self.method_data = method_data
     
 
 if __name__== "__main__":
