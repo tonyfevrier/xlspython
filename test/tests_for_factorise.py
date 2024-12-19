@@ -4,7 +4,7 @@ from controller.one_file_one_tab import ColorTabController, DeleteController, In
 from controller.one_file_multiple_tabs import OneTabCreatedController, MultipleSameTabController, EvenTabsController
 from controller.two_files import OneFileCreatedController, TwoFilesController
 from controller.path import PathController
-from utils.utils_factorise import ColumnDelete, ColumnInsert, LineDelete, LineInsert, TabUpdateFormula, MapIndexLetter
+from utils.utils_factorise import ColumnDelete, ColumnInsert, LineDelete, LineInsert, TabUpdateFormula, MapIndexLetter, String, Dictionary
 from openpyxl.utils import column_index_from_string
 
  
@@ -165,6 +165,7 @@ class TestColumnInsertion(TestCase):
         self.file_data_compare = None
         self.method_data = None 
         self.columns_to_compare = []
+        self.columns_to_delete = []
 
     def apply_compare_columns_restore(fonction):
         def wrapper(self):
@@ -202,76 +203,113 @@ class TestColumnInsertion(TestCase):
     
     def _restore_file_state_before_modification(self):
         tab = self.file_data.file_object.writebook[self.file_data.tab_name]  
-        tab.delete_cols(column_index_from_string(self.columns_to_compare[0]), len(self.columns_to_compare))
-        modification_object = ColumnDelete(self.columns_to_compare)
+        tab.delete_cols(column_index_from_string(self.columns_to_delete[0]), len(self.columns_to_delete))
+        modification_object = ColumnDelete(self.columns_to_delete)
         self.controller.tab_controller._update_cell_formulas(modification_object) 
         self.file_data.file_object.writebook.save(self.file_data.file_object.path + self.file_data.name_file) 
 
     @apply_compare_columns_restore
-    def test_column_transform_string_in_binary(self): 
+    def test_transform_string_in_binary_in_column(self): 
         self.file_data = FileData('test.xlsx', 'Feuille2')
         self.file_data_compare = FileData('test.xlsx', 'Feuille2')
-        self.method_data = MethodData('transform_string_in_binary_in_column', 'F', 'G', 'partie 12 : Faux', 1) 
+        self.method_data = MethodData('transform_string_in_binary_in_column', 
+                                       TabOptions(column_to_read='F', column_to_write='G'), 
+                                       'partie 12 : Faux', 1) 
         self.columns_to_compare = ['G']
+        self.columns_to_delete = self.columns_to_compare
 
     @apply_compare_columns_restore
     def test_convert_time_in_minutes_in_columns(self): 
         self.file_data = FileData('test.xlsx', 'time_min')
         self.file_data_compare = FileData('test.xlsx', 'time_min_expected')
-        self.method_data = MethodData('convert_time_in_minutes_in_columns', 'E', 'F') 
+        self.method_data = MethodData('convert_time_in_minutes_in_columns', 
+                                       TabOptions(column_to_read='E', column_to_write='F')) 
         self.columns_to_compare = ['F']
+        self.columns_to_delete = self.columns_to_compare
 
     @apply_compare_columns_restore
-    def test_column_set_answer_in_group(self):
+    def test_insert_group_associated_with_answer(self):
         self.file_data = FileData('test_column_set_answer.xlsx', 'sheet1')
         self.file_data_compare = FileData('test_column_set_answer.xlsx', 'Feuille2')
         map_groups_to_answers = {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']}  
-        self.method_data = MethodData('insert_group_associated_with_answer', 'B', 'C', map_groups_to_answers)
+        self.method_data = MethodData('insert_group_associated_with_answer', 
+                                       TabOptions(column_to_read='B', column_to_write='C'), 
+                                       map_groups_to_answers)
         self.columns_to_compare = ['C']
+        self.columns_to_delete = self.columns_to_compare
 
     @apply_compare_columns_restore
-    def test_column_cut_string_in_parts(self):
+    def test_insert_splitted_strings_of(self):
         self.file_data = FileData('test.xlsx', 'cutinparts')
         self.file_data_compare = FileData('test.xlsx', 'cutinpartsbis') 
-        self.method_data = MethodData('insert_splitted_strings_of', 'B', 'C', ';')
+        self.method_data = MethodData('insert_splitted_strings_of', 
+                                    TabOptions(column_to_read='B', column_to_write='C'),';')
         self.columns_to_compare = ['C', 'D', 'E']
+        self.columns_to_delete = self.columns_to_compare
 
     @apply_compare_columns_restore
-    def test_create_one_column_by_QCM_answer(self):
+    def test_fill_one_column_by_QCM_answer(self):
         self.file_data = FileData('test_create_one_column.xlsx', 'sheet1')
         self.file_data_compare = FileData('test_create_one_column.xlsx', 'Feuille2') 
-        self.method_data = MethodData('fill_one_column_by_QCM_answer', 'D', 'E', 'Alain', 'Henri', 'Tony', 'Dulcinée')
+        self.method_data = MethodData('fill_one_column_by_QCM_answer', 
+                                       TabOptions(column_to_read='D', column_to_write='E'), 
+                                       'Alain', 'Henri', 'Tony', 'Dulcinée')
         self.columns_to_compare = ['E', 'F', 'G', 'H']
+        self.columns_to_delete = self.columns_to_compare
 
     @apply_compare_columns_restore
-    def test_column_get_part_of_str_1(self):
+    def test_write_piece_of_string_in_column_1(self):
         self.file_data = FileData('test_colgetpartofstr.xlsx', 'Feuille2')
         self.file_data_compare = FileData('test_colgetpartofstr.xlsx', 'expected') 
-        self.method_data = MethodData('write_piece_of_string_in_column', 'C', 'D', '_', 0)
+        self.method_data = MethodData('write_piece_of_string_in_column', 
+                                       TabOptions(column_to_read='C', column_to_write='D'), '_', 0)
         self.columns_to_compare = ['D']
+        self.columns_to_delete = self.columns_to_compare
 
     @apply_compare_columns_restore
-    def test_column_get_part_of_str_2(self):
+    def test_write_piece_of_string_in_column_2(self):
         self.file_data = FileData('test_colgetpartofstr.xlsx', 'Feuille2')
         self.file_data_compare = FileData('test_colgetpartofstr.xlsx', 'expected2') 
-        self.method_data = MethodData('write_piece_of_string_in_column', 'E', 'F', ';', 1)
+        self.method_data = MethodData('write_piece_of_string_in_column', 
+                                       TabOptions(column_to_read='E', column_to_write='F'), ';', 1)
         self.columns_to_compare = ['F']
+        self.columns_to_delete = self.columns_to_compare
 
+    @apply_compare_columns_restore
+    def test_map_two_columns_to_a_third_column(self):
+        self.file_data = FileData('test_maptwocolumns.xlsx', 'Feuille2')
+        self.file_data_compare = FileData('test_maptwocolumns.xlsx', 'expected') 
+        self.method_data = MethodData('map_two_columns_to_a_third_column', 
+                                      TabOptions(columns_to_read=['B', 'C'], column_to_write='D'), 
+                                      {'cat1':['prime','1'], 'cat2':['probe','2']})
+        self.columns_to_compare = ['D']
+        self.columns_to_delete = self.columns_to_compare
 
-        # file = File('test_colgetpartofstr.xlsx')
-        # controler = MultipleSameTabController(file, tab_controller=InsertController(file, tab_options=TabOptions(column_to_read='C', column_to_write='D')),
-        #                                       file_options=FileOptions(names_of_tabs_to_modify=['Feuille2']))
+    @apply_compare_tabs_restore
+    def test_verify_tabs_when_map_two_columns_to_a_third_column(self):
+        self.file_data = FileData('test_maptwocolumns.xlsx', 'Feuille2')
+        self.file_data_compare = FileData('test_maptwocolumns.xlsx', 'expected') 
+        self.method_data = MethodData('map_two_columns_to_a_third_column', 
+                                      TabOptions(columns_to_read=['B', 'C'], column_to_write='D'), 
+                                      {'cat1':['prime','1'], 'cat2':['probe','2']})
+        self.columns_to_delete = ['D']
 
-        # controler.apply_method_on_some_tabs('write_piece_of_string_in_column', '_', 0)
+    @apply_compare_tabs_restore
+    def test_insert_column_for_prime_probe_congruence(self):   
+        self.file_data = FileData('test_prime_probe.xlsx', 'Feuille2')
+        self.file_data_compare = FileData('test_prime_probe.xlsx', 'expected') 
+        self.method_data = MethodData('insert_column_for_prime_probe_congruence', 
+                                      TabOptions(columns_to_read=['B', 'C', 'D'], column_to_write='E'))
+        self.columns_to_delete = ['E']
 
-        # controler.tab_controller.tab_options = TabOptions(column_to_read='F', column_to_write='G')
-        # controler.apply_method_on_some_tabs('write_piece_of_string_in_column', ';', 1)
+    @apply_compare_tabs_restore
+    def test_insert_tags_of_maximum_of_column_list(self):
+        self.file_data = FileData('test_give_names.xlsx', 'sheet1')
+        self.file_data_compare = FileData('test_give_names.xlsx', 'Feuille2') 
+        self.method_data = MethodData('insert_tags_of_maximum_of_column_list', 
+                                      TabOptions(columns_to_read=['A', 'B', 'C'], column_to_write='D'))
+        self.columns_to_delete = ['D']
         
-        # sheet = file.writebook['Feuille2'] 
-        # verify_sheets_identical(sheet, file.writebook['expected'])
-        # sheet.delete_cols(7)
-        # sheet.delete_cols(4)
-        # file.writebook.save(file.path + 'test_colgetpartofstr.xlsx') 
     
 #     def test_add_column_in_sheet_differently_sorted(self):
 #         file1 = File('test.xlsx', dataonly=True)
@@ -365,18 +403,7 @@ class TestColumnInsertion(TestCase):
 #         file.writebook.save(file.path + 'testongletbyparticipant.xlsx')
 #         del file
 
-#     def test_give_names_of_maximum(self):
-#         file = File('test_give_names.xlsx')
-#         controler = MultipleSameTabController(file,
-#                                               tab_controller=InsertController(file, tab_options=TabOptions(columns_to_read=['A', 'B', 'C'], column_to_write='D')),
-#                                               file_options=FileOptions(names_of_tabs_to_modify=['sheet1'])) 
 
-#         controler.apply_method_on_some_tabs('insert_tags_of_maximum_of_column_list') 
-
-#         sheet = file.writebook['sheet1']  
-#         verify_sheets_identical(sheet, file.writebook['Feuille2'])
-#         sheet.delete_cols(4)
-#         file.writebook.save(file.path + 'test_give_names.xlsx') 
         
 #     """ def test_delete_other_columns(self):
 #         # Fonctionnel une fois
@@ -397,123 +424,82 @@ class TestColumnInsertion(TestCase):
 #         verify_sheets_identical(file.get_tab_by_name('sheet1'), File('test_keep_only_columns.xlsx').get_tab_by_name('Feuille2'))
 
 
-#     def test_map_two_columns_to_a_third_column(self):
-#         file = File('test_maptwocolumns.xlsx')
-#         controler = MultipleSameTabController(file,
-#                                               tab_controller=InsertController(file, tab_options=TabOptions(columns_to_read=['B', 'C'], column_to_write='D')),
-#                                               file_options=FileOptions(names_of_tabs_to_modify=['Feuille2']))
-         
-#         controler.apply_method_on_some_tabs('map_two_columns_to_a_third_column', {'cat1':['prime','1'], 'cat2':['probe','2']})
-        
-#         sheet = file.writebook['Feuille2']  
-#         verify_sheets_identical(sheet, file.writebook['expected'])
-#         sheet.delete_cols(4)
-#         file.writebook.save(file.path + 'test_maptwocolumns.xlsx')  
 
-#     def test_insert_column_for_prime_probe_congruence(self):      
-#         file = File('test_prime_probe.xlsx')
-#         controler = MultipleSameTabController(file,
-#                                               tab_controller=InsertController(file, tab_options=TabOptions(columns_to_read=['B', 'C', 'D'], column_to_write='E')),
-#                                               file_options=FileOptions(names_of_tabs_to_modify=['Feuille2']))
-         
-#         controler.apply_method_on_some_tabs('insert_column_for_prime_probe_congruence')
-        
-#         sheet = file.writebook['Feuille2']  
-#         verify_sheets_identical(sheet, file.writebook['expected'])
-#         sheet.delete_cols(5)
-#         file.writebook.save(file.path + 'test_prime_probe.xlsx')  
 
-# # class TestStr(TestCase, Other):
-# #     def test_transform_string_in_binary(self):
-# #         chaine = Str('prout') 
-        
-# #         self.assertEqual(chaine.transform_string_in_binary('prout','rr'),1)
-# #         self.assertEqual(chaine.transform_string_in_binary('rr'),0)
-# #         self.assertEqual(chaine.transform_string_in_binary(''),0)
+class TestString(TestCase, String):
+    
+    def test_transform_string_in_binary(self):
+        self.assertEqual(self.transform_string_in_binary('rrr','rr', 'rrr'), 1)
+        self.assertEqual(self.transform_string_in_binary('rr','rrr'), 0)
+        self.assertEqual(self.transform_string_in_binary('','rrr'), 0)
 
-# #     def test_set_answer_in_group(self):
-# #         chaine = Str(1)
-# #         chaine2 = Str(9)
+    def test_set_answer_in_group(self): 
+        map_groups_to_answers = {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']}
+        map_answers_to_groups = Dictionary.reverse_dictionary(map_groups_to_answers) 
         
-# #         groups_of_response = {"group1":['2','5','6'], "group2":['7','8','9'], "group3":['1','3','4'], "group4":['10']}
-# #         reversed_group = self.reverse_dico_for_set_answer_in_group(groups_of_response)
+        self.assertEqual(self.set_answer_in_group('1', map_answers_to_groups), "group3")
+        self.assertEqual(self.set_answer_in_group('9', map_answers_to_groups), "group2")
+
+    def test_clean_string_from_spaces(self):
+        strings = ['tony', 'tony ', ' tony', ' tony ', 'tony  ', '  tony']
+        for string in strings:
+            cleaned_string = self.clean_string_from_spaces(string)
+            self.assertEqual(cleaned_string, 'tony')
+            
+    def test_convert_time_in_minutes(self):
+        map_durations_to_minutes = {"2 jours 2 heures": '3000,0', "1 heure 25 min": '85,0', "16 min 35 s": '16,58'}
+        for duration in map_durations_to_minutes.keys():
+            duration_in_min = self.convert_time_in_minutes(duration)
+            duration_in_min_expected = map_durations_to_minutes[duration]
+            self.assertEqual(duration_in_min, duration_in_min_expected)
+
+    def test_get_columns_from(self):
+        string = "C-E,H,J-L"
+        expected_list = ['C','D','E','H','J','K','L']
+        self.assertListEqual(self.get_columns_from(string), expected_list)
+
+    def test_get_range_letter(self):
+        string = 'D-H'
+        expected_list = ['D','E','F','G','H']
+        self.assertListEqual(self.get_range_letter(string), expected_list)
+
+
+class TestTabUpdate(TestCase, TabUpdateFormula):
+
+    def test_update_formula_when_insert_one_line(self):
+        modification_object = LineInsert(['2'])
+        updated_formula = modification_object._update_a_cell("SI(J10+K$1+L$3)")
+        self.assertEqual(updated_formula, "SI(J11+K$1+L$4)")
+
+    def test_update_formula_when_delete_one_line(self):
+        modification_object = LineDelete(['11'])
+        updated_formula = modification_object._update_a_cell("SI(J12+K$1+L$3)")
+        self.assertEqual(updated_formula, "SI(J11+K$1+L$3)")
+
+    def test_update_formula_when_delete_one_line_greater_than_all_line_numbers(self):
+        modification_object = LineDelete(['13'])
+        updated_formula = modification_object._update_a_cell("SI(J12+K$1+L$3)")
+        self.assertEqual(updated_formula, "SI(J12+K$1+L$3)")
+
+    def test_update_formula_when_insert_one_column(self):
+        modification_object = ColumnInsert(['C'])
+        updated_formula = modification_object._update_a_cell("SI(J10+K$1+L$3)")
+        self.assertEqual(updated_formula, "SI(K10+L$1+M$3)")
+
+    def test_update_formula_when_delete_one_column(self):
+        modification_object = ColumnDelete(['C'])
+        updated_formula = modification_object._update_a_cell("SI(J10+K$1+L$3)")
+        self.assertEqual(updated_formula, "SI(I10+J$1+K$3)")
+
+    def test_update_formula_when_insert_multiple_lines(self):
+        modification_object = LineInsert(['2', '5'])
+        updated_formula = modification_object._update_a_cell("SI(J10+K$1+L$3)") 
+        self.assertEqual(updated_formula, "SI(J12+K$1+L$4)")
  
-# #         """ 
-# #         groups_of_response = {}
-# #         for elt in ['2','5','6']:
-# #             groups_of_response[elt] = "group1"
-        
-# #         for elt in ['7','8','9']:
-# #             groups_of_response[elt] = "group2"
-
-# #         for elt in ['1','3','4']:
-# #             groups_of_response[elt] = "group3"
-# #         groups_of_response['10'] = "group4" """
-        
-# #         self.assertEqual(chaine.set_answer_in_group(reversed_group),"group3")
-# #         self.assertEqual(chaine2.set_answer_in_group(reversed_group), "group2")
-
-
-# #     def test_clean_string(self):
-# #         chaine1 = Str('prout').clean_string()
-# #         chaine2 = Str(' prout').clean_string()
-# #         chaine3 = Str('prout ').clean_string()
-# #         chaine4 = Str(' prout ').clean_string()
-# #         chaine5 = Str('prout  ').clean_string()
-# #         chaine6 = Str('  prout').clean_string()
-# #         self.assertEqual(chaine1.chaine,'prout')
-# #         self.assertEqual(chaine2.chaine,'prout') 
-# #         self.assertEqual(chaine3.chaine,'prout') 
-# #         self.assertEqual(chaine4.chaine,'prout') 
-# #         self.assertEqual(chaine5.chaine,'prout') 
-# #         self.assertEqual(chaine6.chaine,'prout') 
-
-# #     def test_cut_string_in_parts(self):
-# #         chaine = Str("partie 1 : Vrai; partie 2 : Faux; partie 3 : Vrai; partie 4 : Vrai; partie 5 : Vrai")
-# #         tuple_of_str = chaine.cut_string_in_parts(";")
-        
-# #         self.assertEqual(tuple_of_str,("partie 1 : Vrai"," partie 2 : Faux"," partie 3 : Vrai"," partie 4 : Vrai"," partie 5 : Vrai"))
-
-# #     def test_convert_time_in_minutes(self):
-# #         duration1 = Str("2 jours 2 heures")
-# #         duration2 = Str("1 heure 25 min")
-# #         duration3 = Str("16 min 35 s")
-        
-# #         self.assertEqual(duration1.convert_time_in_minutes(), '3000,0')
-# #         self.assertEqual(duration2.convert_time_in_minutes(), '85,0')
-# #         self.assertEqual(duration3.convert_time_in_minutes(), '16,58')
-
-# #     def test_columns_from_string(self):
-# #         self.assertListEqual(Str.columns_from_strings("C-E,H,J-L"), ['C','D','E','H','J','K','L'])
-
-# #     def test_listFromColumnsStrings(self):
-# #         self.assertListEqual(Str.listFromColumnsStrings("C-E,H,J-L", "D,G","H-K"),[['C','D','E','H','J','K','L'],['D','G'],['H','I','J','K']])
-
-# #     def test_range_Letter(self):
-# #         self.assertListEqual(Str.rangeLetter('D-H'), ['D','E','F','G','H'])
-
-#     def testUpdateOneFormulaForOneInsertion(self):
-#         formula = LineInsert(['2'])._update_a_cell("SI(J10+K$1+L$3)")
-#         self.assertEqual(formula, "SI(J11+K$1+L$4)")
-
-#         formula = LineDelete(['11'])._update_a_cell("SI(J12+K$1+L$3)")
-#         self.assertEqual(formula, "SI(J11+K$1+L$3)")
-
-#         formula = LineDelete(['13'])._update_a_cell("SI(J12+K$1+L$3)")
-#         self.assertEqual(formula, "SI(J12+K$1+L$3)")
-
-#         formula = ColumnInsert(['C'])._update_a_cell("SI(J10+K$1+L$3)")
-#         self.assertEqual(formula, "SI(K10+L$1+M$3)")
-
-#         formula = ColumnDelete(['C'])._update_a_cell("SI(J10+K$1+L$3)")
-#         self.assertEqual(formula, "SI(I10+J$1+K$3)")
-
-#     def testUpdateOneFormula(self):
-#         formula = LineInsert(['2', '5'])._update_a_cell("SI(J10+K$1+L$3)") 
-#         self.assertEqual(formula, "SI(J12+K$1+L$4)")
- 
-#         formula = ColumnInsert(['C', 'D','E', 'F'])._update_a_cell("SI(D10+E$1)") 
-#         self.assertEqual(formula, "SI(H10+I$1)")
+    def test_update_formula_when_insert_multiple_columns(self):
+        modification_object = ColumnInsert(['C', 'D','E', 'F'])
+        updated_formula = modification_object._update_a_cell("SI(D10+E$1)") 
+        self.assertEqual(updated_formula, "SI(H10+I$1)")
 
 
 class AssertIdentical(TestCase):
@@ -563,11 +549,11 @@ class FileData():
 
 
 class MethodData():
-    def __init__(self, method_name, column_to_read, column_to_write, *args, **kwargs):
+    def __init__(self, method_name, tab_options, *args, **kwargs):
         self.method_name = method_name 
         self.args = args
         self.kwargs = kwargs
-        self.tab_options = TabOptions(column_to_read=column_to_read, column_to_write=column_to_write)
+        self.tab_options = tab_options
 
 
 class TestData():
