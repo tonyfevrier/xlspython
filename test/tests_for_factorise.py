@@ -59,17 +59,39 @@ import os
 
         
 
-# class TestFile(TestCase):
+class TestOneTabCreatedController(TestCase):
+
+    def setUp(self):
+        self.file_object = None
+        self.controller = None
+        self.file_data_compare_1 = None
+        self.file_data_compare_2 = None
+        self.file_options = None
+
+    def test_extract_a_column_from_all_tabs(self):
+        self._build_extract_a_column_from_all_tabs()
+        
+        self.controller = OneTabCreatedController(self.file_data_compare_1.file_object, FileOptions(column_to_read='B'))
+        self.controller.extract_a_column_from_all_tabs()
  
+        self._compare_files()
+        self._delete_created_tab()
+    
+    def _build_extract_a_column_from_all_tabs(self): 
+        self.file_data_compare_1 = FileData('test_extract_column.xlsx')
+        self.file_data_compare_1.create_file_object()
+        self.file_data_compare_2 = FileData('test_extract_column_ref.xlsx')
 
-#     def test_extract_a_column_from_all_tabs(self):
-#         file = File('test_extract_column.xlsx')
-#         controler = OneTabCreatedController(file, FileOptions(column_to_read='B'))
-#         controler.extract_a_column_from_all_tabs() 
-#         verify_files_identical(File('test_extract_column_ref.xlsx'),file)
+    def _compare_files(self):
+        self.file_data_compare_2.create_file_object()
+        self.assert_object = AssertIdentical(self.file_data_compare_1, self.file_data_compare_2) 
+        self.assert_object.verify_files_identical()
 
-#         del file.writebook[file.sheets_name[-1]]
-#         file.writebook.save(file.path + 'test_extract_column.xlsx') 
+    def _delete_created_tab(self):
+        self.file_object = self.file_data_compare_1.file_object
+        del self.file_object.writebook[self.file_object.sheets_name[-1]]
+        self.file_object.writebook.save(self.file_object.path + self.file_object.name_file)
+
 
 #     def test_apply_column_formula_on_all_tabs(self):
 #         file = File('dataset.xlsx', dataonly = False)
@@ -178,19 +200,28 @@ class TestOneFileCreatedController(TestCase):
         self.file_options = FileOptions(name_of_tab_to_read='Stroops_test (7)', column_to_read='A')
         self.file_data_compare_2 = FileData('divided_test_create_one_onglet_by_participant.xlsx')
 
-#     def test_one_file_by_tab(self):
-#         file = File("test_onefile_sendmail.xlsx")
-#         controler = OneFileCreatedController(file)
-#         controler.create_one_file_by_tab()
- 
-#         sheet1 = File("tony fevrier.xlsx", "multifiles/").writebook["Sheet"]
-#         sheet2 = File("Marine Moyon.xlsx", "multifiles/").writebook["Sheet"] 
+    def test_one_file_by_tab(self):
+        self._build_one_file_by_tab_for_first_tab()
 
-#         sheet1o = File("test_onefile_sendmail.xlsx").writebook["tony fevrier"] 
-#         sheet2o = File("test_onefile_sendmail.xlsx").writebook["Marine Moyon"]
+        self.controller = OneFileCreatedController(self.file_object)
+        self.controller.create_one_file_by_tab()
 
-#         verify_sheets_identical(sheet1, sheet1o)
-#         verify_sheets_identical(sheet2, sheet2o) 
+        self._compare_tabs()
+        self._delete_created_file()
+
+        self._build_one_file_by_tab_for_second_tab()
+
+        self._compare_tabs()
+        self._delete_created_file()
+    
+    def _build_one_file_by_tab_for_first_tab(self):
+        self.file_object = File('test_onefile_sendmail.xlsx')  
+        self.file_data_compare_1 = FileData('test_onefile_sendmail.xlsx', 'tony fevrier') 
+        self.file_data_compare_2 = FileData('tony fevrier.xlsx', 'Sheet', path="multifiles/")
+
+    def _build_one_file_by_tab_for_second_tab(self):
+        self.file_data_compare_1 = FileData('test_onefile_sendmail.xlsx', 'Marine Moyon') 
+        self.file_data_compare_2 = FileData('Marine Moyon.xlsx', 'Sheet', path="multifiles/")
 
 
 class TestColumnInsertion(TestCase):
@@ -550,7 +581,7 @@ class AssertIdentical(TestCase):
             self.tab1 = None
             self.tab2 = None
 
-    def verify_files_identical(self): 
+    def verify_files_identical(self):  
         self.assertEqual(self.file_object1.sheets_name, self.file_object2.sheets_name)
 
         for tab_name in self.file_object1.sheets_name: 
@@ -574,9 +605,10 @@ class AssertIdentical(TestCase):
 
 
 class FileData():
-    def __init__(self, name_file, tab_name=None):
+    def __init__(self, name_file, tab_name=None, path='fichiers_xls/'):
         self.name_file = name_file
         self.tab_name = tab_name
+        self.path = path
         self.initialize_file_object()
 
     def initialize_file_object(self):
@@ -586,7 +618,7 @@ class FileData():
             self.file_object = None            
 
     def create_file_object(self):
-        self.file_object = File(self.name_file)
+        self.file_object = File(self.name_file, path=self.path)
 
 
 class MethodData():

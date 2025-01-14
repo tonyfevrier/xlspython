@@ -358,8 +358,8 @@ class FileControler(UtilsForFile):
         return wrong_tabs
     
 
-    ## Sheet methods
-
+    ## Sheet methods 
+    
     def color_special_cases_in_column(self, sheet_name, column, chainecolor):
         """
         Fonction qui regarde pour une colonne donnée colore les cases correspondant à certaines chaînes de caractères.
