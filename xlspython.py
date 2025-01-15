@@ -1,7 +1,7 @@
 import typer
 from typing import Optional, List, Tuple 
-from model import File, Path, Str
-from controller import PathControler, FileControler
+from modell import File, Path, Str
+from controlller import PathControler, FileControler
 from typing_extensions import Annotated
 from utils.utils import UtilsForcommands as Ufc
 from utils.prompts import *
@@ -239,7 +239,7 @@ def extractcellsheets(file : Annotated[str, typer.Option(prompt = file_prompt)],
     """
     
     cells = Ufc.askArgumentUntilNone(cells, ask_argument_prompt('cell'))
-    fileobject = File(file, dataonly=True)
+    fileobject = File(file)
     controler = FileControler(fileobject)
     controler.extract_cells_from_all_sheets(*cells)
 

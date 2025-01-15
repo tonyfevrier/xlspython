@@ -69,29 +69,80 @@ class TestOneTabCreatedController(TestCase):
         self.file_options = None
 
     def test_extract_a_column_from_all_tabs(self):
-        self._build_extract_a_column_from_all_tabs()
+        self._build_files_to_compare('test_extract_column.xlsx', 'test_extract_column_ref.xlsx')
+        self.file_options = FileOptions(column_to_read='B')
         
-        self.controller = OneTabCreatedController(self.file_data_compare_1.file_object, FileOptions(column_to_read='B'))
+        self.controller = OneTabCreatedController(self.file_data_compare_1.file_object, self.file_options)
         self.controller.extract_a_column_from_all_tabs()
  
-        self._compare_files()
-        self._delete_created_tab()
+        self._compare_files() 
+        tab_to_delete = [self.file_data_compare_1.file_object.sheets_name[-1]]
+        self._delete_created_tabs(tab_to_delete)
     
-    def _build_extract_a_column_from_all_tabs(self): 
-        self.file_data_compare_1 = FileData('test_extract_column.xlsx')
+    def _build_files_to_compare(self, file_name, file_name_reference): 
+        self.file_data_compare_1 = FileData(file_name)
         self.file_data_compare_1.create_file_object()
-        self.file_data_compare_2 = FileData('test_extract_column_ref.xlsx')
+        self.file_data_compare_2 = FileData(file_name_reference)
+        self.file_data_compare_2.create_file_object() 
 
     def _compare_files(self):
-        self.file_data_compare_2.create_file_object()
         self.assert_object = AssertIdentical(self.file_data_compare_1, self.file_data_compare_2) 
         self.assert_object.verify_files_identical()
 
-    def _delete_created_tab(self):
+    def _compare_tabs(self):
+        self.assert_object = AssertIdentical(self.file_data_compare_1, self.file_data_compare_2)  
+        self.assert_object.verify_tabs_identical()
+
+    def _delete_created_tabs(self, tabs_to_delete):
         self.file_object = self.file_data_compare_1.file_object
-        del self.file_object.writebook[self.file_object.sheets_name[-1]]
+        for tab in tabs_to_delete: 
+            del self.file_object.writebook[tab]
         self.file_object.writebook.save(self.file_object.path + self.file_object.name_file)
 
+    def test_gather_groups_of_multiple_columns_in_tabs_of_two_columns_containing_tags_and_values(self):
+        self._build_files_to_compare('test_gather_columns_in_one.xlsx', 'test_gather_columns_in_one - ref.xlsx')
+        self.file_options = FileOptions(name_of_tab_to_read='test')
+
+        self.controller = OneTabCreatedController(self.file_data_compare_1.file_object, self.file_options)
+        self.controller.gather_groups_of_multiple_columns_in_tabs_of_two_columns_containing_tags_and_values(['C','D','E'], ['G','H','I'])
+ 
+        self._compare_files()
+        tabs_to_delete = ['tab_column_gathered_CDE', 'tab_column_gathered_GHI']
+        self._delete_created_tabs(tabs_to_delete)
+
+    def test_gather_multiple_answers(self):
+        self._build_gather_multiple_answers()
+
+        self.controller = OneTabCreatedController(self.file_data_compare_1.file_object, self.file_options)
+        self.controller.gather_multiple_answers('A', 'B')
+
+        self._compare_tabs()
+        tab_to_delete = ['multiple_answers']
+        self._delete_created_tabs(tab_to_delete)
+
+
+        # file = File('testongletbyparticipant.xlsx')
+        # controler = OneTabCreatedController(file, file_options=FileOptions(name_of_tab_to_read='test'))  
+        # controler.gather_multiple_answers('A','B') 
+
+        # file2 = File('testongletbyparticipant-result.xlsx')
+        # sheet1, sheet2 = file.writebook['severalAnswers'], file2.writebook['Feuille2'] 
+        # verify_sheets_identical(sheet1, sheet2)
+        # del sheet1, sheet2
+
+        # file.writebook.save(file.path + 'testongletbyparticipant.xlsx')
+        # del file
+
+    def _build_gather_multiple_answers(self): 
+        self.file_data_compare_1 = FileData('testongletbyparticipant.xlsx', 'multiple_answers')
+        self.file_data_compare_1.create_file_object()
+        self.file_data_compare_2 = FileData('testongletbyparticipant-result.xlsx', 'Feuille2')
+        self.file_data_compare_2.create_file_object() 
+        self.file_options = FileOptions(name_of_tab_to_read='test')
+
+
+class TestEvenTabsController(TestCase):
+    pass
 
 #     def test_apply_column_formula_on_all_tabs(self):
 #         file = File('dataset.xlsx', dataonly = False)
@@ -99,18 +150,6 @@ class TestOneTabCreatedController(TestCase):
 #         controler.apply_columns_formula_on_all_tabs()
     
 
-#     def test_gather_groups_of_multiple_columns_in_tabs_of_two_columns_containing_tags_and_values(self):
-#         file = File("test_gather_columns_in_one.xlsx")
-#         controler = OneTabCreatedController(file, FileOptions(name_of_tab_to_read='test'))
-#         controler.gather_groups_of_multiple_columns_in_tabs_of_two_columns_containing_tags_and_values(['C','D','E'], ['G','H','I'])
-
-#         file = File("test_gather_columns_in_one.xlsx")
-#         verify_files_identical(File("test_gather_columns_in_one - ref.xlsx"), file)
- 
-#         del file.writebook['tab_column_gathered_CDE']
-#         del file.writebook['tab_column_gathered_GHI']
-#         file.writebook.save(file.path + 'test_gather_columns_in_one.xlsx')
-#         del file
 
 
 
@@ -451,18 +490,7 @@ class TestColumnInsertion(TestCase):
 
 
 
-#     def test_gather_multiple_answers(self):
-#         file = File('testongletbyparticipant.xlsx')
-#         controler = OneTabCreatedController(file, file_options=FileOptions(name_of_tab_to_read='test'))  
-#         controler.gather_multiple_answers('A','B') 
 
-#         file2 = File('testongletbyparticipant-result.xlsx')
-#         sheet1, sheet2 = file.writebook['severalAnswers'], file2.writebook['Feuille2'] 
-#         verify_sheets_identical(sheet1, sheet2)
-#         del sheet1, sheet2
-
-#         file.writebook.save(file.path + 'testongletbyparticipant.xlsx')
-#         del file
 
 
         
@@ -566,7 +594,7 @@ class TestTabUpdate(TestCase, TabUpdateFormula):
 class AssertIdentical(TestCase):
 
     def __init__(self, file_data1, file_data2, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs) 
         self.file_data1 = file_data1
         self.file_data2 = file_data2
         self.file_object1 = self.file_data1.file_object
@@ -574,10 +602,10 @@ class AssertIdentical(TestCase):
         self._initialize_tabs_attributes()
 
     def _initialize_tabs_attributes(self): 
-        try:
-            self.tab1 = self.file_object1.writebook[self.file_data1.tab_name]
-            self.tab2 = self.file_object2.writebook[self.file_data2.tab_name]
-        except KeyError:
+        try:  
+            self.tab1 = self.file_object1.writebook[self.file_data1.tab_name] 
+            self.tab2 = self.file_object2.writebook[self.file_data2.tab_name]  
+        except KeyError: 
             self.tab1 = None
             self.tab2 = None
 
@@ -589,7 +617,7 @@ class AssertIdentical(TestCase):
             self.tab2 = self.file_object2.writebook[tab_name]
             self.verify_tabs_identical()
 
-    def verify_tabs_identical(self):  
+    def verify_tabs_identical(self):   
         self.assertEqual(self.tab1.max_row, self.tab2.max_row)
         self.assertEqual(self.tab1.max_column, self.tab2.max_column)
 

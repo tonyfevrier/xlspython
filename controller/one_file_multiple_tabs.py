@@ -108,12 +108,13 @@ class OneTabCreatedController(MapIndexLetter):
             tab_to = self._create_a_tab_for_a_list_of_columns()
             self.tabs_copy._choose_the_tab_to_write_in(tab_to) 
             self.copy_tags_and_values_of_a_list_of_columns()
+            self.file_object.update_sheet_names()
 
         self.file_object.save_file() 
     
     def _create_a_tab_for_a_list_of_columns(self):
         string_of_columns = ''.join(self.file_options.columns_to_read)
-        tab_name = f"tab_column_gathered_{string_of_columns}"
+        tab_name = f"tab_column_gathered_{string_of_columns}" 
         return self.file_object.create_and_return_new_tab(tab_name) 
 
     def copy_tags_and_values_of_a_list_of_columns(self):
@@ -169,9 +170,10 @@ class OneTabCreatedController(MapIndexLetter):
     def _write_data_of_a_multiple_answers_participant(self, new_tab, participant_item):
         identifier = participant_item[0]
         values_to_store = participant_item[1] 
-        new_tab.cell(new_tab.max_row + 1, 1).value = identifier
+        line_index = new_tab.max_row + 1
+        new_tab.cell(line_index, 1).value = identifier
         for index in range(len(values_to_store)):
-            new_tab.cell(new_tab.max_row + 1, index + 2).value = values_to_store[index]
+            new_tab.cell(line_index, index + 2).value = values_to_store[index]
 
 
 class EvenTabsController(MapIndexLetter):

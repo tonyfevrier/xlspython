@@ -31,7 +31,7 @@ class File():
     def _create_excel_compiler(self):
         return ExcelCompiler(self.path + self.name_file) 
         
-    def create_and_return_new_tab(self, tab_name):
+    def create_and_return_new_tab(self, tab_name): 
         return self.writebook.create_sheet(tab_name)
 
     def get_tab_by_name(self, tab_name):
