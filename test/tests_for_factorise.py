@@ -120,19 +120,6 @@ class TestOneTabCreatedController(TestCase):
         tab_to_delete = ['multiple_answers']
         self._delete_created_tabs(tab_to_delete)
 
-
-        # file = File('testongletbyparticipant.xlsx')
-        # controler = OneTabCreatedController(file, file_options=FileOptions(name_of_tab_to_read='test'))  
-        # controler.gather_multiple_answers('A','B') 
-
-        # file2 = File('testongletbyparticipant-result.xlsx')
-        # sheet1, sheet2 = file.writebook['severalAnswers'], file2.writebook['Feuille2'] 
-        # verify_sheets_identical(sheet1, sheet2)
-        # del sheet1, sheet2
-
-        # file.writebook.save(file.path + 'testongletbyparticipant.xlsx')
-        # del file
-
     def _build_gather_multiple_answers(self): 
         self.file_data_compare_1 = FileData('testongletbyparticipant.xlsx', 'multiple_answers')
         self.file_data_compare_1.create_file_object()
@@ -148,11 +135,6 @@ class TestEvenTabsController(TestCase):
 #         file = File('dataset.xlsx', dataonly = False)
 #         controler = EvenTabsController(file, FileOptions(columns_to_read=['B','C']))
 #         controler.apply_columns_formula_on_all_tabs()
-    
-
-
-
-
 
 #     def test_merge_cells_on_all_tabs(self): 
 #         file = File("test_merging.xlsx")
@@ -409,51 +391,13 @@ class TestColumnInsertion(TestCase):
         self.tab_options = TabOptions(columns_to_read=['A', 'B', 'C'], column_to_write='D')
         self.method_data = MethodData('insert_tags_of_maximum_of_column_list')
         self.columns_to_delete = ['D']
-        
-    
-#     def test_add_column_in_sheet_differently_sorted(self):
-#         file1 = File('test.xlsx', dataonly=True)
-#         file2 = File('test.xlsx')
-#         sheet2 = file2.writebook['Feuille5']
-
-#         controler = TwoFilesController(file1, file2, 'sheet1', 'Feuille5', 'C', 'C') 
-#         controler.copy_columns_in_a_tab_differently_sorted(['B','F'], 'E') 
-
-#         column_identical('test.xlsx','test.xlsx',4,5,5,5)
-#         column_identical('test.xlsx','test.xlsx',4,5,6,6)
-#         column_identical('test.xlsx','test.xlsx',4,5,8,8)
-        
-#         sheet2.delete_cols(5,2)
-#         TabUpdateFormula(ColumnDelete(['E','F'])).update_cells_formulas(sheet2)
-#         file2.writebook.save(file2.path + 'test.xlsx')
-
-#     def test_color_column(self):
-#         file = File('test.xlsx')
-#         controler = MultipleSameTabController(file,
-#                                               ColorTabController(file, tab_options=TabOptions(column_to_read='D')), 
-#                                               file_options=FileOptions(names_of_tabs_to_modify=['cutinpartsbis']))  
-#         #controler.tab_controller.tab_options.column_to_read = 'D'#TabOptions(column_to_read='D')
-#         controler.apply_method_on_some_tabs('color_cases_in_column', 
-#                                             {' partie 2 : Vrai':'0000a933'}) 
-         
-#     def test_color_cases_in_sheet(self):
-#         file = File('test.xlsx')
-#         controler = MultipleSameTabController(file,
-#                                               ColorTabController(file, tab_options=TabOptions()), 
-#                                               file_options=FileOptions(names_of_tabs_to_modify=['cutinpartsbis']))   
-#         controler.apply_method_on_some_tabs('color_cases_in_sheet', 
-#                                             {'partie 1 : Vrai':'0000a933', 'Abbas':'0000a933'}) 
-        
-#     def test_color_line_containing_chaines(self):
-#         file = File('test.xlsx')
-#         controler = MultipleSameTabController(file, 
-#                                               ColorTabController(file, color='0000a933'),
-#                                               file_options=FileOptions(names_of_tabs_to_modify=['color_line']))    
-#         controler.apply_method_on_some_tabs('color_lines_containing_strings', '-', '+') 
-        
 
 
-#     def test_delete_lines(self):
+class TestDeleteItems(TestCase):
+    def setUp(self):
+        pass
+
+    #     def test_delete_lines(self):
 #         file = File('test.xlsx')
 #         controler = MultipleSameTabController(file, tab_controller=DeleteController(file),
 #                                               file_options=FileOptions(names_of_tabs_to_modify=['delete_lines']))  
@@ -487,12 +431,6 @@ class TestColumnInsertion(TestCase):
 #         verify_sheets_identical(sheet1, sheet_result)
 #         verify_sheets_identical(sheet2, sheet_result)
 #         verify_sheets_identical(sheet3, sheet_result)
-
-
-
-
-
-
         
 #     """ def test_delete_other_columns(self):
 #         # Fonctionnel une fois
@@ -513,6 +451,85 @@ class TestColumnInsertion(TestCase):
 #         verify_sheets_identical(file.get_tab_by_name('sheet1'), File('test_keep_only_columns.xlsx').get_tab_by_name('Feuille2'))
 
 
+
+class TestColorItems(TestCase):
+    def setUp(self):
+        pass
+    
+#     def test_color_column(self):
+#         file = File('test.xlsx')
+#         controler = MultipleSameTabController(file,
+#                                               ColorTabController(file, tab_options=TabOptions(column_to_read='D')), 
+#                                               file_options=FileOptions(names_of_tabs_to_modify=['cutinpartsbis']))  
+#         #controler.tab_controller.tab_options.column_to_read = 'D'#TabOptions(column_to_read='D')
+#         controler.apply_method_on_some_tabs('color_cases_in_column', 
+#                                             {' partie 2 : Vrai':'0000a933'}) 
+         
+#     def test_color_cases_in_sheet(self):
+#         file = File('test.xlsx')
+#         controler = MultipleSameTabController(file,
+#                                               ColorTabController(file, tab_options=TabOptions()), 
+#                                               file_options=FileOptions(names_of_tabs_to_modify=['cutinpartsbis']))   
+#         controler.apply_method_on_some_tabs('color_cases_in_sheet', 
+#                                             {'partie 1 : Vrai':'0000a933', 'Abbas':'0000a933'}) 
+        
+#     def test_color_line_containing_chaines(self):
+#         file = File('test.xlsx')
+#         controler = MultipleSameTabController(file, 
+#                                               ColorTabController(file, color='0000a933'),
+#                                               file_options=FileOptions(names_of_tabs_to_modify=['color_line']))    
+#         controler.apply_method_on_some_tabs('color_lines_containing_strings', '-', '+') 
+
+
+class TestTwoFilesController(TestCase):
+    def setUp(self): 
+        self.file_object = None
+        self.controller = None
+        self.file_data_compare_1 = None
+        self.file_data_compare_2 = None
+        self.column_to_read_1 = None
+        self.column_to_read_2 = None
+        self.columns_to_compare = []
+        self.columns_to_copy = []
+        self.column_insertion = None
+
+    def test_copy_columns_in_a_tab_differently_sorted(self):
+        self._build_test()
+        self._apply_method_to_test()
+        self._compare_new_columns()
+        self._restore_file_state_and_save() 
+
+    def _build_test(self):
+        self.file_object_from = File('test.xlsx', dataonly=True)
+        self.tab_name_from = 'sheet1'
+        self.file_data_compare_1 = FileData('test.xlsx', 'Feuille5')
+        self.file_data_compare_2 = FileData('test.xlsx', 'Feuille5bis')
+        self.file_data_compare_1.create_file_object() 
+        self.column_to_read_from = 'C'
+        self.column_to_read_to = 'C'
+        self.columns_to_compare = ['E', 'F', 'H']
+        self.columns_to_copy = ['B','F']
+        self.column_insertion = 'E'
+
+    def _apply_method_to_test(self):
+        self.file1 = self.file_data_compare_1.file_object
+        self.file2 = self.file_data_compare_2.file_object
+        self.controller = TwoFilesController(self.file_object_from, self.file1,
+                                             self.tab_name_from, self.file_data_compare_1.tab_name,
+                                             self.column_to_read_from, self.column_to_read_to)
+        self.controller.copy_columns_in_a_tab_differently_sorted(self.columns_to_copy, self.column_insertion)
+
+    def _compare_new_columns(self):
+        self.assert_object = AssertIdentical(self.file_data_compare_1, self.file_data_compare_2) 
+        columns_to_compare_indexes = MapIndexLetter.get_list_of_columns_indexes(self.columns_to_compare)
+        for column_index in columns_to_compare_indexes:
+            self.assert_object.verify_columns_identical(column_index, column_index)
+
+    def _restore_file_state_and_save(self):
+        tab_modified = self.file1.writebook[self.file_data_compare_1.tab_name]        
+        tab_modified.delete_cols(column_index_from_string(self.column_insertion), len(self.columns_to_copy))
+        TabUpdateFormula(ColumnDelete(['E','F'])).update_cells_formulas(tab_modified)
+        self.file1.writebook.save(self.file1.path + self.file1.name_file)
 
 
 class TestString(TestCase, String):
@@ -592,6 +609,7 @@ class TestTabUpdate(TestCase, TabUpdateFormula):
 
 
 class AssertIdentical(TestCase):
+    """Check if two files are the same, or have the same tabs or columns"""
 
     def __init__(self, file_data1, file_data2, *args, **kwargs):
         super().__init__(*args, **kwargs) 
@@ -633,6 +651,7 @@ class AssertIdentical(TestCase):
 
 
 class FileData():
+    """Data objects containing file informations for test"""
     def __init__(self, name_file, tab_name=None, path='fichiers_xls/'):
         self.name_file = name_file
         self.tab_name = tab_name
@@ -650,6 +669,7 @@ class FileData():
 
 
 class MethodData():
+    """Data object containing method arguments for test"""
     def __init__(self, method_name, *args, **kwargs):
         self.method_name = method_name 
         self.args = args
