@@ -454,32 +454,46 @@ class TestDeleteItems(TestCase):
 
 class TestColorItems(TestCase):
     def setUp(self):
-        pass
-    
-#     def test_color_column(self):
-#         file = File('test.xlsx')
-#         controler = MultipleSameTabController(file,
-#                                               ColorTabController(file, tab_options=TabOptions(column_to_read='D')), 
-#                                               file_options=FileOptions(names_of_tabs_to_modify=['cutinpartsbis']))  
-#         #controler.tab_controller.tab_options.column_to_read = 'D'#TabOptions(column_to_read='D')
-#         controler.apply_method_on_some_tabs('color_cases_in_column', 
-#                                             {' partie 2 : Vrai':'0000a933'}) 
-         
-#     def test_color_cases_in_sheet(self):
-#         file = File('test.xlsx')
-#         controler = MultipleSameTabController(file,
-#                                               ColorTabController(file, tab_options=TabOptions()), 
-#                                               file_options=FileOptions(names_of_tabs_to_modify=['cutinpartsbis']))   
-#         controler.apply_method_on_some_tabs('color_cases_in_sheet', 
-#                                             {'partie 1 : Vrai':'0000a933', 'Abbas':'0000a933'}) 
-        
-#     def test_color_line_containing_chaines(self):
-#         file = File('test.xlsx')
-#         controler = MultipleSameTabController(file, 
-#                                               ColorTabController(file, color='0000a933'),
-#                                               file_options=FileOptions(names_of_tabs_to_modify=['color_line']))    
-#         controler.apply_method_on_some_tabs('color_lines_containing_strings', '-', '+') 
+        self.file_object = None
+        self.tab_controller = None
+        self.file_options = None
+        self.method_data = None
 
+    def apply_method(fonction):
+        def wrapper(self): 
+            fonction(self)
+            self._apply_the_method_to_test() 
+        return wrapper
+    
+    def _apply_the_method_to_test(self): 
+        controller = MultipleSameTabController(self.file_object,
+                                              self.tab_controller, 
+                                              file_options=self.file_options)   
+        controller.apply_method_on_some_tabs(self.method_data.method_name, *self.method_data.args)
+    
+    @apply_method
+    def test_color_cases_in_column(self):
+        self.file_object = File('test.xlsx')
+        tab_options = TabOptions(column_to_read='D')
+        self.file_options = FileOptions(names_of_tabs_to_modify=['cutinpartsbis'])
+        self.method_data = MethodData('color_cases_in_column', {' partie 2 : Vrai':'0000a933'})
+        self.tab_controller = ColorTabController(self.file_object, tab_options=tab_options)
+    
+    @apply_method
+    def test_color_cases_in_sheet(self):
+        self.file_object = File('test.xlsx')
+        tab_options = TabOptions()
+        self.file_options = FileOptions(names_of_tabs_to_modify=['cutinpartsbis'])
+        self.method_data = MethodData('color_cases_in_sheet', {'partie 1 : Vrai':'0000a933', 'Abbas':'0000a933'})
+        self.tab_controller = ColorTabController(self.file_object, tab_options=tab_options)
+    
+    @apply_method    
+    def test_color_line_containing_chaines(self):
+        self.file_object = File('test.xlsx')
+        self.file_options = FileOptions(names_of_tabs_to_modify=['color_line'])
+        self.method_data = MethodData('color_lines_containing_strings', '-', '+')
+        self.tab_controller = ColorTabController(self.file_object, color='0000a933')
+ 
 
 class TestTwoFilesController(TestCase):
     def setUp(self): 
