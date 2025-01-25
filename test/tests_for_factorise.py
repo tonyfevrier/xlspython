@@ -395,61 +395,94 @@ class TestColumnInsertion(TestCase):
 
 class TestDeleteItems(TestCase):
     def setUp(self):
-        pass
+        self.file_data = None
+        self.file_data_compare = None
+        self.tab_controller = None
+        self.file_options = None
+        self.columns_to_compare = []
 
-    #     def test_delete_lines(self):
-#         file = File('test.xlsx')
-#         controler = MultipleSameTabController(file, tab_controller=DeleteController(file),
-#                                               file_options=FileOptions(names_of_tabs_to_modify=['delete_lines']))  
-#         controler.apply_method_on_some_tabs('delete_lines_containing_strings_in_given_column', 'D', '0')
-#         controler.apply_method_on_some_tabs('delete_lines_containing_strings_in_given_column', 'D', 'p a') 
-#         column_identical('test.xlsx','test.xlsx',9,10, 1, 1)
-#         column_identical('test.xlsx','test.xlsx',9,10, 2, 2)
-#         column_identical('test.xlsx','test.xlsx',9,10, 3, 3)
-#         column_identical('test.xlsx','test.xlsx',9,10, 4, 4)
-#         column_identical('test.xlsx','test.xlsx',9,10, 5, 5)
-#         column_identical('test.xlsx','test.xlsx',9,10, 6, 6)
-
-#     def test_delete_lines_with_formulas(self):
-#         file = File('listing_par_etape - Copie.xlsx')
-#         controler = MultipleSameTabController(file, tab_controller=DeleteController(file),
-#                                               file_options=FileOptions(names_of_tabs_to_modify=['Feuil1']))   
-#         controler.apply_method_on_some_tabs('delete_lines_containing_strings_in_given_column', 'B', 'pas consenti') 
-#         column_identical('listing_par_etape - Copie.xlsx','listing_par_etape - Copie.xlsx',0, 1, 2, 2)
-#         column_identical('listing_par_etape - Copie.xlsx','listing_par_etape - Copie.xlsx',0, 1, 10, 10) 
-
-#     def test_delete_doublons(self): 
-#         file = File('test_doublons.xlsx')
-#         controler = MultipleSameTabController(file, 
-#                                               tab_controller=DeleteController(file), 
-#                                               file_options=FileOptions(names_of_tabs_to_modify=['sheet2', 'sheet1', 'sheet3']))
-#         sheet_result = file.writebook['result']  
-#         controler.apply_method_on_some_tabs('delete_twins_lines_and_color_last_twin', 'C', color = 'FFFFFF00') 
-#         sheet1 = file.writebook['sheet1']  
-#         sheet2 = file.writebook['sheet2']  
-#         sheet3 = file.writebook['sheet3']  
-#         verify_sheets_identical(sheet1, sheet_result)
-#         verify_sheets_identical(sheet2, sheet_result)
-#         verify_sheets_identical(sheet3, sheet_result)
+    def test_delete_lines_containing_strings_in_given_column(self):
+        self._build_delete_lines_containing_strings_in_given_column()
         
-#     """ def test_delete_other_columns(self):
-#         # Fonctionnel une fois
-#         file = File('test_keep_only_columns.xlsx')
-#         controller = DeleteController(file, 'sheet1')
-#         controller.delete_other_columns('A-C,D-K')
+        self.tab_controller = DeleteController(self.file_data.file_object)
+        controller = MultipleSameTabController(self.file_data.file_object, self.tab_controller, self.file_options)
+        controller.apply_method_on_some_tabs('delete_lines_containing_strings_in_given_column', 'D', '0', 'p a') 
 
-#         verify_sheets_identical(file.get_tab_by_name('sheet1'), File('test_keep_only_columns.xlsx').get_tab_by_name('Feuille2')) """
+        self._compare_new_columns() 
+    
+    def _build_delete_lines_containing_strings_in_given_column(self):
+        self.file_data = FileData('test.xlsx', 'delete_lines')
+        self.file_data_compare = FileData('test.xlsx', 'delete_lines_bis') 
+        self.file_options = FileOptions(names_of_tabs_to_modify=['delete_lines'])
+        self.columns_to_compare = [i for i in range(1, 7)]
 
-#     def test_delete_columns(self):
-#         # Fonctionnel une fois
-#         file = File('test_keep_only_columns.xlsx')
-#         controller = MultipleSameTabController(file, DeleteController(file, 'sheet1'), 
-#                                   file_options=FileOptions(names_of_tabs_to_modify=['sheet1']))  
-                                   
-#         controller.apply_method_on_some_tabs('delete_columns', 'L,M,N-V')
+    def _compare_new_columns(self):
+        self.assert_object = AssertIdentical(self.file_data, self.file_data_compare)  
+        for column in self.columns_to_compare:
+            self.assert_object.verify_columns_identical(column, column)
 
-#         verify_sheets_identical(file.get_tab_by_name('sheet1'), File('test_keep_only_columns.xlsx').get_tab_by_name('Feuille2'))
+    def test_delete_lines_containing_strings_in_given_column_with_formulas(self):
+        self._build_delete_lines_containing_strings_in_given_column_with_formulas()
 
+        self.tab_controller = DeleteController(self.file_data.file_object)
+        controller = MultipleSameTabController(self.file_data.file_object, self.tab_controller, self.file_options)
+        controller.apply_method_on_some_tabs('delete_lines_containing_strings_in_given_column', 'B', 'pas consenti')         
+        
+        self._compare_new_columns()
+
+    def _build_delete_lines_containing_strings_in_given_column_with_formulas(self):
+        self.file_data = FileData('listing_par_etape - Copie.xlsx', 'Feuil1')
+        self.file_data_compare = FileData('listing_par_etape - Copie.xlsx', 'Feuille2') 
+        self.file_options = FileOptions(names_of_tabs_to_modify=['Feuil1'])
+        self.columns_to_compare = [2, 10]
+
+    def test_delete_twins_lines_and_color_last_twin(self): 
+        self._build_delete_twins_lines_and_color_last_twin()
+
+        self.tab_controller = DeleteController(self.file_object)
+        controller = MultipleSameTabController(self.file_object, self.tab_controller, self.file_options)
+        controller.apply_method_on_some_tabs('delete_twins_lines_and_color_last_twin', 'C', color = 'FFFFFF00')
+
+        self._compare_multiple_tabs()        
+
+    def _build_delete_twins_lines_and_color_last_twin(self):
+        self.file_object = File('test_doublons.xlsx')
+        self.file_data_compare = FileData('test_doublons.xlsx', 'result')
+        self.tab_names = ['sheet2', 'sheet1', 'sheet3']
+        self.file_options = FileOptions(names_of_tabs_to_modify=self.tab_names)
+
+    def _compare_multiple_tabs(self):
+        for tab_name in self.tab_names:
+            self.file_data = FileData(self.file_object.name_file, tab_name)
+            self.assert_object = AssertIdentical(self.file_data, self.file_data_compare) 
+            self.assert_object.verify_tabs_identical()
+        
+    def test_delete_other_columns(self):
+        self._build_delete_columns()
+
+        self.controller = MultipleSameTabController(self.file_data.file_object, self.tab_controller, self.file_options)
+        self.controller.apply_method_on_some_tabs('delete_other_columns', 'A-C,D-K')
+
+        self._compare_tab()
+
+    def test_delete_columns(self):
+        self._build_delete_columns()
+
+        self.controller = MultipleSameTabController(self.file_data.file_object, self.tab_controller, self.file_options)
+        self.controller.apply_method_on_some_tabs('delete_columns', 'L,M,N-V')
+
+        self._compare_tab()
+
+    def _build_delete_columns(self):
+        tab_name = 'sheet1'
+        self.file_data = FileData('test_keep_only_columns.xlsx', tab_name)
+        self.file_data_compare = FileData('test_keep_only_columns.xlsx', 'Feuille2')
+        self.tab_controller = DeleteController(self.file_data.file_object, tab_name) 
+        self.file_options = FileOptions(names_of_tabs_to_modify=[tab_name])
+
+    def _compare_tab(self):
+        self.assert_object = AssertIdentical(self.file_data, self.file_data_compare)
+        self.assert_object.verify_tabs_identical()
 
 
 class TestColorItems(TestCase):
