@@ -129,45 +129,73 @@ class TestOneTabCreatedController(TestCase):
 
 
 class TestEvenTabsController(TestCase):
-    pass
+    def setUp(self):
+        self.file_object = None
+        self.file_options = None
+        self.tab_names = []
+        self.tab_name_to_compare = None
 
-#     def test_apply_column_formula_on_all_tabs(self):
-#         file = File('dataset.xlsx', dataonly = False)
-#         controler = EvenTabsController(file, FileOptions(columns_to_read=['B','C']))
-#         controler.apply_columns_formula_on_all_tabs()
+    def test_apply_column_formula_on_all_tabs(self):
+        self._build_apply_column_formula_on_all_tabs()
 
-#     def test_merge_cells_on_all_tabs(self): 
-#         file = File("test_merging.xlsx")
-#         controler = EvenTabsController(file)
-#         controler.merge_cells_on_all_tabs(MergedCellsRange('C', 'D', 12, 15))
+        controller = EvenTabsController(self.file_object, self.file_options)        
+        controller.apply_columns_formula_on_all_tabs()
 
-#         #voir comment tester le fait qu'une cellule est mergée : comprendre l'objet mergedcells
-#         """ for tab in file1.sheets_name:
-#             sheet = file1.writebook[tab]
-#             mergedcells = sheet.merged_cells
-#             print(mergedcells.ranges, type(mergedcells))
-#             self.assertEqual('C5' in mergedcells.ranges,True)
-#             self.assertIn(sheet['C6'],mergedcells)
-#             self.assertIn(sheet['C7'],mergedcells)
-#             self.assertIn(sheet['D5'],mergedcells)
-#             self.assertIn(sheet['D6'],mergedcells) """
-        
-#     def test_apply_cell_formula_on_all_sheets(self):
-#         file = File("test_merging.xlsx")
-#         controler = EvenTabsController(file)
-#         controler.apply_cells_formula_on_all_tabs('A10','B10','C10')
+        self._compare_multiple_tabs()
 
-#         for tab in file.sheets_name[1:]:
-#             sheet = file.writebook[tab]
-#             self.assertEqual(sheet['A10'].value, file.writebook[file.sheets_name[0]]['A10'].value)
-#             self.assertEqual(sheet['B10'].value, file.writebook[file.sheets_name[0]]['B10'].value)
-#             self.assertEqual(sheet['C10'].value, file.writebook[file.sheets_name[0]]['C10'].value)
+    def _build_apply_column_formula_on_all_tabs(self):
+        self.file_object = File('dataset.xlsx', dataonly = False)
+        self.file_options = FileOptions(columns_to_read=['B','C'])
+        self.tab_names = ['Feuille2', 'Feuille3', 'Feuille4']
+        self.tab_name_to_compare = 'ref'
+
+    def _compare_multiple_tabs(self):
+        file_name = self.file_object.name_file
+        file_data_compare = FileData(file_name, self.tab_name_to_compare)
+        file_data_list = [FileData(file_name, tab_name) for tab_name in self.tab_names]
+
+        for file_data in file_data_list:
+            assert_object = AssertIdentical(file_data, file_data_compare)
+            assert_object.verify_tabs_identical()
+
+    def test_apply_cell_formula_on_all_tabs(self):
+        self._build_apply_cell_formula_on_all_tabs()
+
+        controller = EvenTabsController(self.file_object)
+        controller.apply_cells_formula_on_all_tabs(*self.cells)
+
+        self._compare_cells_of_multiple_tabs()
+
+    def _build_apply_cell_formula_on_all_tabs(self): 
+        self.file_object = File("test_merging.xlsx") 
+        self.tab_names = self.file_object.sheets_name[1:]
+        self.tab_name_to_compare = self.file_object.sheets_name[0]
+        self.cells = ['A10','B10','C10']
+
+    def _compare_cells_of_multiple_tabs(self):
+        file_name = self.file_object.name_file
+        file_data_compare = FileData(file_name, self.tab_name_to_compare)
+
+        for tab_name in self.tab_names:
+            file_data = FileData(file_name, tab_name)
+            assert_object = AssertIdentical(file_data, file_data_compare)
+            assert_object.verify_cells_identical(*self.cells)
     
-#     def test_check_linenumber_of_tabs(self):
-#         file = File('test.xlsx')
-#         controler = EvenTabsController(file)
-#         tabs = controler.list_tabs_with_different_number_of_lines(14)
-#         self.assertListEqual(tabs, ['cutinparts', 'cutinpartsbis', 'delete_lines', 'delete_lines_bis', 'time_min', 'time_min_expected'])
+    def test_merge_cells_on_all_tabs(self): 
+        self.file_object = File("test_merging.xlsx")
+        
+        controller = EvenTabsController(self.file_object)
+        merged_cells_range = MergedCellsRange('E', 'G', 12, 15)
+        controller.merge_cells_on_all_tabs(merged_cells_range)        
+
+    def test_list_tabs_with_different_number_of_lines(self):
+        self.file_object = File('test.xlsx')
+        expected_tabs = ['cutinparts', 'cutinpartsbis', 'delete_lines', 'delete_lines_bis', 'time_min', 'time_min_expected']
+
+        controller = EvenTabsController(self.file_object)
+        tabs = controller.list_tabs_with_different_number_of_lines(14)
+        
+        self.assertListEqual(tabs, expected_tabs)
 
 
 class TestOneFileCreatedController(TestCase):
@@ -696,6 +724,10 @@ class AssertIdentical(TestCase):
         for i in range(2, self.tab1.max_row + 1): 
             self.assertEqual(self.tab1.cell(i, column1).value,self.tab2.cell(i, column2).value)
 
+    def verify_cells_identical(self, *cells):
+        cells_indexes = MapIndexLetter.get_list_of_cells_coordinates(cells)
+        for indexes in cells_indexes:
+            self.assertEqual(self.tab1.cell(indexes[0], indexes[1]).value, self.tab2.cell(indexes[0], indexes[1]).value)
 
 class FileData():
     """Data objects containing file informations for test"""
