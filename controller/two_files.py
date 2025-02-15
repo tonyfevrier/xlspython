@@ -239,16 +239,20 @@ class OneFileCreatedController(MapIndexLetter):
         self.tabs_copy.deep_copy_of_a_tab() 
         self.new_writebook.save('multifiles/' + tab_name + '.xlsx') 
 
-    def copy_a_tab_in_new_workbook(self, tab_name): 
+    def copy_a_tab_at_tab_bottom(self, tab_name): 
         new_file_name = f'gathered_{self.file_object.name_file}'
-        self._create_or_load_workbook(new_file_name) 
+        is_file_new = self._create_or_load_workbook(new_file_name) 
         self.tabs_copy._choose_the_tab_to_read(self.file_object.get_tab_by_name(tab_name))
         self.tabs_copy._choose_the_tab_to_write_in(self.new_writebook[self.new_writebook.active.title])
-        self.tabs_copy.copy_old_file_tab_in_new_file_tab() 
+        if is_file_new:
+            self.tabs_copy.copy_paste_line(1, 1)
+        self.tabs_copy.copy_old_file_tab_in_new_file_tab_at_bottom()
         self._save_writebook_in_good_path(new_file_name)
 
     def _create_or_load_workbook(self, new_file_name): 
         try:
             self.new_writebook = openpyxl.load_workbook(self.new_path + new_file_name)
+            return False
         except (OSError, TypeError):
             self.new_writebook = openpyxl.Workbook()
+            return True

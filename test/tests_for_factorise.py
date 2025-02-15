@@ -7,56 +7,93 @@ from controller.path import PathController
 from utils.utils_factorise import ColumnDelete, ColumnInsert, LineDelete, LineInsert, TabUpdateFormula, MapIndexLetter, String, Dictionary
 from openpyxl.utils import column_index_from_string
 
- 
 import os
  
 
-# class TestPath(TestCase):
+class TestPath(TestCase):
+
+    def setUp(self):
+        self.path = None
+        self.method_data = None
+        self.file_controller = None
+        self.file_data_compare1 = None
+        self.file_data_compare2 = None
     
-#     def test_create_one_onglet_by_participant(self):
-#         path = Path('fichiers_xls/gathertests/')
-#         controller = PathController(path, 'test_cmd_ongletbyparticipant.xlsx', 
-#                                     OneFileCreatedController(file_options=FileOptions(name_of_tab_to_read='test', column_to_read='A'), new_path=path.pathname))
-#         controller.apply_method_on_homononymous_files('split_one_tab_in_multiple_tabs') 
-#         file = File('divided_test_cmd_ongletbyparticipant_before.xlsx', path.pathname)
-#         file2 = File('divided_test_cmd_ongletbyparticipant.xlsx', path.pathname)
-        
-#         verify_files_identical(file, file2)
-#         os.remove(path.pathname + 'divided_test_cmd_ongletbyparticipant.xlsx') 
+    def test_split_one_tab_in_multiple_tabs(self):
+        self._build_split_one_tab_in_multiple_tabs()
+        self._apply_method_on_all_files()
+        self._compare_created_file_to_expected_file()
+        self._delete_created_file()
 
-#     def test_transform_string_in_binary_in_column(self):
-#         path = Path('fichiers_xls/gathertests/')
+    def _build_split_one_tab_in_multiple_tabs(self):
+        self.path = Path('fichiers_xls/gathertests/')
+        self.method_data = MethodData('split_one_tab_in_multiple_tabs')
+        file_options = FileOptions(name_of_tab_to_read='test', column_to_read='A')
+        self.file_controller = OneFileCreatedController(file_options=file_options, new_path=self.path.pathname)
+        self.test_file_name = 'test_cmd_ongletbyparticipant.xlsx'
+        self.expected_file_name = 'divided_test_cmd_ongletbyparticipant_before.xlsx' 
+        self.created_file_name = 'divided_test_cmd_ongletbyparticipant.xlsx'
 
-#         controller = PathController(path, 'test_string_in_binary.xlsx', 
-#                                     InsertController(tab_name='sheet1' , tab_options = TabOptions(column_to_read='G', column_to_write='H'), save=True))
-#         controller.apply_method_on_homononymous_tabs('transform_string_in_binary_in_column', 'partie 1 : Vrai') 
+    def _apply_method_on_all_files(self, args=()):
+        controller = PathController(self.path, self.test_file_name, self.file_controller)
+        controller.apply_method_on_homononymous_files(self.method_data.method_name, *args) 
 
-#         file_object = File('test_string_in_binary.xlsx', path.pathname + 'Nouveau dossier/') 
-#         file_object2 = File('test_string_in_binary.xlsx', path.pathname + 'Nouveau dossier - Copie/') 
-#         sheeta = file_object.writebook['sheet1']
-#         sheetb = file_object.writebook['expected']
-#         sheet2a = file_object2.writebook['sheet1']
-#         sheet2b = file_object2.writebook['expected']
-#         verify_sheets_identical(sheeta, sheetb) 
-#         verify_sheets_identical(sheet2a, sheet2b) 
-#         sheet2a.delete_cols(8)
-#         sheeta.delete_cols(8)
-#         file_object.writebook.save(path.pathname + 'Nouveau dossier/test_string_in_binary.xlsx')
-#         file_object2.writebook.save(path.pathname + 'Nouveau dossier - Copie/test_string_in_binary.xlsx')
-
-#     def test_copy_a_tab_in_new_workbook(self):
-#         path = Path('gatherfiles/')
-#         controller = PathController(path, 'test.xlsx', 
-#                                     OneFileCreatedController(new_path=path.pathname))
-#         controller.apply_method_on_homononymous_files('copy_a_tab_in_new_workbook', 'Sheet') 
-#         file = File('gathered_test.xlsx', path.pathname)
-#         file2 = File('gathered_test_ref.xlsx', path.pathname)
-        
-#         verify_files_identical(file, file2)
-#         os.remove(path.pathname + 'gathered_test.xlsx') 
-
+    def _compare_created_file_to_expected_file(self):
+        self.file_data_compare1 = FileData(self.expected_file_name, path=self.path.pathname)
+        self.file_data_compare2 = FileData(self.created_file_name, path=self.path.pathname)
+        assert_object = AssertIdentical(self.file_data_compare1, self.file_data_compare2)
+        assert_object.verify_files_identical()
     
+    def _delete_created_file(self):
+        os.remove(self.path.pathname + self.file_data_compare2.name_file) 
 
+    def test_copy_a_tab_at_tab_bottom(self):
+        self._build_copy_a_tab_at_tab_bottom()
+        self._apply_method_on_all_files(self.method_data.args)
+        self._compare_created_file_to_expected_file()
+        self._delete_created_file() 
+
+    def _build_copy_a_tab_at_tab_bottom(self):
+        self.path = Path('gatherfiles/')
+        self.method_data = MethodData('copy_a_tab_at_tab_bottom', 'Sheet')
+        self.file_controller = OneFileCreatedController(new_path=self.path.pathname)
+        self.test_file_name = 'test.xlsx'
+        self.expected_file_name = 'gathered_test_ref.xlsx'
+        self.created_file_name = 'gathered_test.xlsx' 
+
+    def test_transform_string_in_binary_in_column(self):
+        self._build_transform_string_in_binary_in_column()
+        self._apply_method_on_all_tabs()
+        self._compare_transform_string_in_binary_in_column()     
+
+    def _build_transform_string_in_binary_in_column(self):
+        self.path = Path('fichiers_xls/gathertests/')
+        tab_options = TabOptions(column_to_read='G', column_to_write='H')
+        self.file_controller = InsertController(tab_name='sheet1' , tab_options = tab_options, save=True)
+        self.method_data = MethodData('transform_string_in_binary_in_column', 'partie 1 : Vrai')
+        self.test_file_name = 'test_string_in_binary.xlsx'
+
+    def _apply_method_on_all_tabs(self):
+        controller = PathController(self.path, self.test_file_name, self.file_controller)
+        controller.apply_method_on_homononymous_tabs(self.method_data.method_name, *self.method_data.args) 
+
+    def _compare_transform_string_in_binary_in_column(self):
+        folders_names = ['Nouveau dossier/', 'Nouveau dossier - Copie/']
+        for name in folders_names:
+            self._compare_modified_tab_to_expected(name)
+            self._delete_created_columns_and_save()
+
+    def _compare_modified_tab_to_expected(self, name):
+        self.file_data_compare = FileData(self.test_file_name, 'sheet1', path=self.path.pathname + name) 
+        self.file_data_compare_ref = FileData(self.test_file_name, 'expected', path=self.path.pathname + name)
+        self.assert_object = AssertIdentical(self.file_data_compare, self.file_data_compare_ref)
+        self.assert_object.verify_tabs_identical()
+
+    def _delete_created_columns_and_save(self):
+        tab_name = self.file_data_compare.tab_name
+        tab = self.file_data_compare.file_object.writebook[tab_name] 
+        tab.delete_cols(8)
+        self.file_data_compare.file_object.save_file()
         
 
 class TestOneTabCreatedController(TestCase):
@@ -97,7 +134,7 @@ class TestOneTabCreatedController(TestCase):
         self.file_object = self.file_data_compare_1.file_object
         for tab in tabs_to_delete: 
             del self.file_object.writebook[tab]
-        self.file_object.writebook.save(self.file_object.path + self.file_object.name_file)
+        self.file_object.save_file()
 
     def test_gather_groups_of_multiple_columns_in_tabs_of_two_columns_containing_tags_and_values(self):
         self._build_files_to_compare('test_gather_columns_in_one.xlsx', 'test_gather_columns_in_one - ref.xlsx')
@@ -194,7 +231,7 @@ class TestEvenTabsController(TestCase):
 
         controller = EvenTabsController(self.file_object)
         tabs = controller.list_tabs_with_different_number_of_lines(14)
-        
+
         self.assertListEqual(tabs, expected_tabs)
 
 
@@ -321,7 +358,7 @@ class TestColumnInsertion(TestCase):
         tab.delete_cols(column_index_from_string(self.columns_to_delete[0]), len(self.columns_to_delete))
         modification_object = ColumnDelete(self.columns_to_delete)
         self.controller.tab_controller._update_cell_formulas(modification_object) 
-        self.file_data.file_object.writebook.save(self.file_data.file_object.path + self.file_data.name_file) 
+        self.file_data.file_object.save_file()
 
     @apply_compare_columns_restore
     def test_transform_string_in_binary_in_column(self): 
@@ -604,7 +641,7 @@ class TestTwoFilesController(TestCase):
         tab_modified = self.file1.writebook[self.file_data_compare_1.tab_name]        
         tab_modified.delete_cols(column_index_from_string(self.column_insertion), len(self.columns_to_copy))
         TabUpdateFormula(ColumnDelete(['E','F'])).update_cells_formulas(tab_modified)
-        self.file1.writebook.save(self.file1.path + self.file1.name_file)
+        self.file1.save_file()
 
 
 class TestString(TestCase, String):

@@ -317,7 +317,7 @@ class FileControler(UtilsForFile):
                 if adressjson == "":
                     prenom = tab.split(" ")[0]
                     nom = tab.split(" ")[1]
-                    self.envoi_mail(prenom + "." + nom + "@universite-paris-saclay.fr", file_to_send, "tony.fevrier62@gmail.com", "qkxqzhlvsgdssboh", objet, message)
+                    self.envoi_mail(prenom + "." + nom + "@etu-upsaclay.fr", file_to_send, "tony.fevrier62@gmail.com", "qkxqzhlvsgdssboh", objet, message)
                 else: 
                     self.envoi_mail(mailinglist[tab], file_to_send, "tony.fevrier62@gmail.com", "qkxqzhlvsgdssboh", objet, message) 
             Other.display_running_infos('one_file_by_tab_sendmail', tab, self.file.sheets_name, start)

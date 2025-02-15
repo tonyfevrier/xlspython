@@ -149,6 +149,10 @@ class TabsCopy():
             for j in range(1, self.tab_from.max_column + 1):  
                 self.copy_of_a_cell(Cell(i,j), Cell(i,j))
 
+    def copy_old_file_tab_in_new_file_tab_at_bottom(self):
+        for line in range(2, self.tab_from.max_row + 1):
+            self.add_line_at_bottom(line)
+
     def deep_copy_of_a_cell(self, cell_from, cell_to):   
         self.tab_to.cell(cell_to.line_index, cell_to.column_index).value = self.tab_from.cell(cell_from.line_index, cell_from.column_index).value  
         self.tab_to.cell(cell_to.line_index, cell_to.column_index).fill = copy(self.tab_from.cell(cell_from.line_index, cell_from.column_index).fill)
