@@ -45,14 +45,12 @@ def gatherfiles(directory : Annotated[str, typer.Option(prompt = directory_promp
     controller = PathController(path_object, file_name, file_controller, dataonly=values)
     controller.apply_method_on_homononymous_files('copy_a_tab_at_tab_bottom', tab_name) 
     
-    #controller = PathControler(pathobject)
-    #controller.gather_files_in_different_directories(file, sheet, values_only=values)
-
+# AAAAAAAAAAARRIVE ICI
 
 @app.command()
 def multidelcols(directory : Annotated[str, typer.Option(prompt = directory_prompt)],
-                 file : Annotated[str, typer.Option(prompt = multiple_file_prompt)],
-                 sheet : Annotated[str, typer.Option(prompt = sheet_prompt)],
+                 file_name : Annotated[str, typer.Option(prompt = multiple_file_prompt)],
+                 tab_name : Annotated[str, typer.Option(prompt = sheet_prompt)],
                  columns : Annotated[str, typer.Option(prompt = "Enter the group of column you want to KEEP. Respect the form A-D,E,G,H-J,Z without introducing any space.")]):
     """
     Fonction agissant sur un dossier. Fonction qui prend plusieurs fichiers de structures identiques et qui ne garde qu'un ensemble
@@ -62,9 +60,10 @@ def multidelcols(directory : Annotated[str, typer.Option(prompt = directory_prom
 
         Version guidée : python xlspython.py multidelcols 
     """  
-    pathobject = Path(directory + '/') 
-    controler = PathControler(pathobject)
-    controler.apply_method_on_homononymous_sheets(file, sheet, 'delete_other_columns', columns)
+    pathobject = Path(directory + '/')  
+    tab_controller = DeleteController(tab_name=tab_name)
+    controller = PathController(pathobject, file_name, tab_controller)
+    controller.apply_method_on_homononymous_tabs('delete_other_columns', columns)
 
 
 # File commands
