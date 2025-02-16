@@ -4,11 +4,12 @@ from model.model_factorise import File
 from utils.utils_factorise import DisplayRunningInfos, TabsCopy
 
 class PathController():
-    def __init__(self, path, name_file, controller):
+    def __init__(self, path, name_file, controller, dataonly=False):
         """Input : path (object of the class Path)"""
         self.path = path 
         self.name_file = name_file
         self.controller = controller
+        self.dataonly = dataonly
         self.display = DisplayRunningInfos() 
         self.tabs_copy = TabsCopy
 
@@ -27,7 +28,7 @@ class PathController():
 
         for directory in self.path.directories:
             self._reinitialize_controller_attributes(controller_copy)
-            self.controller.file_object = File(self.name_file, self.path.pathname + directory + '/') 
+            self.controller.file_object = File(self.name_file, self.path.pathname + directory + '/', dataonly=self.dataonly) 
             method = getattr(self.controller, method_name)
             method(*args, **kwargs) 
 
@@ -43,7 +44,7 @@ class PathController():
 
         for directory in self.path.directories: 
             self._reinitialize_controller_attributes(controller_copy)  
-            self.controller.file_object = File(self.name_file, self.path.pathname + directory + '/') 
+            self.controller.file_object = File(self.name_file, self.path.pathname + directory + '/', dataonly=self.dataonly) 
             self.controller.tab = self.controller.file_object.get_tab_by_name(self.controller.tab_name)
             method = getattr(self.controller, method_name)
             method(*args, **kwargs) 
