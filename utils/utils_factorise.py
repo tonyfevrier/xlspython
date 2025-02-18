@@ -1,5 +1,6 @@
 import re
 import openpyxl
+import typer
 
 from openpyxl.utils import get_column_interval,\
                            column_index_from_string,\
@@ -248,6 +249,7 @@ class RegularExpression():
         time_values = re.findall(r'\d+', time_string)
         unities = re.findall(r'[A-Za-z]+', time_string)
         return dict(zip(unities, time_values))
+    
 
 class TabUpdateFormula():
     """Update cells formula of a tab after columns/lines are inserted/deleted. Modification_object 
@@ -438,6 +440,13 @@ class String():
         return string.strip().replace('\xa0', ' ')
     
     @classmethod
+    def get_columns_from_several(cls, *strings):
+        columns_list = []
+        for string in strings: 
+            columns_list.append(cls.get_columns_from(string)) 
+        return columns_list
+    
+    @classmethod
     def get_columns_from(cls, string):
         """
         Fonction qui prend en entrée une chaîne de caractères de la forme "C-E,H,J" et qui retourne une liste de colonnes 
@@ -550,4 +559,46 @@ class Workbook():
     def get_first_tab_of_new_workbook():
         workbook = openpyxl.Workbook()
         return workbook[workbook.active.title] 
+    
+
+class InputStore():
+    """Store inputs from the user when using functinos"""
+    def __init__(self, args, message):
+        self.message = message
+        self.args = args
+
+    def ask_argument_until_none(self):
+        if not self.args:
+            self.args = []
+            self._store_argument_if_not_none()
+        return self.args
+    
+    def _store_argument_if_not_none(self):
+        while True:
+            user_input = typer.prompt(self.message, default="")
+            if not user_input:
+                break
+            self.args.append(user_input)
+
+
+class MapStore():
+    """Create a dictionary containing inputs for keys and values"""
+    def __init__(self, message_key, message_value):
+        self.message_key = message_key
+        self.message_value = message_value 
+        self.mapping = {}
+
+    def create_mapping(self):
+        while True: 
+            key = typer.prompt(self.message_key, default = "")
+            if not key:
+                break 
+            value = typer.prompt(self.message_value, default = "")
+            self._assign_splitted_value_if_contains_comma(key, value)
+
+    def _assign_splitted_value_if_contains_comma(self, key, value):
+        if ',' in value:
+            self.mapping[key] = value.split(',')
+        else:
+            self.mapping[key] = value   
     

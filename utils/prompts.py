@@ -9,6 +9,7 @@ group_column_prompt = "Enter a group of column of the form A-D,E,G,H-J,Z. There 
 line_prompt = '(Optional) Enter the number of the line or press enter'
 cell_prompt = "Entrez une cellule que vous souhaitez copier : "
 color_prompt = "Please enter the color in hexadecimal type"
+separator_prompt = '(Optional) Enter the separator'
 
 def ask_argument_prompt(name):
     return f'"Enter one {name} and then press enter. Press directly enter if you have entered all the good {name}s'

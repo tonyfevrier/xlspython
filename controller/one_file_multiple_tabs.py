@@ -201,7 +201,7 @@ class EvenTabsController(MapIndexLetter):
             self.tabs_copy._choose_the_tab_to_write_in(self.file_object.get_tab_by_name(tab_name))
             self.tabs_copy.copy_paste_multiple_columns(columns_int_list) 
 
-            self.display._update_display_infos('apply_column_formula_on_all_sheets', tab_name, self.file_object.sheets_name[1:])
+            self.display._update_display_infos('apply_column_formula_on_all_tabs', tab_name, self.file_object.sheets_name[1:])
             self.display.display_running_infos()
             
         self.file_object.save_file() 

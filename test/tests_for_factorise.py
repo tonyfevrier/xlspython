@@ -582,7 +582,7 @@ class TestColorItems(TestCase):
         self.file_object = File('test.xlsx')
         tab_options = TabOptions()
         self.file_options = FileOptions(names_of_tabs_to_modify=['cutinpartsbis'])
-        self.method_data = MethodData('color_cases_in_sheet', {'partie 1 : Vrai':'0000a933', 'Abbas':'0000a933'})
+        self.method_data = MethodData('color_cases_in_tab', {'partie 1 : Vrai':'0000a933', 'Abbas':'0000a933'})
         self.tab_controller = ColorTabController(self.file_object, tab_options=tab_options)
     
     @apply_method    

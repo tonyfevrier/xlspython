@@ -61,7 +61,7 @@ class ColorTabController(String):
         return cleaned_cell_value
 
     @save_file
-    def color_cases_in_sheet(self, map_string_to_color): 
+    def color_cases_in_tab(self, map_string_to_color): 
         """
         Fonction qui colore les cases contenant à certaines chaînes de caractères d'une feuille 
         """  
@@ -348,10 +348,13 @@ class InsertController(MapIndexLetter, RegularExpression, String):
         return wrapper
 
     def _get_indexes_of_columns_to_read(self): 
-        if self.tab_options.columns_to_read is not None:
-            self.tab_options.columns_to_read = self.get_list_of_columns_indexes(self.tab_options.columns_to_read)
-        if self.tab_options.column_to_read is not None:
-            self.tab_options.column_to_read = column_index_from_string(self.tab_options.column_to_read)
+        try:
+            if self.tab_options.columns_to_read is not None:
+                self.tab_options.columns_to_read = self.get_list_of_columns_indexes(self.tab_options.columns_to_read)
+            if self.tab_options.column_to_read is not None :
+                self.tab_options.column_to_read = column_index_from_string(self.tab_options.column_to_read)
+        except TypeError:
+            pass
     
     @save_file
     @act_on_columns
@@ -527,4 +530,4 @@ class InsertController(MapIndexLetter, RegularExpression, String):
             cell_value = self.file_object.get_compiled_cell_value(self.tab, cell_read)  
             answer = self.clean_string_from_spaces(cell_value)
             group = self.set_answer_in_group(answer, map_answers_to_groups) 
-            self.tab.cell(line_index, column_to_write).value = group 
+            self.tab.cell(line_index, column_to_write).value = group

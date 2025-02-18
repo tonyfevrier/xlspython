@@ -195,7 +195,7 @@ class OneFileCreatedController(MapIndexLetter):
             self.tabs_copy._choose_the_tab_to_read(self.file_object.get_tab_by_name(tab_name))   
             self._fill_the_line_corresponding_to_one_tab(cells_list, tab_name)
             
-            self.display._update_display_infos('extract_cells_from_all_sheets', tab_name, self.file_object.sheets_name)
+            self.display._update_display_infos('extract_cells_from_all_tabs', tab_name, self.file_object.sheets_name)
             self.display.display_running_infos()
  
         self.new_writebook.save(self.file_object.path + 'gathered_data_' + self.file_object.name_file) 
