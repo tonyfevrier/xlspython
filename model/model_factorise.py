@@ -1,6 +1,7 @@
 import openpyxl
 import os   
 import yagmail
+import re
 
 from pycel import ExcelCompiler
 
@@ -15,8 +16,16 @@ from pycel import ExcelCompiler
 class Path():
     def __init__(self, pathname = 'fichiers_xls/'):
         self.pathname = pathname
-        self.directories = [f for f in os.listdir(self.pathname) if os.path.isdir(os.path.join(self.pathname, f))]
+        self.directories = [f for f in os.listdir(self.pathname) if self._is_string_a_directory(f)]
+        self.files = [f for f in os.listdir(self.pathname) if self._is_string_a_xlsx_file(f)]
         
+    def _is_string_a_directory(self, string):
+        return os.path.isdir(os.path.join(self.pathname, string))
+    
+    def _is_string_a_xlsx_file(self, string):
+        is_a_file = os.path.isfile(os.path.join(self.pathname, string))
+        is_xlsx = re.fullmatch(r'.+.xlsx', string)
+        return is_a_file and is_xlsx
 
 class File(): 
     """Classe permettant de récupérer et mettre à jour les données d'un fichier"""
@@ -111,7 +120,7 @@ class FileOptions(TabOptions):
  
 
 class Mail():
-    def __init__(self, sender_mail, receiver_mail, joint_file, subject, message, password):
+    def __init__(self, sender_mail=None, receiver_mail=None, joint_file=None, subject=None, message=None, password=None):
         self.sender_mail = sender_mail
         self.receiver_mail = receiver_mail
         self.joint_file = joint_file

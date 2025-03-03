@@ -3,7 +3,7 @@ from model.model_factorise import File, FileOptions, TabOptions, MergedCellsRang
 from controller.one_file_one_tab import ColorTabController, DeleteController, InsertController 
 from controller.one_file_multiple_tabs import OneTabCreatedController, MultipleSameTabController, EvenTabsController
 from controller.two_files import OneFileCreatedController, TwoFilesController
-from controller.path import PathController
+from controller.path import SeveralFoldersOneFileController
 from utils.utils_factorise import ColumnDelete, ColumnInsert, LineDelete, LineInsert, TabUpdateFormula, MapIndexLetter, String, Dictionary
 from openpyxl.utils import column_index_from_string
 
@@ -35,7 +35,7 @@ class TestPath(TestCase):
         self.created_file_name = 'divided_test_cmd_ongletbyparticipant.xlsx'
 
     def _apply_method_on_all_files(self, args=()):
-        controller = PathController(self.path, self.test_file_name, self.file_controller)
+        controller = SeveralFoldersOneFileController(self.path, self.test_file_name, self.file_controller)
         controller.apply_method_on_homononymous_files(self.method_data.method_name, *args) 
 
     def _compare_created_file_to_expected_file(self):
@@ -74,7 +74,7 @@ class TestPath(TestCase):
         self.test_file_name = 'test_string_in_binary.xlsx'
 
     def _apply_method_on_all_tabs(self):
-        controller = PathController(self.path, self.test_file_name, self.file_controller)
+        controller = SeveralFoldersOneFileController(self.path, self.test_file_name, self.file_controller)
         controller.apply_method_on_homononymous_tabs(self.method_data.method_name, *self.method_data.args) 
 
     def _compare_transform_string_in_binary_in_column(self):

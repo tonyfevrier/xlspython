@@ -243,6 +243,10 @@ class RegularExpression():
         return re.sub(r'([A-Z-a-z]+)\d+_[A-Z-a-z].jpg', r'\1', string)
     
     @staticmethod
+    def _is_string_a_xlsx_file(string): 
+        return re.fullmatch(r'.+.xlsx', string)
+    
+    @staticmethod
     def map_time_unity_to_value_from(time_string):
         """Get a dictionary corresponding to a string of the form 1 jour 10min 5s or '10min 5s'. 
         Example of return value : {'jour':1, 'min':10, 's': 5] from 1 jour 10 min 5 s. """

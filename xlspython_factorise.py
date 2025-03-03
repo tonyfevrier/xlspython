@@ -1,7 +1,7 @@
 import typer
-from typing import Optional, List, Tuple 
-from model.model_factorise import File, Path, FileOptions, TabOptions, MergedCellsRange
-from controller.path import PathController
+from typing import Optional, List
+from model.model_factorise import File, Path, FileOptions, TabOptions, MergedCellsRange, Mail
+from controller.path import SeveralFoldersOneFileController, PathMailSender
 from controller.one_file_multiple_tabs import EvenTabsController, OneTabCreatedController, MultipleSameTabController
 from controller.one_file_one_tab import ColorTabController, InsertController, DeleteController
 from controller.two_files import TwoFilesController, OneFileCreatedController
@@ -43,7 +43,7 @@ def gatherfiles(directory : Annotated[str, typer.Option(prompt = directory_promp
     """ 
     path_object = Path(directory + '/')
     file_controller = OneFileCreatedController(new_path=path_object.pathname)
-    controller = PathController(path_object, file_name, file_controller, dataonly=values)
+    controller = SeveralFoldersOneFileController(path_object, file_name, file_controller, dataonly=values)
     controller.apply_method_on_homononymous_files('copy_a_tab_at_tab_bottom', tab_name) 
     
 @app.command()
@@ -61,7 +61,7 @@ def multidelcols(directory : Annotated[str, typer.Option(prompt = directory_prom
     """  
     pathobject = Path(directory + '/')  
     tab_controller = DeleteController(tab_name=tab_name)
-    controller = PathController(pathobject, file_name, tab_controller)
+    controller = SeveralFoldersOneFileController(pathobject, file_name, tab_controller)
     controller.apply_method_on_homononymous_tabs('delete_other_columns', columns)
 
 # File commands
@@ -84,11 +84,9 @@ def filesave(file : Annotated[str, typer.Option(prompt = file_prompt)],
     controller = OneFileCreatedController(file_object)
     controller.make_horodated_copy_of_a_file()
 
-# AAAAAAAAAAARRIVE ICI à faire
-
 @app.command()
 def multipletabs(file : Annotated[str, typer.Option(prompt = file_prompt)],
-                 sheet : Annotated[str, typer.Option(prompt = sheet_prompt)],
+                 tab : Annotated[str, typer.Option(prompt = sheet_prompt)],
                  colread : Annotated[str, typer.Option(prompt = column_read_prompt)],
                  newfilepath : Annotated[Optional[str], typer.Option(prompt = 'If you want to divide a single file in tabs, press enter, otherwise your files must be included in folders themselves included in a bigger folder whose name must be written now.')] = '',
                  line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
@@ -107,27 +105,28 @@ def multipletabs(file : Annotated[str, typer.Option(prompt = file_prompt)],
     """
     # Apply command to same name files contained in folders
     if newfilepath:
-        pathobject = Path(newfilepath + '/')
-        controler = PathControler(pathobject)
-        #controler.create_one_onglet_by_participant(file, sheet, colread, first_line=line)
-        controler.apply_method_on_homononymous_files(file, 'create_one_onglet_by_participant', sheet, colread, f'divided_{file}', newfilepath + '/', first_line=line)
-        path = pathobject.pathname
+        path_object = Path(newfilepath + '/')
+        file_options = FileOptions(name_of_tab_to_read=tab, column_to_read=colread)
+        controller = OneFileCreatedController(file_options=file_options, new_path=path_object.pathname, first_line=line)
+        path_controller = SeveralFoldersOneFileController(path_object, file, controller)
+        path_controller.apply_method_on_homononymous_files('split_one_tab_in_multiple_tabs')
+        path = path_object.pathname
 
     # Apply command to a single file
     else:
-        fileobject = File(file)
-        controler = FileControler(fileobject)
-        controler.create_one_onglet_by_participant(sheet, colread, f'divided_{file}', 'fichiers_xls/', first_line=line)
-        path = fileobject.path
+        file_object = File(file)
+        file_options = FileOptions(name_of_tab_to_read=tab, column_to_read=colread)
+        controller = OneFileCreatedController(file_object, file_options=file_options, first_line=line)
+        controller.split_one_tab_in_multiple_tabs()
+        path = file_object.path
     
     # Eventually verify if each tab has the same number of lines
     check = typer.prompt('Do you want to check if all tabs have the same number of lines? If yes, write the number of lines else press enter', default="")
     if check:
-        wrong_tabs = FileControler(File(f'divided_{file}', path)).check_linenumber_of_tabs(int(check))
+        wrong_tabs = EvenTabsController(File(f'divided_{file}', path)).list_tabs_with_different_number_of_lines(int(check))
         if wrong_tabs:
             print('The following tabs have a different number of lines :' + ",".join(wrong_tabs))
 
-################################
 
 @app.command()
 def checklinenumber(file : Annotated[str, typer.Option(prompt = file_prompt)], 
@@ -151,7 +150,7 @@ def checklinenumber(file : Annotated[str, typer.Option(prompt = file_prompt)],
 
 @app.command()
 def extractcoltabs(file : Annotated[str, typer.Option(prompt = file_prompt)], 
-                     colread : Annotated[str, typer.Option(prompt = column_read_prompt)]):
+                   colread : Annotated[str, typer.Option(prompt = column_read_prompt)]):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Fonction qui récupère une même colonne (colread) dans chaque onglet pour former une nouvelle feuille contenant toutes les colonnes.
@@ -169,11 +168,9 @@ def extractcoltabs(file : Annotated[str, typer.Option(prompt = file_prompt)],
     controller = OneTabCreatedController(file_object, file_options)
     controller.extract_a_column_from_all_tabs(colread)
 
-
-#######################A faire quand on aura reprogrammer l'envoi de mails
 @app.command()
 def cutsendmail(file : Annotated[str, typer.Option(prompt = file_prompt)], 
-                sendmail : Annotated[Optional[str], typer.Option(prompt = '(Optional) Do you want to send files by mail? Press y (yes) or enter (no)')] = 'n'):
+                send : Annotated[bool, typer.Option(prompt = 'Do you want to send files by mail? Press y (yes) or enter (no)')]):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Vous souhaitez fabriquer un fichier par onglet. Chaque fichier aura le nom de l'onglet. Vous souhaitez éventuellement envoyer chaque fichier à la personne associée.
@@ -185,19 +182,24 @@ def cutsendmail(file : Annotated[str, typer.Option(prompt = file_prompt)],
 
         Version complète : python xlspython.py cutsendmail 
     """
-    fileobject = File(file, dataonly=True)
-    controler = FileControler(fileobject)
+    file_object = File(file, dataonly=True)
+    controller = OneFileCreatedController(file_object)
+    controller.create_one_file_by_tab()
 
+    if send:
+        _write_mails_and_send_it()
 
-    if sendmail ==  'n':
-        controler.one_file_by_tab_sendmail()
+def _write_mails_and_send_it():
+    objet = typer.prompt('Please enter the object of your email',default="")
+    message = typer.prompt('Please enter the message of your email',default="") 
+    mail = Mail(sender_mail="tony.fevrier62@gmail.com", subject=objet, message=message, password="qkxqzhlvsgdssboh")
+    path = Path('multifiles/')
+    mail_controller = PathMailSender(path, mail, "@universite-paris-saclay.fr" )#"@etu-upsaclay.fr")
+    json_file = typer.prompt('Please enter the name of the json file containing mail adresses. If you want to send to the mail paris-saclay, just press enter',default="") 
+    if json_file:
+        mail_controller.send_files_by_mail_using_(json_file)
     else:
-        objet = typer.prompt('Please enter the object of your email',default="")
-        message = typer.prompt('Please enter the message of your email',default="") 
-        jsonfile = typer.prompt('Please enter the name of the json file containing mail adresses. If you want to send to the mail paris-saclay, just press enter',default="") 
-        controler.one_file_by_tab_sendmail(send = True, adressjson = jsonfile, objet = objet, message = message)
-
-#########################################
+        mail_controller.send_files_by_mail_using_same_domain()
 
 @app.command()
 def gathercolumn(file : Annotated[str, typer.Option(prompt = file_prompt)],
