@@ -1,6 +1,6 @@
-from utils.utils_factorise import MapIndexLetter, TabsCopy, DisplayRunningInfos
+from utils.utils import MapIndexLetter, TabsCopy, DisplayRunningInfos
 from openpyxl.utils import column_index_from_string  
-from model.model_factorise import Cell
+from model.model import Cell
 from time import time 
 
 

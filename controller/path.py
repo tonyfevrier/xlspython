@@ -3,8 +3,8 @@ import re
 
 from time import time
 from copy import deepcopy
-from model.model_factorise import File, Mail
-from utils.utils_factorise import DisplayRunningInfos, TabsCopy
+from model.model import File, Mail
+from utils.utils import DisplayRunningInfos, TabsCopy
 
 class SeveralFoldersOneFileController():
     """Apply a method for all files having save name but stored in different directories of a given folder"""

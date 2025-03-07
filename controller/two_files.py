@@ -2,8 +2,8 @@ import openpyxl
 
 import openpyxl.workbook
 
-from utils.utils_factorise import MapIndexLetter, TabsCopy, DisplayRunningInfos, TabUpdateFormula, ColumnInsert, Workbook, String
-from model.model_factorise import Cell  
+from utils.utils import MapIndexLetter, TabsCopy, DisplayRunningInfos, TabUpdateFormula, ColumnInsert, Workbook, String
+from model.model import Cell  
 from openpyxl.utils import column_index_from_string
 from datetime import datetime 
 from time import time

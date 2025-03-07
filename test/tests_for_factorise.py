@@ -1,10 +1,10 @@
 from unittest import TestCase, main 
-from model.model_factorise import File, FileOptions, TabOptions, MergedCellsRange, Path
+from model.model import File, FileOptions, TabOptions, MergedCellsRange, Path
 from controller.one_file_one_tab import ColorTabController, DeleteController, InsertController 
 from controller.one_file_multiple_tabs import OneTabCreatedController, MultipleSameTabController, EvenTabsController
 from controller.two_files import OneFileCreatedController, TwoFilesController
 from controller.path import SeveralFoldersOneFileController
-from utils.utils_factorise import ColumnDelete, ColumnInsert, LineDelete, LineInsert, TabUpdateFormula, MapIndexLetter, String, Dictionary
+from utils.utils import ColumnDelete, ColumnInsert, LineDelete, LineInsert, TabUpdateFormula, MapIndexLetter, String, Dictionary
 from openpyxl.utils import column_index_from_string
 
 import os

@@ -2,8 +2,8 @@
 
 from openpyxl.styles import PatternFill
 from openpyxl.utils import column_index_from_string, get_column_letter 
-from utils.utils_factorise import String, MapIndexLetter, TabUpdateFormula, ColumnDelete, ColumnInsert, LineDelete, RegularExpression, Dictionary
-from model.model_factorise import Cell 
+from utils.utils import String, MapIndexLetter, TabUpdateFormula, ColumnDelete, ColumnInsert, LineDelete, RegularExpression, Dictionary
+from model.model import Cell 
 
 
 class ColorTabController(String):

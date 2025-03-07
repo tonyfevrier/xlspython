@@ -1,40 +1,33 @@
 import typer
-from typing import Optional, List, Tuple 
-from modell import File, Path, Str
-from controlller import PathControler, FileControler
-from typing_extensions import Annotated
-from utils.utils import UtilsForcommands as Ufc
+from typing import Optional, List
+from model.model import File, Path, FileOptions, TabOptions, MergedCellsRange, Mail
+from controller.path import SeveralFoldersOneFileController, PathMailSender
+from controller.one_file_multiple_tabs import EvenTabsController, OneTabCreatedController, MultipleSameTabController
+from controller.one_file_one_tab import ColorTabController, InsertController, DeleteController
+from controller.two_files import TwoFilesController, OneFileCreatedController
+from typing_extensions import Annotated 
 from utils.prompts import *
+from utils.utils import InputStore, MapStore, String
 
 app = typer.Typer()
 
+# ####################Voir comment récrire et où placer cette fonction
+# def apply_method_on_some_tabs_of_a_file(file_name, sheets, method_name, *args, **kwargs): 
+#         fileobject = File(file_name)
+#         controler = FileControler(fileobject)
 
-def apply_sheet_method_on_a_file(file_name, sheets, method_name, *args, **kwargs):
-        """
-        Create a file object and apply a given method on some or all sheets of this file.
-
-        Inputs : 
-            - file_name(str)
-            - sheets (list[str]): list of sheet names to apply the method on
-            - method_name(str)
-            - *args, **kwargs: arguments associated with the method
-        """
-        fileobject = File(file_name)
-        controler = FileControler(fileobject)
-
-        if sheets:
-            controler.apply_method_on_some_sheets(sheets, method_name, *args, **kwargs)
-        else:
-            # when sheets is empty, the method applies on all sheets
-            controler.apply_method_on_some_sheets(fileobject.sheets_name, method_name, *args, **kwargs)
-
+#         if sheets:
+#             controler.apply_method_on_some_sheets(sheets, method_name, *args, **kwargs)
+#         else:
+#             # when sheets is empty, the method applies on all sheets
+#             controler.apply_method_on_some_sheets(fileobject.sheets_name, method_name, *args, **kwargs)
 
 # Path commands
 
 @app.command()
 def gatherfiles(directory : Annotated[str, typer.Option(prompt = directory_prompt)],
-                file : Annotated[str, typer.Option(prompt = multiple_file_prompt)],
-                sheet : Annotated[str, typer.Option(prompt = sheet_prompt)],
+                file_name : Annotated[str, typer.Option(prompt = multiple_file_prompt)],
+                tab_name : Annotated[str, typer.Option(prompt = sheet_prompt)],
                 values : Annotated[bool, typer.Option(prompt = 'Do you want to copy only values (y) or to keep forumla (n)')],):
     
     """
@@ -48,15 +41,15 @@ def gatherfiles(directory : Annotated[str, typer.Option(prompt = directory_promp
         Version complète : python xlspython.py gatherfiles --directory name --file name.xlsx --sheet name
     
     """ 
-    pathobject = Path(directory + '/')
-    controler = PathControler(pathobject)
-    controler.gather_files_in_different_directories(file, sheet, values_only=values)
-
-
+    path_object = Path(directory + '/')
+    file_controller = OneFileCreatedController(new_path=path_object.pathname)
+    controller = SeveralFoldersOneFileController(path_object, file_name, file_controller, dataonly=values)
+    controller.apply_method_on_homononymous_files('copy_a_tab_at_tab_bottom', tab_name) 
+    
 @app.command()
 def multidelcols(directory : Annotated[str, typer.Option(prompt = directory_prompt)],
-                 file : Annotated[str, typer.Option(prompt = multiple_file_prompt)],
-                 sheet : Annotated[str, typer.Option(prompt = sheet_prompt)],
+                 file_name : Annotated[str, typer.Option(prompt = multiple_file_prompt)],
+                 tab_name : Annotated[str, typer.Option(prompt = sheet_prompt)],
                  columns : Annotated[str, typer.Option(prompt = "Enter the group of column you want to KEEP. Respect the form A-D,E,G,H-J,Z without introducing any space.")]):
     """
     Fonction agissant sur un dossier. Fonction qui prend plusieurs fichiers de structures identiques et qui ne garde qu'un ensemble
@@ -66,10 +59,10 @@ def multidelcols(directory : Annotated[str, typer.Option(prompt = directory_prom
 
         Version guidée : python xlspython.py multidelcols 
     """  
-    pathobject = Path(directory + '/') 
-    controler = PathControler(pathobject)
-    controler.apply_method_on_homononymous_sheets(file, sheet, 'delete_other_columns', columns)
-
+    pathobject = Path(directory + '/')  
+    tab_controller = DeleteController(tab_name=tab_name)
+    controller = SeveralFoldersOneFileController(pathobject, file_name, tab_controller)
+    controller.apply_method_on_homononymous_tabs('delete_other_columns', columns)
 
 # File commands
 
@@ -87,13 +80,13 @@ def filesave(file : Annotated[str, typer.Option(prompt = file_prompt)],
         Version complète : python xlspython.py filesave --file name.xlsx
     
     """
-    fileobject = File(file, dataonly=dataonly) 
-    fileobject.sauvegarde()
-
+    file_object = File(file, dataonly=dataonly) 
+    controller = OneFileCreatedController(file_object)
+    controller.make_horodated_copy_of_a_file()
 
 @app.command()
 def multipletabs(file : Annotated[str, typer.Option(prompt = file_prompt)],
-                 sheet : Annotated[str, typer.Option(prompt = sheet_prompt)],
+                 tab : Annotated[str, typer.Option(prompt = sheet_prompt)],
                  colread : Annotated[str, typer.Option(prompt = column_read_prompt)],
                  newfilepath : Annotated[Optional[str], typer.Option(prompt = 'If you want to divide a single file in tabs, press enter, otherwise your files must be included in folders themselves included in a bigger folder whose name must be written now.')] = '',
                  line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
@@ -112,23 +105,25 @@ def multipletabs(file : Annotated[str, typer.Option(prompt = file_prompt)],
     """
     # Apply command to same name files contained in folders
     if newfilepath:
-        pathobject = Path(newfilepath + '/')
-        controler = PathControler(pathobject)
-        #controler.create_one_onglet_by_participant(file, sheet, colread, first_line=line)
-        controler.apply_method_on_homononymous_files(file, 'create_one_onglet_by_participant', sheet, colread, f'divided_{file}', newfilepath + '/', first_line=line)
-        path = pathobject.pathname
+        path_object = Path(newfilepath + '/')
+        file_options = FileOptions(name_of_tab_to_read=tab, column_to_read=colread)
+        controller = OneFileCreatedController(file_options=file_options, new_path=path_object.pathname, first_line=line)
+        path_controller = SeveralFoldersOneFileController(path_object, file, controller)
+        path_controller.apply_method_on_homononymous_files('split_one_tab_in_multiple_tabs')
+        path = path_object.pathname
 
     # Apply command to a single file
     else:
-        fileobject = File(file)
-        controler = FileControler(fileobject)
-        controler.create_one_onglet_by_participant(sheet, colread, f'divided_{file}', 'fichiers_xls/', first_line=line)
-        path = fileobject.path
+        file_object = File(file)
+        file_options = FileOptions(name_of_tab_to_read=tab, column_to_read=colread)
+        controller = OneFileCreatedController(file_object, file_options=file_options, first_line=line)
+        controller.split_one_tab_in_multiple_tabs()
+        path = file_object.path
     
     # Eventually verify if each tab has the same number of lines
     check = typer.prompt('Do you want to check if all tabs have the same number of lines? If yes, write the number of lines else press enter', default="")
     if check:
-        wrong_tabs = FileControler(File(f'divided_{file}', path)).check_linenumber_of_tabs(int(check))
+        wrong_tabs = EvenTabsController(File(f'divided_{file}', path)).list_tabs_with_different_number_of_lines(int(check))
         if wrong_tabs:
             print('The following tabs have a different number of lines :' + ",".join(wrong_tabs))
 
@@ -148,14 +143,14 @@ def checklinenumber(file : Annotated[str, typer.Option(prompt = file_prompt)],
         Version complète : python xlspython.py checklinenumber --file name.xlsx --number 1
     
     """
-    fileobject = File(file) 
-    controler = FileControler(fileobject)
-    wrong_tabs = controler.check_linenumber_of_tabs(number)
+    file_object = File(file)  
+    controller = EvenTabsController(file_object)
+    wrong_tabs = controller.list_tabs_with_different_number_of_lines(number)
     print(f'The tabs {wrong_tabs} does not have the expected number of lines.')
 
 @app.command()
-def extractcolsheets(file : Annotated[str, typer.Option(prompt = file_prompt)], 
-                     colread : Annotated[str, typer.Option(prompt = column_read_prompt)]):
+def extractcoltabs(file : Annotated[str, typer.Option(prompt = file_prompt)], 
+                   colread : Annotated[str, typer.Option(prompt = column_read_prompt)]):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Fonction qui récupère une même colonne (colread) dans chaque onglet pour former une nouvelle feuille contenant toutes les colonnes.
@@ -168,13 +163,14 @@ def extractcolsheets(file : Annotated[str, typer.Option(prompt = file_prompt)],
         Version complète : python xlspython.py extractcolsheets --file name.xlsx --colread columnletter
     
     """
-    fileobject = File(file) 
-    controler = FileControler(fileobject)
-    controler.extract_column_from_all_sheets(colread)
+    file_object = File(file) 
+    file_options = FileOptions(column_to_read=colread)
+    controller = OneTabCreatedController(file_object, file_options)
+    controller.extract_a_column_from_all_tabs(colread)
 
 @app.command()
 def cutsendmail(file : Annotated[str, typer.Option(prompt = file_prompt)], 
-                sendmail : Annotated[Optional[str], typer.Option(prompt = '(Optional) Do you want to send files by mail? Press y (yes) or enter (no)')] = 'n'):
+                send : Annotated[bool, typer.Option(prompt = 'Do you want to send files by mail? Press y (yes) or enter (no)')]):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Vous souhaitez fabriquer un fichier par onglet. Chaque fichier aura le nom de l'onglet. Vous souhaitez éventuellement envoyer chaque fichier à la personne associée.
@@ -186,23 +182,29 @@ def cutsendmail(file : Annotated[str, typer.Option(prompt = file_prompt)],
 
         Version complète : python xlspython.py cutsendmail 
     """
-    fileobject = File(file, dataonly=True)
-    controler = FileControler(fileobject)
+    file_object = File(file, dataonly=True)
+    controller = OneFileCreatedController(file_object)
+    controller.create_one_file_by_tab()
 
+    if send:
+        _write_mails_and_send_it()
 
-    if sendmail ==  'n':
-        controler.one_file_by_tab_sendmail()
+def _write_mails_and_send_it():
+    objet = typer.prompt('Please enter the object of your email',default="")
+    message = typer.prompt('Please enter the message of your email',default="") 
+    mail = Mail(sender_mail="tony.fevrier62@gmail.com", subject=objet, message=message, password="qkxqzhlvsgdssboh")
+    path = Path('multifiles/')
+    mail_controller = PathMailSender(path, mail, "@universite-paris-saclay.fr" )#"@etu-upsaclay.fr")
+    json_file = typer.prompt('Please enter the name of the json file containing mail adresses. If you want to send to the mail paris-saclay, just press enter',default="") 
+    if json_file:
+        mail_controller.send_files_by_mail_using_(json_file)
     else:
-        objet = typer.prompt('Please enter the object of your email',default="")
-        message = typer.prompt('Please enter the message of your email',default="") 
-        jsonfile = typer.prompt('Please enter the name of the json file containing mail adresses. If you want to send to the mail paris-saclay, just press enter',default="") 
-        controler.one_file_by_tab_sendmail(send = True, adressjson = jsonfile, objet = objet, message = message)
-
+        mail_controller.send_files_by_mail_using_same_domain()
 
 @app.command()
 def gathercolumn(file : Annotated[str, typer.Option(prompt = file_prompt)],
-                 sheet : Annotated[str, typer.Option(prompt = sheet_prompt)],
-                 columnlists : Annotated[Optional[List[str]], typer.Option()] = None):
+                 tab : Annotated[str, typer.Option(prompt = sheet_prompt)],
+                 column_lists : Annotated[Optional[List[str]], typer.Option()] = None):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Vous avez des groupes de colonnes de valeurs avec une étiquette en première cellule. Pour chaque groupe, vous souhaitez former deux colonnes de valeurs : l'une qui contient
@@ -214,17 +216,17 @@ def gathercolumn(file : Annotated[str, typer.Option(prompt = file_prompt)],
 
         Version complète : python xlspython.py gathercolumn --file nom --sheet onglet --columnlists A-D,E,G,H-J,Z
     """
- 
-    group = Ufc.askArgumentUntilNone(columnlists, group_column_prompt)
-    column_lists = Str.listFromColumnsStrings(*group) 
+    store = InputStore(column_lists, group_column_prompt)
+    strings = store.ask_argument_until_none()
+    column_lists = String.get_columns_from_several(*strings)
 
-    fileobject = File(file)
-    controler = FileControler(fileobject)
-    controler.gather_columns_in_one(sheet,*column_lists)
-
+    file_object = File(file)
+    file_options = FileOptions(name_of_tab_to_read=tab)
+    controller = OneTabCreatedController(file_object, file_options)
+    controller.gather_groups_of_multiple_columns_in_tabs_of_two_columns_containing_tags_and_values(*column_lists)
 
 @app.command()
-def extractcellsheets(file : Annotated[str, typer.Option(prompt = file_prompt)], 
+def extractcelltabs(file : Annotated[str, typer.Option(prompt = file_prompt)], 
                  cells : Annotated[Optional[List[str]], typer.Option()] = None):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -237,18 +239,19 @@ def extractcellsheets(file : Annotated[str, typer.Option(prompt = file_prompt)],
 
         Version guidée: python xlspython.py extractcellsheets
     """
-    
-    cells = Ufc.askArgumentUntilNone(cells, ask_argument_prompt('cell'))
-    fileobject = File(file)
-    controler = FileControler(fileobject)
-    controler.extract_cells_from_all_sheets(*cells)
+    store = InputStore(cells, ask_argument_prompt('cell'))
+    cells = store.ask_argument_until_none() 
+
+    file_object = File(file)
+    controller = OneFileCreatedController(file_object)
+    controller.extract_cells_from_all_tabs(*cells)
 
 
 @app.command()
 def stringinbinary(file : Annotated[str, typer.Option(prompt = file_prompt)], 
                    colread : Annotated[str, typer.Option(prompt = column_read_prompt)],
                    colwrite : Annotated[str, typer.Option(prompt = column_store_prompt)], 
-                   sheets : Annotated[Optional[List[str]], typer.Option()] = None,
+                   tabs : Annotated[Optional[List[str]], typer.Option()] = None,
                    answers : Annotated[Optional[List[str]], typer.Option()] = None):
     """
     Fonction agissant sur un ou plusieurs onglets d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -262,16 +265,21 @@ def stringinbinary(file : Annotated[str, typer.Option(prompt = file_prompt)],
         Version complète : python xlspython.py stringinbinary --file name.xlsx --sheet nametab --colread columnletter --colwrite columnletter --answers chaine1 --answers chaine2
     
     """ 
-    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
-    answers = Ufc.askArgumentUntilNone(answers, ask_argument_prompt('answer'))
-     
-    apply_sheet_method_on_a_file(file, sheets, 'column_transform_string_in_binary', colread, colwrite, *answers)
-
+    file_object = File(file)
+    tab_options = TabOptions(column_to_read=colread, column_to_write=colwrite)
+    tab_controller = InsertController(file_object, tab_options=tab_options)
+    file_options = _choose_tabs_to_modify(file_object, tabs, multiple_tabs_prompt)
+    
+    store_answers = InputStore(answers, ask_argument_prompt('answer'))
+    answers = store_answers.ask_argument_until_none()
+      
+    controller = MultipleSameTabController(file_object, tab_controller, file_options)
+    controller.apply_method_on_some_tabs('transform_string_in_binary_in_column', *answers) 
 
 # Créer un fichier test pour tester cette fonction.
 @app.command()
-def cpcolumnonsheets(file : Annotated[str, typer.Option(prompt = file_prompt)],
-                     column : Annotated[List[str], typer.Option()] = None):
+def cpcolumnontabs(file : Annotated[str, typer.Option(prompt = file_prompt)],
+                   column : Annotated[List[str], typer.Option()] = None):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Fonction qui reproduit les formules d'une ou plusieurs colonnes (column) du premier onglet sur toutes les colonnes situées à la même position dans les 
@@ -280,19 +288,19 @@ def cpcolumnonsheets(file : Annotated[str, typer.Option(prompt = file_prompt)],
     Commande : 
 
         Version guidée : python xlspython.py cpcolumnonsheets
-
         Version complète : python xlspython.py cpcolumnonsheets --file name.xlsx --column columnletter
-    
     """
-    columns = Ufc.askArgumentUntilNone(column, ask_argument_prompt('column'))
+    store = InputStore(column, ask_argument_prompt('column'))
+    columns = store.ask_argument_until_none()
 
     fileobject = File(file, dataonly = False)
-    controler = FileControler(fileobject)
-    controler.apply_column_formula_on_all_sheets(*columns) 
+    file_options = FileOptions(columns_to_read=columns)
+    controller = EvenTabsController(fileobject, file_options)
+    controller.apply_columns_formula_on_all_tabs() 
 
 @app.command()
-def cpcellonsheets(file : Annotated[str, typer.Option(prompt = file_prompt)],
-                   cell : Annotated[List[str], typer.Option()] = None):
+def cpcellontabs(file : Annotated[str, typer.Option(prompt = file_prompt)],
+                 cell : Annotated[List[str], typer.Option()] = None):
     
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -302,23 +310,21 @@ def cpcellonsheets(file : Annotated[str, typer.Option(prompt = file_prompt)],
     Commande : 
 
         Version guidée : python xlspython.py cpcellonsheets
-
         Version complète : python xlspython.py cpcellonsheets --file name.xlsx --cell C5 --cell C17
-    
     """
-
-    cells = Ufc.askArgumentUntilNone(cell, ask_argument_prompt('cell'))
+    store = InputStore(cell, ask_argument_prompt('cell'))
+    cells = store.ask_argument_until_none()
 
     fileobject = File(file)
-    controler = FileControler(fileobject)
-    controler.apply_cells_formula_on_all_sheets(*cells) 
+    controller = EvenTabsController(fileobject)
+    controller.apply_cells_formula_on_all_tabs(*cells) 
     
 @app.command()
 def mergecells(file : Annotated[str, typer.Option(prompt = file_prompt)],
                start_column : Annotated[str, typer.Option(prompt = 'Enter the first column of cells to merge :')],
                end_column : Annotated[str, typer.Option(prompt = 'Enter the last column of cells to merge :')],
-               start_row : Annotated[str, typer.Option(prompt = 'Enter the first row of  cells to merge :')],
-               end_row : Annotated[str, typer.Option(prompt = 'Enter the last row of cells to merge :')]):
+               start_line : Annotated[str, typer.Option(prompt = 'Enter the first row of  cells to merge :')],
+               end_line : Annotated[str, typer.Option(prompt = 'Enter the last row of cells to merge :')]):
     
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -327,21 +333,20 @@ def mergecells(file : Annotated[str, typer.Option(prompt = file_prompt)],
     Commande : 
 
         Version guidée : python xlspython.py mergecells
-
         Version complète : python xlspython.py mergecells --file name.xlsx --start_column columnletter --end_column columnletter --start_row rowindex --end_column rowindex 
-    
     """
     
     fileobject = File(file)
-    controler = FileControler(fileobject)
-    controler.merge_cells_on_all_tabs(start_column,end_column,start_row,end_row)
+    controller = EvenTabsController(fileobject)
+    merged_cells_range = MergedCellsRange(start_column, end_column, start_line, end_line)
+    controller.merge_cells_on_all_tabs(merged_cells_range)
 
  
 @app.command()
 def convertminutes(file : Annotated[str, typer.Option(prompt = file_prompt)], 
                    colread : Annotated[str, typer.Option(prompt = column_read_prompt)],
                    colwrite : Annotated[str, typer.Option(prompt = column_store_prompt)], 
-                   sheets : Annotated[Optional[List[str]], typer.Option()] = None,
+                   tabs : Annotated[Optional[List[str]], typer.Option()] = None,
                    line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
     """
     Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. Vous avez une colonne (colread) contenant des temps de la forme xx jours 5 heures 10 min 5 s.
@@ -350,19 +355,22 @@ def convertminutes(file : Annotated[str, typer.Option(prompt = file_prompt)],
     Commande : 
 
         Version guidée : python xlspython.py convertminutes
-
         Version complète : python xlspython.py convertminutes --file name.xlsx --sheet nametab --colread columnletter --colwrite columnletter --line linenumber
     
     """
-    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
-    apply_sheet_method_on_a_file(file, sheets, 'column_convert_in_minutes', colread, colwrite, line_beginning=line)
-
+    file_object = File(file)
+    tab_options = TabOptions(column_to_read=colread, column_to_write=colwrite)
+    tab_controller = InsertController(file_object, tab_options=tab_options, first_line=line) 
+    file_options = _choose_tabs_to_modify(file_object, tabs, multiple_tabs_prompt)
+    
+    controller = MultipleSameTabController(file_object, tab_controller, file_options)
+    controller.apply_method_on_some_tabs('convert_time_in_minutes_in_columns') 
 
 @app.command()
 def groupofanswers(file : Annotated[str, typer.Option(prompt = file_prompt)], 
                    colread : Annotated[str, typer.Option(prompt = column_read_prompt)],
                    colwrite : Annotated[str, typer.Option(prompt = column_store_prompt)], 
-                   sheets : Annotated[Optional[List[str]], typer.Option()] = None,
+                   tabs : Annotated[Optional[List[str]], typer.Option()] = None,
                    line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
     """
     Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. Vous avez une colonne (colread) contenant des réponses. Chacune de ses réponses appartient à un groupe.
@@ -371,21 +379,25 @@ def groupofanswers(file : Annotated[str, typer.Option(prompt = file_prompt)],
     Commande : 
 
         Version guidée : python xlspython.py groupofanswers
-
         Version complète : python xlspython.py groupofanswers --file name.xlsx --sheet nametab --colread columnletter --colwrite columnletter --line linenumber
     """
-    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
+    file_object = File(file)
+    tab_options = TabOptions(column_to_read=colread, column_to_write=colwrite)
+    tab_controller = InsertController(file_object, tab_options=tab_options, first_line=line)
+    file_options = _choose_tabs_to_modify(file_object, tabs, multiple_tabs_prompt)
 
-    #Creation of the groups of answers dictionary 
-    groups_of_responses = Ufc.createDictListValueByCmd("Enter the name of one group of answers", "")
-
-    apply_sheet_method_on_a_file(file, sheets, 'column_set_answer_in_group', colread, colwrite, groups_of_responses, line_beginning=line)
+    # Creation of the groups of answers dictionary 
+    map_store = MapStore("Enter one answer associated with this group:", 
+                         "Enter the name of one group of answers of type answer1,answer2,answer3")
+    map_store.create_mapping() 
     
+    controller = MultipleSameTabController(file_object, tab_controller, file_options)
+    controller.apply_method_on_some_tabs('insert_group_associated_with_answer', map_store.mapping)     
 
 @app.command()
 def colorcasescolumn(file : Annotated[str, typer.Option(prompt = file_prompt)], 
                      column : Annotated[str, typer.Option(prompt = column_read_prompt)],
-                     sheets : Annotated[Optional[List[str]], typer.Option()] = None):
+                     tabs : Annotated[Optional[List[str]], typer.Option()] = None):
     """
     Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Vous souhaitez parcourir une colonne (column) et colorer certaines chaînes de caractères dans cette colonne. Ces chaînes et les couleurs associées vous seront demandées
@@ -394,20 +406,29 @@ def colorcasescolumn(file : Annotated[str, typer.Option(prompt = file_prompt)],
     Commande : 
 
         Version guidée : python xlspython.py colorcasescolumn 
-
         Version complète : python xlspython.py colorcasescolumn --file name.xlsx --sheet nametab --column columnletter
     """
-    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
+    file_object = File(file)
+    tab_options = TabOptions(column_to_read=column)
+    tab_controller = ColorTabController(file_object, tab_options=tab_options) 
+    file_options = _choose_tabs_to_modify(file_object, tabs, multiple_tabs_prompt)
 
-    #Creation of the dictionary with the strings to color and their color
-    color = Ufc.createDictByCmd("Please enter a string which will be colored", color_prompt)
-    
-    apply_sheet_method_on_a_file(file, sheets, 'color_special_cases_in_column', column, color)
-    
+    map_store = MapStore("Please enter a string which will be colored", color_prompt)
+    map_store.create_mapping() 
+
+    controller = MultipleSameTabController(file_object, tab_controller, file_options)
+    controller.apply_method_on_some_tabs('color_cases_in_column', map_store.mapping)  
+
+def _choose_tabs_to_modify(file_object, tabs, prompt):
+    store = InputStore(tabs, prompt)
+    tabs = store.ask_argument_until_none()
+    if len(tabs) == 0:
+        tabs = file_object.sheets_name
+    return FileOptions(names_of_tabs_to_modify=tabs)     
 
 @app.command()
 def colorcasestab(file : Annotated[str, typer.Option(prompt = file_prompt)], 
-                  sheets : Annotated[Optional[List[str]], typer.Option()] = None):
+                  tabs : Annotated[Optional[List[str]], typer.Option()] = None):
     """
     Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Vous souhaitez parcourir un onglet (sheet) et colorer certaines chaînes de caractères. Ces chaînes et les couleurs associées vous seront demandées
@@ -419,23 +440,26 @@ def colorcasestab(file : Annotated[str, typer.Option(prompt = file_prompt)],
 
         Version complète : python xlspython.py colorcasestab --file name.xlsx --sheet nametab
     """
-    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
+    file_object = File(file)
+    tab_options = TabOptions()
+    tab_controller = ColorTabController(file_object, tab_options=tab_options) 
+    file_options = _choose_tabs_to_modify(file_object, tabs, multiple_tabs_prompt)
 
-    #Creation of the dictionary with the strings to color and their color
-    color = Ufc.createDictByCmd("Please enter a string which will be colored", color_prompt)
+    map_store = MapStore("Please enter a string which will be colored", color_prompt)
+    map_store.create_mapping() 
 
-    apply_sheet_method_on_a_file(file, sheets, 'color_special_cases_in_sheet', color)
-
+    controller = MultipleSameTabController(file_object, tab_controller, file_options)
+    controller.apply_method_on_some_tabs('color_cases_in_tab', map_store.mapping) 
 
 @app.command()
-def addcolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file in which you want to write ')],
-            sheet : Annotated[str, typer.Option(prompt = 'Enter the corresponding sheet name')],
-            colread : Annotated[str, typer.Option(prompt = 'Enter the column of this sheet containing the identifiers')],
+def addcolumn(file_from : Annotated[str, typer.Option(prompt = 'Enter the xlsx file in which you want to write ')],
+            tab_from : Annotated[str, typer.Option(prompt = 'Enter the corresponding sheet name')],
+            colread_from : Annotated[str, typer.Option(prompt = 'Enter the column of this sheet containing the identifiers')],
             colwrite : Annotated[str, typer.Option(prompt = 'Enter the column from which you want to write')],
-            file2 : Annotated[str, typer.Option(prompt = 'Enter the xlsx file from which you import data ')],
-            sheet2 : Annotated[str, typer.Option(prompt = 'Enter the corresponding sheet name')],
-            colread2 : Annotated[str, typer.Option(prompt = 'Enter the column of this sheet containing the identifiers')],
-            colimport : Annotated[Optional[List[str]], typer.Option()] = None):                    
+            file_to : Annotated[str, typer.Option(prompt = 'Enter the xlsx file from which you import data ')],
+            tab_to : Annotated[str, typer.Option(prompt = 'Enter the corresponding sheet name')],
+            colread_to : Annotated[str, typer.Option(prompt = 'Enter the column of this sheet containing the identifiers')],
+            col_to_import : Annotated[Optional[List[str]], typer.Option()] = None):                    
     """
     Fonction agissant sur un onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
       Vous souhaitez importer des colonnes (colimport) d'un fichier (file2, sheet2) dans un autre fichier (file,sheet).
@@ -449,16 +473,19 @@ def addcolumn(file : Annotated[str, typer.Option(prompt = 'Enter the xlsx file i
         Version complète : python xlspython.py addcolumn --file name.xlsx --sheet nametab --colread columnletter --colwrite columnletter --file2 name.xlsx --sheet2 nametab --colread2 columnletter --colimport col1 --colimport col2
     
     """ 
-    colimport = Ufc.askArgumentUntilNone(colimport, ask_argument_prompt('column to import'))
-    fileobject = File(file)
-    controler = FileControler(fileobject)
+    file_object_from = File(file_from)
+    file_object_to = File(file_to)
+    controller = TwoFilesController(file_object_from, file_object_to, tab_from, tab_to, colread_from, colread_to)  
 
-    controler.add_column_in_sheet_differently_sorted(sheet,colread,colwrite,[file2,sheet2,colread2,colimport])
+    store = InputStore(col_to_import, ask_argument_prompt('column to import'))
+    col_to_import = store.ask_argument_until_none()
+
+    controller.copy_columns_in_a_tab_differently_sorted(col_to_import, colwrite) 
 
 @app.command()
 def colorlines(file : Annotated[str, typer.Option(prompt = file_prompt)], 
                color : Annotated[str, typer.Option(prompt = 'Enter the color in a hexadecimal format')],
-               sheets : Annotated[Optional[List[str]], typer.Option()] = None,
+               tabs : Annotated[Optional[List[str]], typer.Option()] = None,
                strings : Annotated[Optional[List[str]], typer.Option()] = None):                    
 
     """
@@ -471,18 +498,23 @@ def colorlines(file : Annotated[str, typer.Option(prompt = file_prompt)],
 
         Version complète : python xlspython.py colorlines --file name.xlsx --sheet nametab --color colorinhexadecimal --strings chaine1 --strings chaine2
     """
-    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
-    strings = Ufc.askArgumentUntilNone(strings, ask_argument_prompt('string'))
-    
-    apply_sheet_method_on_a_file(file, sheets, 'color_lines_containing_chaines', color, *strings)
-    
+    file_object = File(file)
+    tab_options = TabOptions()
+    tab_controller = ColorTabController(file_object, tab_options=tab_options, color=color) 
+    file_options = _choose_tabs_to_modify(file_object, tabs, multiple_tabs_prompt)
+
+    strings_store = InputStore(strings, ask_argument_prompt('string'))
+    strings = strings_store.ask_argument_until_none()
+
+    controller = MultipleSameTabController(file_object, tab_controller, file_options)
+    controller.apply_method_on_some_tabs('color_lines_containing_strings', *strings) 
 
 @app.command()
 def cutstring(file : Annotated[str, typer.Option(prompt = file_prompt)], 
               colcut : Annotated[str, typer.Option(prompt = 'Enter the column containing strings to cut')],
               colwrite : Annotated[str, typer.Option(prompt = column_store_prompt)], 
-              sheets : Annotated[Optional[List[str]], typer.Option()] = None,
-              separator : Annotated[Optional[str], typer.Option(prompt = line_prompt)] = ','):
+              tabs : Annotated[Optional[List[str]], typer.Option()] = None,
+              separator : Annotated[Optional[str], typer.Option(prompt = separator_prompt)] = ','):
     """
     Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls. 
     Une colonne (colcut) contient des chaînes de caractères séparées par un symbole (separator). Vous souhaitez les couper en morceaux 
@@ -494,14 +526,18 @@ def cutstring(file : Annotated[str, typer.Option(prompt = file_prompt)],
 
         Version complète : python xlspython.py cutstring --file name.xlsx --sheet nametab --colcut columnletter --colwrite columnletter --separator symbol
     """
-    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
-    apply_sheet_method_on_a_file(file, sheets, 'column_cut_string_in_parts', colcut,colwrite,separator)
-    
+    file_object = File(file)
+    tab_options = TabOptions(column_to_read=colcut, column_to_write=colwrite)
+    tab_controller = InsertController(file_object, tab_options=tab_options)
+    file_options = _choose_tabs_to_modify(file_object, tabs, multiple_tabs_prompt)
+
+    controller = MultipleSameTabController(file_object, tab_controller, file_options)
+    controller.apply_method_on_some_tabs('insert_splitted_strings_of', separator) 
 
 @app.command()
 def deletecols(file : Annotated[str, typer.Option(prompt = file_prompt)], 
                columns : Annotated[str, typer.Option(prompt = group_column_prompt)],
-               sheets : Annotated[Optional[List[str]], typer.Option()] = None):
+               tabs : Annotated[Optional[List[str]], typer.Option()] = None):
 
     """
     Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -514,14 +550,17 @@ def deletecols(file : Annotated[str, typer.Option(prompt = file_prompt)],
         Version complète : python xlspython.py deletecols --file name.xlsx --sheet nametab --columns A --columns D 
     
     """ 
-    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
-    apply_sheet_method_on_a_file(file, sheets, 'delete_columns', columns)
+    file_object = File(file)
+    tab_controller = DeleteController(file_object)
+    file_options = _choose_tabs_to_modify(file_object, tabs, multiple_tabs_prompt)
 
+    controller = MultipleSameTabController(file_object, tab_controller, file_options)
+    controller.apply_method_on_some_tabs('delete_columns', columns) 
 
 @app.command()
 def keepcols(file : Annotated[str, typer.Option(prompt = file_prompt)], 
-               columns : Annotated[str, typer.Option(prompt = group_column_prompt)],
-               sheets : Annotated[Optional[List[str]], typer.Option()] = None):
+             columns : Annotated[str, typer.Option(prompt = group_column_prompt)],
+             tabs : Annotated[Optional[List[str]], typer.Option()] = None):
 
     """
     Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -533,15 +572,19 @@ def keepcols(file : Annotated[str, typer.Option(prompt = file_prompt)],
 
         Version complète : python xlspython.py deletecols --file name.xlsx --sheet nametab --columns A --columns D 
     
-    """ 
-    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
-    apply_sheet_method_on_a_file(file, sheets, 'delete_other_columns', columns)
+    """  
+    file_object = File(file)
+    tab_controller = DeleteController(file_object)
+    file_options = _choose_tabs_to_modify(file_object, tabs, multiple_tabs_prompt)
+
+    controller = MultipleSameTabController(file_object, tab_controller, file_options)
+    controller.apply_method_on_some_tabs('delete_other_columns', columns) 
 
 
 @app.command()
 def deletelinesstr(file : Annotated[str, typer.Option(prompt = file_prompt)], 
                 colread : Annotated[str, typer.Option(prompt = column_read_prompt)],
-                sheets : Annotated[Optional[List[str]], typer.Option()] = None,
+                tabs : Annotated[Optional[List[str]], typer.Option()] = None,
                 strings : Annotated[Optional[List[str]], typer.Option()] = None):                    
     """
     Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -553,17 +596,22 @@ def deletelinesstr(file : Annotated[str, typer.Option(prompt = file_prompt)],
 
         Version complète : python xlspython.py deletelines --file name.xlsx --sheet nametab --colread columnletter --strings chaine1 --strings chaine2
     
-    """
-    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
-    strings = Ufc.askArgumentUntilNone(strings, ask_argument_prompt('string'))
+    """ 
+    file_object = File(file)
+    tab_controller = DeleteController(file_object)
+    file_options = _choose_tabs_to_modify(file_object, tabs, multiple_tabs_prompt)
 
-    apply_sheet_method_on_a_file(file, sheets, 'delete_lines_containing_str', colread,*strings) 
+    strings_store = InputStore(strings, ask_argument_prompt('string'))
+    strings = strings_store.ask_argument_until_none()    
+
+    controller = MultipleSameTabController(file_object, tab_controller, file_options)
+    controller.apply_method_on_some_tabs('delete_lines_containing_strings_in_given_column', colread, *strings) 
 
 
 @app.command()
 def deletetwins(file : Annotated[str, typer.Option(prompt = file_prompt)], 
                 colread : Annotated[str, typer.Option(prompt = column_read_prompt)],
-                sheets : Annotated[Optional[List[str]], typer.Option()] = None,
+                tabs : Annotated[Optional[List[str]], typer.Option()] = None,
                 line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
     """
     Fonction agissant sur un ou plusieurs onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -576,18 +624,21 @@ def deletetwins(file : Annotated[str, typer.Option(prompt = file_prompt)],
 
         Version complète : python xlspython.py deletetwins --file name.xlsx --sheet nametab --colread columnletter --line linenumber
     """
-    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
+    file_object = File(file)
+    tab_controller = DeleteController(file_object)
+    file_options = _choose_tabs_to_modify(file_object, tabs, multiple_tabs_prompt)
 
-    apply_sheet_method_on_a_file(file, sheets, 'delete_doublons', colread, line_beginning=line)  
+    controller = MultipleSameTabController(file_object, tab_controller, file_options)
+    controller.apply_method_on_some_tabs('delete_twins_lines_and_color_last_twin', colread) 
 
 
 @app.command()
 def columnbyqcmanswer(file : Annotated[str, typer.Option(prompt = file_prompt)],
                      colread : Annotated[str, typer.Option(prompt = 'Enter the column containing the answers')],
                      colwrite : Annotated[str, typer.Option(prompt = 'Enter the column from which you want to write')], 
-                     sheets : Annotated[Optional[List[str]], typer.Option()] = None,
+                     tabs : Annotated[Optional[List[str]], typer.Option()] = None,
                      answers : Annotated[Optional[List[str]], typer.Option()] = None,
-                     liste : Annotated[Tuple[str, str], typer.Option(prompt = 'Enter what you want to write in the cells or press enter')] = ('oui', 'non'),
+                     #liste : Annotated[Tuple[str, str], typer.Option(prompt = 'Enter what you want to write in the cells or press enter')] = ('oui', 'non'),
                      line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
                    
 
@@ -603,17 +654,22 @@ def columnbyqcmanswer(file : Annotated[str, typer.Option(prompt = file_prompt)],
         Version complète : python xlspython.py columnbyqcmanswer --file name.xlsx --sheet nametab --colread columnletter --colwrite columnletter --answers chaine1 --answers chaine2 --list oui non
     
     """
-    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
-    answers = Ufc.askArgumentUntilNone(answers, ask_argument_prompt('QCM answer'))
+    file_object = File(file)
+    tab_options = TabOptions(column_to_read=colread, column_to_write=colwrite)
+    tab_controller = InsertController(file_object, tab_options=tab_options, first_line=line)
+    file_options = _choose_tabs_to_modify(file_object, tabs, multiple_tabs_prompt)
 
-    apply_sheet_method_on_a_file(file, sheets, 'create_one_column_by_QCM_answer', colread, colwrite, liste, *answers, line_beggining=line)  
+    answers_store = InputStore(answers, ask_argument_prompt('QCM answer'))
+    answers = answers_store.ask_argument_until_none()
 
+    controller = MultipleSameTabController(file_object, tab_controller, file_options)
+    controller.apply_method_on_some_tabs('fill_one_column_by_QCM_answer', *answers) 
 
 @app.command()
 def gathermultianswers(file : Annotated[str, typer.Option(prompt = file_prompt)],
-                       sheet : Annotated[str, typer.Option(prompt = sheet_prompt)],
+                       tab : Annotated[str, typer.Option(prompt = sheet_prompt)],
                        colread : Annotated[str, typer.Option(prompt = column_read_prompt)],
-                       colstore : Annotated[str, typer.Option(prompt = column_store_prompt)],
+                       colstore : Annotated[str, typer.Option(prompt = 'Enter the column letter containing the data to store')],
                        line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
     """
     Fonction agissant sur un onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -628,14 +684,15 @@ def gathermultianswers(file : Annotated[str, typer.Option(prompt = file_prompt)]
         Version complète : python xlspython.py gathermultianswers --file name.xlsx --sheet nametab --colread columnletter --colstore columnletter --line linenumber
     
     """
-    fileobject = File(file)
-    controler = FileControler(fileobject)
-    controler.gather_multiple_answers(sheet,colread,colstore,line_beggining=line)
+    file_object = File(file)
+    file_options = FileOptions(name_of_tab_to_read=tab)
+    controller = OneTabCreatedController(file_object, file_options=file_options, first_line=line)
+    controller.gather_multiple_answers(colread, colstore)  
 
 @app.command()
 def maxnames(file : Annotated[str, typer.Option(prompt = file_prompt)], 
              colstore : Annotated[str, typer.Option(prompt = column_store_prompt)],
-             sheets : Annotated[Optional[List[str]], typer.Option()] = None,
+             tabs : Annotated[Optional[List[str]], typer.Option()] = None,
              columnlist : Annotated[Optional[List[str]], typer.Option()] = None,
              line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
     
@@ -651,10 +708,15 @@ def maxnames(file : Annotated[str, typer.Option(prompt = file_prompt)],
         Version complète : python xlspython.py maxnames --file name.xlsx --sheet nametab --colstore columnletter --columnlist A --columnlist C
     
     """
-    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
-    columnlist = Ufc.askArgumentUntilNone(columnlist, "Enter the letter of a column you want to read")
+    file_object = File(file)
+    column_store = InputStore(columnlist, "Enter the letter of a column you want to read")
+    columnlist = column_store.ask_argument_until_none()
+    tab_options = TabOptions(columns_to_read= columnlist, column_to_write=colstore)
+    tab_controller = InsertController(file_object, tab_options=tab_options, first_line=line)
+    file_options = _choose_tabs_to_modify(file_object, tabs, multiple_tabs_prompt)
 
-    apply_sheet_method_on_a_file(file, sheets, 'give_names_of_maximum', columnlist, colstore, line_beggining=line)  
+    controller = MultipleSameTabController(file_object, tab_controller, file_options)
+    controller.apply_method_on_some_tabs('insert_tags_of_maximum_of_column_list' ) 
 
 
 @app.command()
@@ -663,7 +725,7 @@ def colcongruent(file : Annotated[str, typer.Option(prompt = file_prompt)],
                 secondcol : Annotated[str, typer.Option(prompt = 'Enter the column letter corresponding to prime')],
                 thirdcol : Annotated[str, typer.Option(prompt = 'Enter the column letter corresponding to probe')],
                 colwrite : Annotated[str, typer.Option(prompt = 'Enter the column letter in which you want to write')],
-                sheets : Annotated[Optional[List[str]], typer.Option()] = None):
+                tabs : Annotated[Optional[List[str]], typer.Option()] = None):
     
     """
     Fonction agissant sur un onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -675,9 +737,13 @@ def colcongruent(file : Annotated[str, typer.Option(prompt = file_prompt)],
         Version guidée : python xlspython.py colcongruent
  
     """
-    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
-    apply_sheet_method_on_a_file(file, sheets, 'column_for_prime_probe_congruence', [firstcol, secondcol, thirdcol], colwrite)  
+    file_object = File(file)
+    tab_options = TabOptions(columns_to_read=[firstcol, secondcol, thirdcol], column_to_write=colwrite)
+    tab_controller = InsertController(file_object, tab_options=tab_options)
+    file_options = _choose_tabs_to_modify(file_object, tabs, multiple_tabs_prompt)
 
+    controller = MultipleSameTabController(file_object, tab_controller, file_options)
+    controller.apply_method_on_some_tabs('insert_column_for_prime_probe_congruence') 
 
 @app.command()
 def colgetpart(file : Annotated[str, typer.Option(prompt = file_prompt)], 
@@ -685,7 +751,7 @@ def colgetpart(file : Annotated[str, typer.Option(prompt = file_prompt)],
                 colwrite : Annotated[str, typer.Option(prompt = 'Enter the column letter where to write')],
                 separator : Annotated[str, typer.Option(prompt = 'Enter the separator')],
                 piece : Annotated[int, typer.Option(prompt = 'Enter the number of the part you want to get. For example, tap 1 to get the begin of the word')],
-                sheets : Annotated[Optional[List[str]], typer.Option()] = None,
+                tabs : Annotated[Optional[List[str]], typer.Option()] = None,
                 line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
     """
     Fonction agissant sur un onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -696,15 +762,19 @@ def colgetpart(file : Annotated[str, typer.Option(prompt = file_prompt)],
 
         Version guidée : python xlspython.py colgetbegin
     """
-    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
-    apply_sheet_method_on_a_file(file, sheets, 'column_get_part_of_str', colread, colwrite, separator, piece - 1, line_beginning=line)  
+    file_object = File(file)
+    tab_options = TabOptions(column_to_read=colread, column_to_write=colwrite)
+    tab_controller = InsertController(file_object, tab_options=tab_options, first_line=line)
+    file_options = _choose_tabs_to_modify(file_object, tabs, multiple_tabs_prompt)
 
+    controller = MultipleSameTabController(file_object, tab_controller, file_options)
+    controller.apply_method_on_some_tabs('write_piece_of_string_in_column', separator, piece - 1) 
 
 @app.command()
 def maptwocols(file : Annotated[str, typer.Option(prompt = file_prompt)], 
                colread : Annotated[str, typer.Option(prompt = 'Enter the column letters to read separated by a comma (C,E)')],
                colwrite : Annotated[str, typer.Option(prompt = column_store_prompt)],
-               sheets : Annotated[Optional[List[str]], typer.Option()] = None,
+               tabs : Annotated[Optional[List[str]], typer.Option()] = None,
                line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
     """
     Fonction agissant sur un onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -715,9 +785,17 @@ def maptwocols(file : Annotated[str, typer.Option(prompt = file_prompt)],
 
         Version guidée : python xlspython.py maptwocols
     """
-    sheets = Ufc.askArgumentUntilNone(sheets, multiple_tabs_prompt)
-    mapping = Ufc.createDictListValueByCmd("Enter a value you want to put in the new column", "Enter the two strings which should lead to this new value. You must enter it with the same order as the order you entered the columns to read")
-    apply_sheet_method_on_a_file(file, sheets, 'map_two_columns_to_a_third_column', colread.split(","), colwrite, mapping, line_beginning=line)  
+    file_object = File(file)
+    tab_options = TabOptions(columns_to_read=colread.split(","), column_to_write=colwrite)
+    tab_controller = InsertController(file_object, tab_options=tab_options, first_line=line)
+    file_options = _choose_tabs_to_modify(file_object, tabs, multiple_tabs_prompt)
+
+    map_store = MapStore("Enter a value you want to put in the new column", 
+                         "Enter the two strings which should lead to this new value. You must enter it with the same order as the order you entered the columns to read")
+    map_store.create_mapping() 
+    
+    controller = MultipleSameTabController(file_object, tab_controller, file_options)
+    controller.apply_method_on_some_tabs('map_two_columns_to_a_third_column', map_store.mapping) 
 
 
 if __name__ == "__main__":

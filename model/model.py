@@ -5,13 +5,6 @@ import re
 
 from pycel import ExcelCompiler
 
-""" def display_run():
-    def wrapper(method, *args, **kwargs):
-        start = time()
-        method(*args, **kwargs)
-        Other.display_running_infos('sauvegarde', tab_name, self.sheets_name, start)
-    return wrapper """
-
 
 class Path():
     def __init__(self, pathname = 'fichiers_xls/'):
