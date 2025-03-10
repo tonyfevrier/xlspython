@@ -185,7 +185,7 @@ class TabsCopy():
 
 
 class MapIndexLetter():
-    """Handle methods to transform cell, columns in indexes"""
+    """Handle methods to transform cell, columns in indexes and vice versa"""
 
     @staticmethod
     def get_list_of_cells_coordinates(cells): 
@@ -221,6 +221,24 @@ class RegularExpression():
     def _is_string_a_cell_expression(string):
         """Verifies if the string has the shape A1 or C$5 (LetterNumber or Letter$Number)"""
         return re.fullmatch(r'\b[A-Za-z-$]+\d+\b', string)
+    
+    @staticmethod
+    def _is_string_a_cell(string):
+        """Verifies if the string has the shape A1 or C$5 (LetterNumber or Letter$Number)"""
+        return re.fullmatch(r'[A-Z$]+\d+', string)
+    
+    @staticmethod
+    def _is_string_a_line_of_cells(string):
+        """Verifies if the string has the shape A1 or C-G9"""
+        return re.fullmatch(r'([A-Z]+)-([A-Z]+)(\d+)', string)
+
+    @staticmethod
+    def _is_string_a_column_of_cells(string):
+        return re.fullmatch(r'([A-Z]+)(\d+)-(\d+)', string)
+
+    @staticmethod
+    def _is_string_a_2D_cell_range(string):
+        return re.fullmatch(r'([A-Z]+)-([A-Z]+):(\d+)-(\d+)', string)
     
     @staticmethod
     def _split_cell_expression_from(cell_expression):
@@ -443,40 +461,6 @@ class String():
         """
         return string.strip().replace('\xa0', ' ')
     
-    @classmethod
-    def get_columns_from_several(cls, *strings):
-        columns_list = []
-        for string in strings: 
-            columns_list.append(cls.get_columns_from(string)) 
-        return columns_list
-    
-    @classmethod
-    def get_columns_from(cls, string):
-        """
-        Fonction qui prend en entrée une chaîne de caractères de la forme "C-E,H,J" et qui retourne une liste de colonnes 
-        ['C','D','E','H','J']. 
-        """
-        substrings = string.split(',')
-        columns_list = []
-        for substring in substrings:
-            columns_list = cls._add_to_list_columns_of_substring(columns_list, substring)
-        return columns_list
-    
-    @classmethod
-    def _add_to_list_columns_of_substring(cls, columns_list, substring):
-        if '-' in substring:
-            columns_list += cls.get_range_letter(substring)
-        else:
-            columns_list.append(substring)
-        return columns_list
-
-    @staticmethod
-    def get_range_letter(string):
-        """
-        Fonction qui prend une chaîne de la forme "D-G" et qui retourne la liste des lettres entre elles. 
-        """
-        L = string.split('-')
-        return get_column_interval(L[0], L[-1])
     
     @staticmethod
     def transform_string_in_binary(string, *args):
@@ -538,6 +522,84 @@ class String():
            position = string.find('.xlsx')
 
         return string[:position]
+    
+    @staticmethod
+    def get_range_letter(string):
+        """
+        Fonction qui prend une chaîne de la forme "D-G" et qui retourne la liste des lettres entre elles. 
+        """
+        L = string.split('-')
+        return get_column_interval(L[0], L[-1])
+    
+
+class StringExtractor():
+    """
+    This class is used to get the columns or cells from a string and to store them in a list.
+    The string is of the form 'C12,C14-17,D-G13,F15,H-J:21-23' for cells and 'C-E,H,J' for columns.
+    This extractor will be used in the commands of xlspython.py.
+    """
+    def __init__(self, string):
+        self.string = string
+        self.substrings = self.string.split(',') 
+        self.final_list = []
+
+    #Fonction qui va disparaître, ils mettront toutes les colonnes dans un str
+    # @classmethod
+    # def get_columns_from_several(cls, *strings):
+    #     columns_list = []
+    #     for string in strings: 
+    #         columns_list.append(cls.get_columns_from(string)) 
+    #     return columns_list
+    
+    def get_columns_from(self):
+        """
+        Fonction qui prend en entrée une chaîne de caractères de la forme "C-E,H,J" et qui retourne une liste de colonnes 
+        ['C','D','E','H','J']. 
+        """
+        for substring in self.substrings:
+            self._add_to_list_columns_of_(substring)
+    
+    def _add_to_list_columns_of_(self, substring):
+        if '-' in substring:
+            self.final_list += String.get_range_letter(substring)
+        else:
+            self.final_list.append(substring)
+        
+    def get_cells_from(self): 
+        for substring in self.substrings:
+            self._add_a_range_of_cells(substring)
+    
+    def _add_a_range_of_cells(self, string):
+        if RegularExpression._is_string_a_cell(string):
+            self.final_list.append(string)
+        elif RegularExpression._is_string_a_column_of_cells(string):
+            self._add_cells_of_a_column(string)
+        elif RegularExpression._is_string_a_line_of_cells(string):
+            self._add_cells_of_a_line(string)
+        else:
+            self._add_cells_of_a_2D_range(string)
+
+    def _add_cells_of_a_column(self, string):
+        match = RegularExpression._is_string_a_column_of_cells(string)
+        column = match.group(1)
+        first_line = int(match.group(2))
+        last_line = int(match.group(3))
+        self.final_list += [f'{column}{line}' for line in range(first_line, last_line + 1)]
+
+    def _add_cells_of_a_line(self, string):
+        match = RegularExpression._is_string_a_line_of_cells(string)
+        first_column = column_index_from_string(match.group(1))
+        last_column = column_index_from_string(match.group(2))
+        line = int(match.group(3))
+        self.final_list += [f'{column}{line}' for column in get_column_interval(first_column, last_column)]
+
+    def _add_cells_of_a_2D_range(self, string):
+        match = RegularExpression._is_string_a_2D_cell_range(string)
+        first_column = column_index_from_string(match.group(1))
+        last_column = column_index_from_string(match.group(2))
+        first_line = int(match.group(3))
+        last_line = int(match.group(4))
+        self.final_list += [f'{column}{line}' for column in get_column_interval(first_column, last_column) for line in range(first_line, last_line + 1)]
 
 
 class Dictionary():

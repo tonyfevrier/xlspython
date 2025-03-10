@@ -11,17 +11,6 @@ from utils.utils import InputStore, MapStore, String
 
 app = typer.Typer()
 
-# ####################Voir comment récrire et où placer cette fonction
-# def apply_method_on_some_tabs_of_a_file(file_name, sheets, method_name, *args, **kwargs): 
-#         fileobject = File(file_name)
-#         controler = FileControler(fileobject)
-
-#         if sheets:
-#             controler.apply_method_on_some_sheets(sheets, method_name, *args, **kwargs)
-#         else:
-#             # when sheets is empty, the method applies on all sheets
-#             controler.apply_method_on_some_sheets(fileobject.sheets_name, method_name, *args, **kwargs)
-
 # Path commands
 
 @app.command()
@@ -638,7 +627,6 @@ def columnbyqcmanswer(file : Annotated[str, typer.Option(prompt = file_prompt)],
                      colwrite : Annotated[str, typer.Option(prompt = 'Enter the column from which you want to write')], 
                      tabs : Annotated[Optional[List[str]], typer.Option()] = None,
                      answers : Annotated[Optional[List[str]], typer.Option()] = None,
-                     #liste : Annotated[Tuple[str, str], typer.Option(prompt = 'Enter what you want to write in the cells or press enter')] = ('oui', 'non'),
                      line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
                    
 
