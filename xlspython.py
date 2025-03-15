@@ -7,20 +7,9 @@ from controller.one_file_one_tab import ColorTabController, InsertController, De
 from controller.two_files import TwoFilesController, OneFileCreatedController
 from typing_extensions import Annotated 
 from utils.prompts import *
-from utils.utils import InputStore, MapStore, String
+from utils.utils import InputStore, MapStore, String, StringExtractor
 
 app = typer.Typer()
-
-# ####################Voir comment récrire et où placer cette fonction
-# def apply_method_on_some_tabs_of_a_file(file_name, sheets, method_name, *args, **kwargs): 
-#         fileobject = File(file_name)
-#         controler = FileControler(fileobject)
-
-#         if sheets:
-#             controler.apply_method_on_some_sheets(sheets, method_name, *args, **kwargs)
-#         else:
-#             # when sheets is empty, the method applies on all sheets
-#             controler.apply_method_on_some_sheets(fileobject.sheets_name, method_name, *args, **kwargs)
 
 # Path commands
 
@@ -194,7 +183,7 @@ def _write_mails_and_send_it():
     message = typer.prompt('Please enter the message of your email',default="") 
     mail = Mail(sender_mail="tony.fevrier62@gmail.com", subject=objet, message=message, password="qkxqzhlvsgdssboh")
     path = Path('multifiles/')
-    mail_controller = PathMailSender(path, mail, "@universite-paris-saclay.fr" )#"@etu-upsaclay.fr")
+    mail_controller = PathMailSender(path, mail, "@etu-upsaclay.fr")
     json_file = typer.prompt('Please enter the name of the json file containing mail adresses. If you want to send to the mail paris-saclay, just press enter',default="") 
     if json_file:
         mail_controller.send_files_by_mail_using_(json_file)
@@ -227,7 +216,7 @@ def gathercolumn(file : Annotated[str, typer.Option(prompt = file_prompt)],
 
 @app.command()
 def extractcelltabs(file : Annotated[str, typer.Option(prompt = file_prompt)], 
-                 cells : Annotated[Optional[List[str]], typer.Option()] = None):
+                    cells : Annotated[str, typer.Option(prompt = cell_prompt)]):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Vous avez un fichier avec des onglets de structure identique avec un onglet par participant. Vous souhaitez
@@ -238,14 +227,15 @@ def extractcelltabs(file : Annotated[str, typer.Option(prompt = file_prompt)],
     Commande :
 
         Version guidée: python xlspython.py extractcellsheets
-    """
-    store = InputStore(cells, ask_argument_prompt('cell'))
-    cells = store.ask_argument_until_none() 
+    """ 
+
+    extractor = StringExtractor(cells)
+    extractor.get_cells_from()
+    list_of_cells = extractor.final_list
 
     file_object = File(file)
     controller = OneFileCreatedController(file_object)
-    controller.extract_cells_from_all_tabs(*cells)
-
+    controller.extract_cells_from_all_tabs(*list_of_cells)
 
 @app.command()
 def stringinbinary(file : Annotated[str, typer.Option(prompt = file_prompt)], 
@@ -279,7 +269,7 @@ def stringinbinary(file : Annotated[str, typer.Option(prompt = file_prompt)],
 # Créer un fichier test pour tester cette fonction.
 @app.command()
 def cpcolumnontabs(file : Annotated[str, typer.Option(prompt = file_prompt)],
-                   column : Annotated[List[str], typer.Option()] = None):
+                   columns : Annotated[str, typer.Option(prompt = group_column_prompt)]):
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
     Fonction qui reproduit les formules d'une ou plusieurs colonnes (column) du premier onglet sur toutes les colonnes situées à la même position dans les 
@@ -290,17 +280,18 @@ def cpcolumnontabs(file : Annotated[str, typer.Option(prompt = file_prompt)],
         Version guidée : python xlspython.py cpcolumnonsheets
         Version complète : python xlspython.py cpcolumnonsheets --file name.xlsx --column columnletter
     """
-    store = InputStore(column, ask_argument_prompt('column'))
-    columns = store.ask_argument_until_none()
+    extractor = StringExtractor(columns)
+    extractor.get_columns_from()
+    list_of_columns = extractor.final_list
 
     fileobject = File(file, dataonly = False)
-    file_options = FileOptions(columns_to_read=columns)
+    file_options = FileOptions(columns_to_read=list_of_columns)
     controller = EvenTabsController(fileobject, file_options)
     controller.apply_columns_formula_on_all_tabs() 
 
 @app.command()
 def cpcellontabs(file : Annotated[str, typer.Option(prompt = file_prompt)],
-                 cell : Annotated[List[str], typer.Option()] = None):
+                 cells : Annotated[str, typer.Option(prompt = cell_prompt)]): 
     
     """
     Fonction agissant sur un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
@@ -310,14 +301,15 @@ def cpcellontabs(file : Annotated[str, typer.Option(prompt = file_prompt)],
     Commande : 
 
         Version guidée : python xlspython.py cpcellonsheets
-        Version complète : python xlspython.py cpcellonsheets --file name.xlsx --cell C5 --cell C17
+        Version complète : python xlspython.py cpcellonsheets --file name.xlsx --cells C5,D6,E7-9
     """
-    store = InputStore(cell, ask_argument_prompt('cell'))
-    cells = store.ask_argument_until_none()
+    extractor = StringExtractor(cells)
+    extractor.get_cells_from()
+    list_of_cells = extractor.final_list  
 
     fileobject = File(file)
     controller = EvenTabsController(fileobject)
-    controller.apply_cells_formula_on_all_tabs(*cells) 
+    controller.apply_cells_formula_on_all_tabs(*list_of_cells) 
     
 @app.command()
 def mergecells(file : Annotated[str, typer.Option(prompt = file_prompt)],
@@ -452,14 +444,14 @@ def colorcasestab(file : Annotated[str, typer.Option(prompt = file_prompt)],
     controller.apply_method_on_some_tabs('color_cases_in_tab', map_store.mapping) 
 
 @app.command()
-def addcolumn(file_from : Annotated[str, typer.Option(prompt = 'Enter the xlsx file in which you want to write ')],
+def addcolumn(file_from : Annotated[str, typer.Option(prompt = 'Enter the xlsx file from which you import data')],
             tab_from : Annotated[str, typer.Option(prompt = 'Enter the corresponding sheet name')],
             colread_from : Annotated[str, typer.Option(prompt = 'Enter the column of this sheet containing the identifiers')],
             colwrite : Annotated[str, typer.Option(prompt = 'Enter the column from which you want to write')],
-            file_to : Annotated[str, typer.Option(prompt = 'Enter the xlsx file from which you import data ')],
+            file_to : Annotated[str, typer.Option(prompt = 'Enter the xlsx file in which you want to write')],
             tab_to : Annotated[str, typer.Option(prompt = 'Enter the corresponding sheet name')],
             colread_to : Annotated[str, typer.Option(prompt = 'Enter the column of this sheet containing the identifiers')],
-            col_to_import : Annotated[Optional[List[str]], typer.Option()] = None):                    
+            col_to_import : Annotated[str, typer.Option(prompt = 'Enter a group of column you want to import of the form A-D,E,G,H-J,Z. There must be no space')]):                    
     """
     Fonction agissant sur un onglet d'un fichier. Pensez à mettre le fichier sur lequel vous appliquez la commande dans un dossier nommé fichiers_xls.
       Vous souhaitez importer des colonnes (colimport) d'un fichier (file2, sheet2) dans un autre fichier (file,sheet).
@@ -469,18 +461,17 @@ def addcolumn(file_from : Annotated[str, typer.Option(prompt = 'Enter the xlsx f
     Commande : 
 
         Version guidée : python xlspython.py addcolumn 
-
-        Version complète : python xlspython.py addcolumn --file name.xlsx --sheet nametab --colread columnletter --colwrite columnletter --file2 name.xlsx --sheet2 nametab --colread2 columnletter --colimport col1 --colimport col2
     
     """ 
     file_object_from = File(file_from)
     file_object_to = File(file_to)
     controller = TwoFilesController(file_object_from, file_object_to, tab_from, tab_to, colread_from, colread_to)  
 
-    store = InputStore(col_to_import, ask_argument_prompt('column to import'))
-    col_to_import = store.ask_argument_until_none()
+    extractor = StringExtractor(col_to_import)
+    extractor.get_columns_from()
+    columns_to_import = extractor.final_list
 
-    controller.copy_columns_in_a_tab_differently_sorted(col_to_import, colwrite) 
+    controller.copy_columns_in_a_tab_differently_sorted(columns_to_import, colwrite) 
 
 @app.command()
 def colorlines(file : Annotated[str, typer.Option(prompt = file_prompt)], 
@@ -638,7 +629,6 @@ def columnbyqcmanswer(file : Annotated[str, typer.Option(prompt = file_prompt)],
                      colwrite : Annotated[str, typer.Option(prompt = 'Enter the column from which you want to write')], 
                      tabs : Annotated[Optional[List[str]], typer.Option()] = None,
                      answers : Annotated[Optional[List[str]], typer.Option()] = None,
-                     #liste : Annotated[Tuple[str, str], typer.Option(prompt = 'Enter what you want to write in the cells or press enter')] = ('oui', 'non'),
                      line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
                    
 
@@ -692,8 +682,8 @@ def gathermultianswers(file : Annotated[str, typer.Option(prompt = file_prompt)]
 @app.command()
 def maxnames(file : Annotated[str, typer.Option(prompt = file_prompt)], 
              colstore : Annotated[str, typer.Option(prompt = column_store_prompt)],
+             columns : Annotated[str, typer.Option(prompt = group_column_prompt)],
              tabs : Annotated[Optional[List[str]], typer.Option()] = None,
-             columnlist : Annotated[Optional[List[str]], typer.Option()] = None,
              line : Annotated[Optional[int], typer.Option(prompt = line_prompt)] = '2'):
     
     """
@@ -709,9 +699,11 @@ def maxnames(file : Annotated[str, typer.Option(prompt = file_prompt)],
     
     """
     file_object = File(file)
-    column_store = InputStore(columnlist, "Enter the letter of a column you want to read")
-    columnlist = column_store.ask_argument_until_none()
-    tab_options = TabOptions(columns_to_read= columnlist, column_to_write=colstore)
+    extractor = StringExtractor(columns)
+    extractor.get_columns_from()
+    list_of_columns = extractor.final_list
+
+    tab_options = TabOptions(columns_to_read=list_of_columns, column_to_write=colstore)
     tab_controller = InsertController(file_object, tab_options=tab_options, first_line=line)
     file_options = _choose_tabs_to_modify(file_object, tabs, multiple_tabs_prompt)
 

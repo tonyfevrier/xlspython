@@ -4,7 +4,7 @@ from controller.one_file_one_tab import ColorTabController, DeleteController, In
 from controller.one_file_multiple_tabs import OneTabCreatedController, MultipleSameTabController, EvenTabsController
 from controller.two_files import OneFileCreatedController, TwoFilesController
 from controller.path import SeveralFoldersOneFileController
-from utils.utils import ColumnDelete, ColumnInsert, LineDelete, LineInsert, TabUpdateFormula, MapIndexLetter, String, Dictionary
+from utils.utils import ColumnDelete, ColumnInsert, LineDelete, LineInsert, TabUpdateFormula, MapIndexLetter, String, Dictionary, StringExtractor
 from openpyxl.utils import column_index_from_string
 
 import os
@@ -674,12 +674,23 @@ class TestString(TestCase, String):
     def test_get_columns_from(self):
         string = "C-E,H,J-L"
         expected_list = ['C','D','E','H','J','K','L']
-        self.assertListEqual(self.get_columns_from(string), expected_list)
+        extractor = StringExtractor(string)
+        extractor.get_columns_from()
+        self.assertListEqual(extractor.final_list, expected_list)
 
     def test_get_range_letter(self):
         string = 'D-H'
         expected_list = ['D','E','F','G','H']
-        self.assertListEqual(self.get_range_letter(string), expected_list)
+        final_list = String.get_range_letter(string)
+        self.assertListEqual(final_list, expected_list)
+
+    def test_get_cells_from(self):
+        string = 'C12,C14-17,D-G13,F15,H-J:21-23'
+        expected_list = ['C12', 'C14', 'C15', 'C16', 'C17', 'D13', 'E13', 'F13', 'G13',
+                        'F15', 'H21', 'H22', 'H23', 'I21', 'I22', 'I23', 'J21', 'J22', 'J23']
+        extractor = StringExtractor(string)
+        extractor.get_cells_from()
+        self.assertListEqual(expected_list, extractor.final_list)
 
 
 class TestTabUpdate(TestCase, TabUpdateFormula):

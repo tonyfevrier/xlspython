@@ -2,7 +2,7 @@
 
 from openpyxl.styles import PatternFill
 from openpyxl.utils import column_index_from_string, get_column_letter 
-from utils.utils import String, MapIndexLetter, TabUpdateFormula, ColumnDelete, ColumnInsert, LineDelete, RegularExpression, Dictionary
+from utils.utils import String, StringExtractor, MapIndexLetter, TabUpdateFormula, ColumnDelete, ColumnInsert, LineDelete, RegularExpression, Dictionary
 from model.model import Cell 
 
 
@@ -137,8 +137,10 @@ class DeleteController(String):
         Prend une séquence de colonnes sous la forme 'C-J,K,L-N,Z' qu'on souhaite supprimer. 
         """  
 
-        # Réordonner par les lettres les plus grandes pour supprimer de la droite vers la gauche dans l'excel  
-        self.columns_to_delete = self.get_columns_from(string_of_columns)
+        # Réordonner par les lettres les plus grandes pour supprimer de la droite vers la gauche dans l'excel 
+        extractor = StringExtractor(string_of_columns)
+        extractor.get_columns_from()
+        self.columns_to_delete = extractor.final_list
         self.columns_to_delete.sort(reverse = True)  
 
         for column_letter in self.columns_to_delete:  
@@ -151,7 +153,9 @@ class DeleteController(String):
         """
         Prend une séquence de colonnes sous la forme 'C-J,K,L-N,Z' et supprime les autres 
         """  
-        columns_to_keep = self.get_columns_from(string_of_columns)
+        extractor = StringExtractor(string_of_columns)
+        extractor.get_columns_from()
+        columns_to_keep = extractor.final_list
         list_all_columns = self._get_list_of_columns()
 
         #Réordonner par les lettres les plus grandes pour supprimer de la droite vers la gauche
